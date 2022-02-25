@@ -1,0 +1,23 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+[x-cloak] {
+  display: none !important;
+}
+
+.content-card-content a {
+  pointer-events: all;
+}
+
+a.disabled {
+  pointer-events: none;
+}
+
+.dark-theme .dark-theme-button,
+.light-theme .light-theme-button,
+.system-theme .system-theme-button {
+  @apply text-orange-500;
+  @apply border-b-2;
+  @apply border-gray-500;
+}
