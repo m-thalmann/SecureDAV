@@ -20,18 +20,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get("/", function () {
-    return redirect("/dashboard");
-});
+Route::permanentRedirect("/", "dashboard");
 
 Route::middleware(["auth", "verified"])->group(function () {
     /*
      * DASHBOARD
      */
 
-    Route::get("/dashboard", function () {
-        return view("dashboard");
-    })->name("dashboard");
+    Route::view("/dashboard", "dashboard")->name("dashboard");
 
     Route::middleware(["password.confirm"])->group(function () {
         /*
