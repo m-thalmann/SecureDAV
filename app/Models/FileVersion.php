@@ -169,7 +169,16 @@ class FileVersion extends Model {
      * @param bool $useTmp Whether the file should be uploaded to a temporary file and then moved to the correct path
      */
     public function replaceFile($file, $doEncrypt, $useTmp = true) {
-        self::putFile($this->path, $file, $doEncrypt, $useTmp);
+        list($etag, $bytes) = self::putFile(
+            $this->path,
+            $file,
+            $doEncrypt,
+            $useTmp
+        );
+
+        $this->etag = $etag;
+        $this->bytes = $bytes;
+
         $this->touch();
     }
 

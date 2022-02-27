@@ -20,3 +20,27 @@ if (!function_exists("generateNameInitials")) {
         return Str::upper($initials);
     }
 }
+
+if (!function_exists("formatBytes")) {
+    /**
+     * Format bytes to kb, mb, gb, tb
+     *
+     * @param integer $size The size in bytes
+     * @param integer $precision The precision to display
+     *
+     * @return string
+     */
+    function formatBytes($size, $precision = 2): string {
+        if ($size > 0) {
+            $size = (int) $size;
+            $base = log($size) / log(1024);
+            $suffixes = ["B", "KB", "MB", "GB", "TB"];
+
+            return round(pow(1024, $base - floor($base)), $precision) .
+                " " .
+                $suffixes[floor($base)];
+        } else {
+            return $size;
+        }
+    }
+}

@@ -52,6 +52,9 @@
                                     {{ $version->deleted_at->diffForHumans() }}
                                 </x-tooltip-element>
                             </td>
+                            <td class="px-6 py-3">
+                                {{ formatBytes($version->bytes) }}
+                            </td>
                             <td class="px-2 py-2 text-xl">
                                 <form method="POST" action="{{ route('versions.trash.delete', ['version' => $version->id]) }}">
                                     @method('DELETE')
@@ -76,7 +79,7 @@
                     @endforeach
                     @if(count($trashed) === 0)
                         <tr>
-                            <td class="px-6 py-3 text-center" colspan="5"><i class="fa-solid fa-info-circle mr-2"></i> {{ __('No versions in the trash') }}</td>
+                            <td class="px-6 py-3 text-center" colspan="6"><i class="fa-solid fa-info-circle mr-2"></i> {{ __('No versions in the trash') }}</td>
                         </tr>
                     @endif
                 </tbody>

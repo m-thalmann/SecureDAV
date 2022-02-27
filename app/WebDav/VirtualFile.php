@@ -77,6 +77,14 @@ class VirtualFile extends DAV\File {
         return '"' . $this->version->etag . '"';
     }
 
+    function getContentType() {
+        return $this->file->mime_type;
+    }
+
+    function getLastModified() {
+        return $this->version->updated_at->timestamp;
+    }
+
     /**
      * @return string The file's path
      */

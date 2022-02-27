@@ -70,6 +70,12 @@ class Server extends Dav\Server {
                 'attachment; filename="' .
                 VirtualFile::getSelectedFile()->client_name .
                 '"';
+
+            if (!array_key_exists("Last-Modified", $headers)) {
+                $headers["Last-Modified"] = VirtualFile::getSelectedFile()
+                    ->getLastVersion()
+                    ->updated_at->toRfc7231String();
+            }
         }
 
         if (is_null($body) || is_string($body)) {

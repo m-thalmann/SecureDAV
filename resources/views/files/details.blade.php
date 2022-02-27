@@ -88,6 +88,7 @@
                         <th class="px-6 py-2"><i class="fa-solid fa-clock-rotate-left"></i></th>
                         <th class="px-6 py-2">{{ __('Created') }}</th>
                         <th class="px-6 py-2">{{ __('Last updated') }}</th>
+                        <th class="px-6 py-2">{{ __('Size') }}</th>
                         <th class="px-3 py-2">{{ __('Delete') }}</th>
                         {{-- <th class="px-3 py-2">{{ __('Share') }}</th> --}}
                         <!-- TODO: share -->
@@ -107,6 +108,9 @@
                                 <x-tooltip-element class="cursor-default" :tooltip="$version->updated_at->format('d/m/Y H:i:s P')">
                                     {{ $version->updated_at->diffForHumans() }}
                                 </x-tooltip-element>
+                            </td>
+                            <td class="px-6 py-3">
+                                {{ formatBytes($version->bytes) }}
                             </td>
                             <td class="px-2 py-2 text-xl">
                                 <form method="POST" action="{{ route('files.versions.delete', ['file' => $file->uuid, 'version' => $version->version]) }}">
@@ -132,8 +136,8 @@
                     @endforeach
                     @if(count($file->versions) === 0)
                         <tr>
-                            <!-- TODO: on share expand to colspan 6 -->
-                            <td class="px-6 py-3 text-center" colspan="5"><i class="fa-solid fa-info-circle mr-2"></i> {{ __('No versions for this file') }}</td>
+                            <!-- TODO: on share expand to colspan 7 -->
+                            <td class="px-6 py-3 text-center" colspan="6"><i class="fa-solid fa-info-circle mr-2"></i> {{ __('No versions for this file') }}</td>
                         </tr>
                     @endif
                 </tbody>
