@@ -3,7 +3,7 @@
 namespace App\WebDav;
 
 use App\Models\File;
-use Illuminate\Filesystem\FilesystemAdapter;
+use App\Models\FileVersion;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Sabre\DAV;
@@ -17,6 +17,10 @@ class VirtualFile extends DAV\File {
      * @var File
      */
     private $file;
+    /**
+     * @var FileVersion
+     */
+    private $version;
 
     /**
      * @var File|null The selected file (set by a get()-call)
@@ -25,10 +29,22 @@ class VirtualFile extends DAV\File {
 
     function __construct(File $file) {
         $this->file = $file;
+        $this->version = $file->getLastVersion();
     }
 
     function getName() {
         return $this->file->uuid . "." . $this->file->extension;
+    }
+
+    /**
+     * Checks whether the name matches the uuid or "<uuid>.<extension>"
+     *
+     * @param string $name The name to check
+     *
+     * @return bool Whether the names match
+     */
+    function checkName($name) {
+        return $this->file->uuid === $name || $this->getName() === $name;
     }
 
     function get() {
@@ -44,28 +60,28 @@ class VirtualFile extends DAV\File {
     }
 
     function getSize() {
-        return Storage::disk("files")->size($this->getFilePath());
+        return $this->version->bytes;
     }
 
     function getETag() {
-        /**
-         * @var FilesystemAdapter
-         */
-        $fileSystem = Storage::disk("files");
-
-        return '"' . md5_file($fileSystem->path($this->getFilePath())) . '"';
+        return '"' . $this->version->etag . '"';
     }
 
     function put($data) {
-        // TODO: implement
-        throw new \BadFunctionCallException("Not implemented");
+        if (Authentication::getUser()->readonly) {
+            throw new DAV\Exception\Forbidden("You are a read-only user.");
+        }
+
+        $this->version->replaceFile($data, $this->file->encrypted);
+
+        return '"' . $this->version->etag . '"';
     }
 
     /**
      * @return string The file's path
      */
     private function getFilePath() {
-        return $this->file->getLastVersion()->path;
+        return $this->version->path;
     }
 
     /**

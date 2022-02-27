@@ -2,13 +2,15 @@
 
 namespace App\WebDav;
 
+use App\Models\File;
 use InvalidArgumentException;
 use Sabre\DAV;
 
 /**
  * Virtual directory implementation for the Sabre\DAV server.
- * Currently there can only exist the root-directory, which lists
- * all files visible for the authenticated user.
+ * Currently there can only exist the root-directory, which lists all files visible
+ * for the authenticated user. It is also not possible to create a new file in the directory,
+ * only replacing/updating is possible
  */
 class VirtualDirectory extends DAV\Collection {
     private $path;
@@ -24,11 +26,20 @@ class VirtualDirectory extends DAV\Collection {
         }
     }
 
+    private function loadChildren() {
+        foreach (Authentication::getUser()->files() as $file) {
+            if ($file instanceof File) {
+                if ($file->getAmountVersions() === 0) {
+                    continue;
+                }
+            }
+            $this->children[] = new VirtualFile($file);
+        }
+    }
+
     function getChildren() {
         if ($this->children === null) {
-            foreach (Authentication::getUser()->files() as $file) {
-                $this->children[] = new VirtualFile($file);
-            }
+            $this->loadChildren();
         }
 
         return $this->children;
@@ -41,8 +52,14 @@ class VirtualDirectory extends DAV\Collection {
         }
 
         foreach ($this->getChildren() as $child) {
-            if ($child->getName() === $name) {
-                return $child;
+            if ($child instanceof VirtualFile) {
+                if ($child->checkName($name)) {
+                    return $child;
+                }
+            } else {
+                if ($child->getName() === $name) {
+                    return $child;
+                }
             }
         }
 
@@ -63,10 +80,5 @@ class VirtualDirectory extends DAV\Collection {
 
     function getName() {
         return $this->path;
-    }
-
-    function createFile($name, $data = null) {
-        // TODO: implement
-        throw new \BadFunctionCallException("Not implemented");
     }
 }

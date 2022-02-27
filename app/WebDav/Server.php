@@ -28,15 +28,15 @@ class Server extends Dav\Server {
             $this->debugExceptions = true;
         }
 
-        $authBackend = new Authentication();
-        $authPlugin = new DAV\Auth\Plugin($authBackend);
+        $authPlugin = new DAV\Auth\Plugin(new Authentication());
+        $locksPlugin = new DAV\Locks\Plugin(new Locks());
 
         $this->setBaseUri("/dav");
 
         $this->addPlugin(new DAV\Browser\Plugin()); // TODO: remove
         $this->addPlugin($authPlugin);
+        $this->addPlugin($locksPlugin);
 
-        // TODO: locks: https://sabre.io/dav/locks/
     }
 
     /**
@@ -68,7 +68,7 @@ class Server extends Dav\Server {
         if (VirtualFile::getSelectedFile() !== null) {
             $headers["Content-Disposition"] =
                 'attachment; filename="' .
-                VirtualFile::getSelectedFile()->display_name .
+                VirtualFile::getSelectedFile()->client_name .
                 '"';
         }
 

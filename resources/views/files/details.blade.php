@@ -33,7 +33,7 @@
                 <td>
                     <input
                         type="checkbox"
-                        class="rounded border-gray-300 text-orange-500 shadow-sm dark:border-none"
+                        class="rounded border-gray-300 text-orange-500 shadow-sm dark:border-none cursor-not-allowed"
                         @checked($file->encrypted) disabled>
                 </td>
             </tr>

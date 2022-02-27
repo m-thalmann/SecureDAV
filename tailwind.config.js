@@ -18,4 +18,10 @@ module.exports = {
   },
 
   plugins: [require('@tailwindcss/forms')],
+
+  safelist: [
+    {
+      pattern: /max-w-.*/,
+    },
+  ],
 };

@@ -28,37 +28,6 @@ class FileVersion extends Model {
     }
 
     /**
-     * Returns a streaming-download-response for the file
-     *
-     * @return \Symfony\Component\HttpFoundation\StreamedResponse
-     */
-    public function download() {
-        $fileContents = Storage::disk("files")->get($this->path);
-
-        if (!$fileContents) {
-            throw new Exception("File not found");
-        }
-
-        if ($this->file->encrypted) {
-            $fileContents = Crypt::decrypt($fileContents);
-        }
-
-        $headers = [
-            "Content-Type" => $this->file->mime_type,
-            "Content-Disposition" =>
-                "attachment; filename=" . $this->file->client_name,
-        ];
-
-        return response()->stream(
-            function () use ($fileContents) {
-                echo $fileContents;
-            },
-            200,
-            $headers
-        );
-    }
-
-    /**
      * Creates the first version of a file
      *
      * @param string $fileUuid The file's uuid
@@ -95,6 +64,8 @@ class FileVersion extends Model {
         $version->file_uuid = $fileUuid;
         $version->version = $file->version + 1;
         $version->path = self::generatePath();
+        $version->etag = $file->etag;
+        $version->bytes = $file->bytes;
 
         try {
             if (!Storage::disk("files")->copy($file->path, $version->path)) {
@@ -141,7 +112,15 @@ class FileVersion extends Model {
         $version->version = $lastVersion + 1;
         $version->path = self::generatePath();
 
-        self::putFile($version->path, $file, $doEncrypt);
+        list($etag, $bytes) = self::putFile(
+            $version->path,
+            $file,
+            $doEncrypt,
+            false
+        );
+
+        $version->etag = $etag;
+        $version->bytes = $bytes;
 
         if (!$version->save()) {
             Storage::disk("files")->delete($version->path);
@@ -151,20 +130,47 @@ class FileVersion extends Model {
         return $version;
     }
 
-    public function replaceFile($file, $doEncrypt) {
-        self::putFile($this->path, $file, $doEncrypt);
-        $this->touch();
+    /**
+     * Returns a streaming-download-response for the file
+     *
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    public function download() {
+        $fileContents = Storage::disk("files")->get($this->path);
+
+        if (!$fileContents) {
+            throw new Exception("File not found");
+        }
+
+        if ($this->file->encrypted) {
+            $fileContents = Crypt::decrypt($fileContents);
+        }
+
+        $headers = [
+            "Content-Type" => $this->file->mime_type,
+            "Content-Disposition" =>
+                "attachment; filename=" . $this->file->client_name,
+        ];
+
+        return response()->stream(
+            function () use ($fileContents) {
+                echo $fileContents;
+            },
+            200,
+            $headers
+        );
     }
 
-    public static function putFile($path, $file, $doEncrypt) {
-        if ($doEncrypt) {
-            $encrypted = Crypt::encrypt(
-                file_get_contents($file->getRealPath())
-            );
-            Storage::disk("files")->put($path, $encrypted);
-        } else {
-            $file->storeAs("", $path, "files");
-        }
+    /**
+     * Replaces the version's file and updates it's updated_at-timestamp
+     *
+     * @param \Illuminate\Http\UploadedFile|resource $file The uploaded file or resource to store
+     * @param bool $doEncrypt Whether the file should be encrypted (derived from the File-instance)
+     * @param bool $useTmp Whether the file should be uploaded to a temporary file and then moved to the correct path
+     */
+    public function replaceFile($file, $doEncrypt, $useTmp = true) {
+        self::putFile($this->path, $file, $doEncrypt, $useTmp);
+        $this->touch();
     }
 
     public function prunable() {
@@ -175,10 +181,21 @@ class FileVersion extends Model {
         $this->deleteFile();
     }
 
+    /**
+     * Deletes the file for this version from the storage
+     */
     public function deleteFile() {
         Storage::disk("files")->delete($this->path);
     }
 
+    /**
+     * Returns all file-paths for the given file-uuid
+     *
+     * @param string $fileUuid The files uuid
+     * @param bool $withTrashed Whether to include the trashed versions as well
+     *
+     * @return string[]
+     */
     public static function getFilePaths($fileUuid, $withTrashed = false) {
         if ($withTrashed) {
             $query = static::withTrashed();
@@ -192,6 +209,71 @@ class FileVersion extends Model {
             ->toArray();
     }
 
+    /**
+     * Stores a file to the given path
+     *
+     * @param string $path The path within the "files"-storage
+     * @param \Illuminate\Http\UploadedFile|resource $file The uploaded file or resource to store
+     * @param bool $doEncrypt Whether the file should be encrypted (derived from the File-instance)
+     * @param bool $useTmp Whether the file should be uploaded to a temporary file and then moved to the correct path
+     *
+     * @return array Returns the etag and filesize of the stored file:
+     *               - `[0]` - The ETag
+     *               - `[1]` - The file size in bytes
+     */
+    private static function putFile($path, $file, $doEncrypt, $useTmp = true) {
+        $uploadPath = $path;
+
+        if ($useTmp) {
+            $uploadPath .= ".tmp";
+        }
+
+        $etag = $path;
+        $bytes = 0;
+
+        if ($doEncrypt) {
+            if (is_resource($file)) {
+                $contents = stream_get_contents($file);
+            } else {
+                $contents = file_get_contents($file->getRealPath());
+            }
+
+            $etag = md5($contents);
+            $bytes = strlen($contents);
+
+            $encrypted = Crypt::encrypt($contents);
+            Storage::disk("files")->put($uploadPath, $encrypted);
+        } else {
+            if (is_resource($file)) {
+                Storage::disk("files")->put($uploadPath, $file);
+            } else {
+                $file->storeAs("", $uploadPath, "files");
+            }
+
+            /**
+             * @var FilesystemAdapter
+             */
+            $fileSystem = Storage::disk("files");
+
+            $etag = md5_file($fileSystem->path($path));
+            $bytes = $fileSystem->size($path);
+        }
+
+        if ($useTmp) {
+            Storage::disk("files")->move($uploadPath, $path);
+        }
+
+        return [$etag, $bytes];
+    }
+
+    /**
+     * Generates a random path for a file.
+     * If a file with this path already exists, it retries the operation MAX_PATH_TRIES times
+     *
+     * @throws Exception If there could not be found any unused path within MAX_PATH_TRIES tries
+     *
+     * @return string The path
+     */
     private static function generatePath() {
         $pathTries = 0;
         $exists = false;
@@ -212,5 +294,6 @@ class FileVersion extends Model {
     }
 
     // TODO: if deleted -> delete corresponding file; also check if migrate rollback
+    // TODO: check tmp files -> delete if old -> warning
     // TODO: add command to clean files
 }

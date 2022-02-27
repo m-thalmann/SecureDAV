@@ -21,6 +21,8 @@ return new class extends Migration {
                 ->cascadeOnDelete();
             $table->integer("version");
             $table->string("path");
+            $table->string("etag", 32);
+            $table->unsignedBigInteger("bytes");
             $table->timestamps();
             $table->softDeletes();
         });
