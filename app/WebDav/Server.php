@@ -13,6 +13,20 @@ use Sabre\DAV;
  */
 class Server extends Dav\Server {
     /**
+     * HTTP-Methods required for the server to work
+     */
+    const methods = [
+        "GET",
+        "PROPFIND",
+        "LOCK",
+        "UNLOCK",
+        "POST",
+        "PUT",
+        "OPTIONS",
+        "HEAD",
+    ];
+
+    /**
      * Creates a new instance of Sabre Server.
      *
      * @param  \Sabre\DAV\Tree|\Sabre\DAV\INode|array|null  $treeOrNode  The tree object
@@ -63,19 +77,17 @@ class Server extends Dav\Server {
         /** @var resource|string|null */
         $body = $this->httpResponse->getBody();
         $status = $this->httpResponse->getStatus();
-        $headers = $this->httpResponse->getHeaders(); // TODO: maybe add CORS-Headers? Make optional with config?
+        $headers = $this->httpResponse->getHeaders();
 
         if (VirtualFile::getSelectedFile() !== null) {
             $headers["Content-Disposition"] =
                 'attachment; filename="' .
                 VirtualFile::getSelectedFile()->client_name .
                 '"';
+        }
 
-            if (!array_key_exists("Last-Modified", $headers)) {
-                $headers["Last-Modified"] = VirtualFile::getSelectedFile()
-                    ->getLastVersion()
-                    ->updated_at->toRfc7231String();
-            }
+        if (config("webdav.cors.enabled", false)) {
+            $headers = array_merge($headers, self::getCorsHeaders());
         }
 
         if (is_null($body) || is_string($body)) {
@@ -111,5 +123,30 @@ class Server extends Dav\Server {
         $url = Str::finish($request->getPathInfo(), "/");
 
         return is_null($query) ? $url : $url . "?" . $query;
+    }
+
+    /**
+     * Returns the HTTP-Headers required for CORS
+     *
+     * @return array
+     */
+    private static function getCorsHeaders() {
+        return [
+            "Access-Control-Allow-Origin" => config(
+                "webdav.cors.allowed_origin"
+            ),
+
+            "Access-Control-Allow-Methods" => implode(", ", self::methods),
+
+            "Access-Control-Expose-Headers" => config(
+                "webdav.cors.expose_headers"
+            ),
+
+            "Access-Control-Request-Headers" => config(
+                "webdav.cors.request_headers"
+            ),
+
+            "Access-Control-Allow-Credentials" => "true",
+        ];
     }
 }

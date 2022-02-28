@@ -13,7 +13,7 @@
                     $customColor :
                     ($danger ?
                         'bg-red-600 hover:bg-red-800 active:bg-red-900 focus:border-red-900' :
-                        'bg-gray-800 hover:bg-gray-700 active:bg-gray-900 focus:border-gray-900 dark:bg-gray-600'
+                        'bg-gray-800 hover:bg-gray-700 active:bg-gray-900 focus:border-gray-900 dark:bg-gray-600 dark:hover:bg-gray-500'
                     )
                 )
         ])

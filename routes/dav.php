@@ -1,9 +1,10 @@
 <?php
 
 use App\Http\Controllers\WebDavController;
+use App\WebDav\Server;
 use Illuminate\Support\Facades\Route;
 
-Route::match(["GET", "PROPFIND", "LOCK", "UNLOCK", "POST", "PUT"], "{path?}", [
+Route::match(Server::methods, "{path?}", [
     WebDavController::class,
     "server",
 ])->where("path", ".*");

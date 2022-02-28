@@ -27,6 +27,8 @@ class VirtualDirectory extends DAV\Collection {
     }
 
     private function loadChildren() {
+        $this->children = [];
+
         foreach (Authentication::getUser()->files() as $file) {
             if ($file instanceof File) {
                 if ($file->getAmountVersions() === 0) {
