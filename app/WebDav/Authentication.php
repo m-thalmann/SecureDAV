@@ -3,7 +3,6 @@
 namespace App\WebDav;
 
 use App\Models\AccessUser;
-use Illuminate\Support\Facades\Hash;
 use Sabre\DAV;
 
 class Authentication extends DAV\Auth\Backend\AbstractBasic {
@@ -17,7 +16,7 @@ class Authentication extends DAV\Auth\Backend\AbstractBasic {
 
         $user = AccessUser::where("username", $username)->first();
 
-        if ($user === null || !Hash::check($password, $user->password)) {
+        if ($user === null || !$user->authenticate($password)) {
             return false;
         }
 

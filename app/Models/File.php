@@ -36,6 +36,17 @@ class File extends Model {
         return $this->hasMany(FileVersion::class)->orderBy("version", "desc");
     }
 
+    public function accessUsers() {
+        return AccessUser::query()
+            ->where(function ($query) {
+                $query
+                    ->where("user_id", $this->user_id)
+                    ->where("access_all", 1);
+            })
+            ->orWhereRelation("accessFiles", "file_uuid", $this->uuid)
+            ->get();
+    }
+
     /**
      * @return FileVersion|null
      */

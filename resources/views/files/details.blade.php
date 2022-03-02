@@ -9,9 +9,9 @@
     ]"
 >
     <x-content-card :title="__('General')" class="mb-4">
-        <table class="mb-6">
+        <table class="mb-4 w-full">
             <tr>
-                <td class="pr-4 font-bold">{{ __('Name') }}:</td>
+                <td class="pr-4 font-bold w-36">{{ __('Name') }}:</td>
                 <td>{{ $file->display_name }}</td>
             </tr>
             @if($file->display_name !== $file->client_name)
@@ -37,6 +37,31 @@
                         @checked($file->encrypted) disabled>
                 </td>
             </tr>
+            <tr>
+                <td class="pr-4 font-bold pt-4">{{ __('WebDAV URL') }}:</td>
+                <td class="flex w-full sm:w-3/4 md:w-1/2 pt-4">
+                    @php
+                        $webDavRoute = route('webdav', ["path" => $file->uuid]);
+                    @endphp
+            
+                    <x-input
+                        class="mr-4 flex-auto"
+                        type="text"
+                        id="webDavRouteInput"
+                        value="{{ $webDavRoute }}"
+                        size="1"
+                        readonly />
+        
+                    <x-button
+                        type="button"
+                        onclick="document.getElementById('webDavRouteInput').select();
+                                 document.execCommand('copy');
+                                 changeClass(this.getElementsByTagName('i')[0], 'fa-solid fa-check w-4 text-green-500', 1500)"
+                    >
+                        <i class="fa-solid fa-copy w-4"></i>
+                    </x-button>
+                </td>
+            </tr>
         </table>
 
         <div>
@@ -52,6 +77,67 @@
                     <i class="fa-solid fa-trash-can mr-2"></i> {{ __('Delete file') }}
                 </x-button>
             </form>
+        </div>
+    </x-content-card>
+
+    @php
+        $accessUsers = $file->accessUsers();
+    @endphp
+    <x-content-card :title="__('Access users') . ' (' . count($accessUsers) . ')'" class="mb-4">
+        <div class="shadow rounded-sm overflow-x-auto sm:m-0 -ml-4 -mr-4">
+            <table class="text-center table-auto w-full">
+                <thead class="bg-gray-100 text-gray-500 dark:bg-gray-900 dark:text-gray-300 whitespace-nowrap">
+                    <tr>
+                        <th class="px-6 py-2">{{ __('Username') }}</th>
+                        <th class="px-6 py-2">{{ __('Write') }}</th>
+                        <th class="px-6 py-2">{{ __('Access all files') }}</th>
+                        <th class="px-6 py-2">{{ __('Last access') }}</th>
+                        <th class="px-6 py-2">{{ __('Active tokens') }}</th>
+                        <th class="px-6 py-2">{{ __('Generate token') }}</th>
+                        <th class="px-6 py-2">{{ __('View') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-700 whitespace-nowrap">
+                    @foreach ($accessUsers as $accessUser)
+                        <tr>
+                            <td class="px-6 py-3">{{ $accessUser->username }}</td>
+                            <td class="px-6 py-3">
+                                <input
+                                    type="checkbox"
+                                    class="rounded border-gray-300 text-orange-500 shadow-sm dark:border-none cursor-not-allowed"
+                                    @checked(!$accessUser->readonly) disabled>
+                            </td>
+                            <td class="px-6 py-3">
+                                <input
+                                    type="checkbox"
+                                    class="rounded border-gray-300 text-orange-500 shadow-sm dark:border-none cursor-not-allowed"
+                                    @checked($accessUser->access_all) disabled>
+                            </td>
+                            <td class="px-6 py-3">
+                                <x-tooltip-element class="cursor-default" :tooltip="$accessUser->lastAccess()->format('d/m/Y H:i:s P')">
+                                    {{ $accessUser->lastAccess()->diffForHumans() }}
+                                </x-tooltip-element>
+                            </td>
+                            <td class="px-6 py-3">{{ $accessUser->activeTokens()->count() }}</td>
+                            <td class="px-2 py-2 text-xl">
+                                <a href="#"> <!-- TODO: add route -->
+                                    <i class="fa-solid fa-key"></i>
+                                </a>
+                            </td>
+                            <td class="px-2 py-2 text-xl">
+                                <a href="#"> <!-- TODO: add route -->
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @endforeach
+                    @if(count($accessUsers) === 0)
+                        <tr>
+                            <td class="px-6 py-3 text-center" colspan="7"><i class="fa-solid fa-info-circle mr-2"></i> {{ __('No access-users for this file') }}</td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
         </div>
     </x-content-card>
 

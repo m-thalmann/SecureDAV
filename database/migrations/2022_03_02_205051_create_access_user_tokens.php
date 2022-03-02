@@ -11,17 +11,16 @@ return new class extends Migration {
      * @return void
      */
     public function up() {
-        Schema::create("access_users", function (Blueprint $table) {
+        Schema::create("access_user_tokens", function (Blueprint $table) {
             $table->id();
-            $table->string("username")->unique();
-            $table->boolean("readonly");
-            $table->boolean("access_all");
+            $table->string("token");
             $table
-                ->foreignId("user_id")
-                ->constrained("users")
+                ->foreignId("access_user_id")
+                ->constrained("access_users")
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-            $table->timestamps();
+            $table->boolean("active")->default(true);
+            $table->timestamp("last_access")->nullable();
         });
     }
 
@@ -31,6 +30,6 @@ return new class extends Migration {
      * @return void
      */
     public function down() {
-        Schema::dropIfExists("access_users");
+        Schema::dropIfExists("access_user_tokens");
     }
 };
