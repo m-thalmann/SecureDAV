@@ -12,8 +12,6 @@ class Authentication extends DAV\Auth\Backend\AbstractBasic {
     private static $user = null;
 
     public function validateUserPass($username, $password) {
-        // TODO: rate limiting
-
         $user = AccessUser::where("username", $username)->first();
 
         if ($user === null || !$user->authenticate($password)) {

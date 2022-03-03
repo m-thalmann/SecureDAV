@@ -21,6 +21,7 @@ return new class extends Migration {
                 ->cascadeOnDelete();
             $table->boolean("active")->default(true);
             $table->timestamp("last_access")->nullable();
+            $table->string("label")->nullable();
         });
     }
 

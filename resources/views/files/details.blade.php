@@ -84,6 +84,12 @@
         $accessUsers = $file->accessUsers();
     @endphp
     <x-content-card :title="__('Access users') . ' (' . count($accessUsers) . ')'" class="mb-4">
+        <div class="mb-4">
+            <x-button href="#" class="mb-4"> <!-- TODO: add route -->
+                <i class="fa-solid fa-user-plus mr-2"></i> {{ __('Create new access user') }}
+            </x-button>
+        </div>
+
         <div class="shadow rounded-sm overflow-x-auto sm:m-0 -ml-4 -mr-4">
             <table class="text-center table-auto w-full">
                 <thead class="bg-gray-100 text-gray-500 dark:bg-gray-900 dark:text-gray-300 whitespace-nowrap">
@@ -114,15 +120,27 @@
                                     @checked($accessUser->access_all) disabled>
                             </td>
                             <td class="px-6 py-3">
-                                <x-tooltip-element class="cursor-default" :tooltip="$accessUser->lastAccess()->format('d/m/Y H:i:s P')">
-                                    {{ $accessUser->lastAccess()->diffForHumans() }}
-                                </x-tooltip-element>
+                                @if($accessUser->lastAccess() !== null)
+                                    <x-tooltip-element class="cursor-default" :tooltip="$accessUser->lastAccess()->format('d/m/Y H:i:s P')">
+                                        {{ $accessUser->lastAccess()->diffForHumans() }}
+                                    </x-tooltip-element>
+                                @else
+                                    {{ __('Never') }}
+                                @endif
                             </td>
-                            <td class="px-6 py-3">{{ $accessUser->activeTokens()->count() }}</td>
+                            <td class="px-6 py-3">
+                                {{ $accessUser->activeTokens()->count() }}
+                                /
+                                {{ $accessUser->tokens()->count() }}
+                            </td>
                             <td class="px-2 py-2 text-xl">
-                                <a href="#"> <!-- TODO: add route -->
-                                    <i class="fa-solid fa-key"></i>
-                                </a>
+                                <form method="POST" action="{{ route("access.tokens.generate", ["accessUser" => $accessUser->id]) }}">
+                                    @csrf
+                        
+                                    <button>
+                                        <i class="fa-solid fa-key"></i>
+                                    </button>
+                                </form>
                             </td>
                             <td class="px-2 py-2 text-xl">
                                 <a href="#"> <!-- TODO: add route -->
@@ -175,6 +193,9 @@
                         <th class="px-6 py-2">{{ __('Created') }}</th>
                         <th class="px-6 py-2">{{ __('Last updated') }}</th>
                         <th class="px-6 py-2">{{ __('Size') }}</th>
+                        @if ($file->encrypted)
+                            <th class="px-6 py-2">{{ __('Size on disk') }}</th>
+                        @endif
                         <th class="px-3 py-2">{{ __('Delete') }}</th>
                         {{-- <th class="px-3 py-2">{{ __('Share') }}</th> --}}
                         <!-- TODO: share -->
@@ -198,6 +219,11 @@
                             <td class="px-6 py-3">
                                 {{ formatBytes($version->bytes) }}
                             </td>
+                            @if ($file->encrypted)
+                                <td class="px-6 py-3">
+                                    {{ formatBytes($version->bytesOnDisk()) }}
+                                </td>
+                            @endif
                             <td class="px-2 py-2 text-xl">
                                 <form method="POST" action="{{ route('files.versions.delete', ['file' => $file->uuid, 'version' => $version->version]) }}">
                                     @method('DELETE')
@@ -222,8 +248,8 @@
                     @endforeach
                     @if(count($file->versions) === 0)
                         <tr>
-                            <!-- TODO: on share expand to colspan 7 -->
-                            <td class="px-6 py-3 text-center" colspan="6"><i class="fa-solid fa-info-circle mr-2"></i> {{ __('No versions for this file') }}</td>
+                            <!-- TODO: on share updated colspan -->
+                            <td class="px-6 py-3 text-center" colspan="{{ $file->encrypted ? '7' : '6' }}"><i class="fa-solid fa-info-circle mr-2"></i> {{ __('No versions for this file') }}</td>
                         </tr>
                     @endif
                 </tbody>

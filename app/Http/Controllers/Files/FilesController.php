@@ -72,4 +72,3 @@ class FilesController extends Controller {
         ]);
     }
 }
-// TODO: unify controller function names (delete <-> destroy, create <-> view)

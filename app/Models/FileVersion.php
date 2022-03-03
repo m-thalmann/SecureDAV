@@ -198,6 +198,16 @@ class FileVersion extends Model {
     }
 
     /**
+     * Returns the size of the version is on the disk.
+     * If not encrypted, will be the same as 'bytes'.
+     *
+     * @return number
+     */
+    public function bytesOnDisk() {
+        return Storage::disk("files")->size($this->path);
+    }
+
+    /**
      * Returns all file-paths for the given file-uuid
      *
      * @param string $fileUuid The files uuid
@@ -301,8 +311,4 @@ class FileVersion extends Model {
 
         return $path;
     }
-
-    // TODO: if deleted -> delete corresponding file; also check if migrate rollback
-    // TODO: check tmp files -> delete if old -> warning
-    // TODO: add command to clean files
 }

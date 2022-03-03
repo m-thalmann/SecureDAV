@@ -163,6 +163,4 @@ class File extends Model {
             $model->setAttribute($model->getKeyName(), Str::uuid());
         });
     }
-
-    // TODO: add health-checks -> remove files from db that don't exist anymore + notify user
 }

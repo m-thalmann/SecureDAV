@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AccessUser extends Model {
     use HasFactory;
@@ -91,5 +92,23 @@ class AccessUser extends Model {
         }
 
         return null;
+    }
+
+    /**
+     * Generates a random token (password) for this access-user
+     * and returns the plain-text-token
+     *
+     * @return string
+     */
+    public function generateToken() {
+        $token = Str::random(32);
+
+        $accessToken = new AccessUserToken();
+        $accessToken->access_user_id = $this->id;
+        $accessToken->token = Hash::make($token);
+
+        $accessToken->save();
+
+        return $token;
     }
 }

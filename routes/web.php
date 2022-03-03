@@ -134,6 +134,10 @@ Route::middleware(["auth", "verified"])->group(function () {
 
         Route::controller(AccessController::class)->group(function () {
             Route::view("/access", "access.index")->name("access");
+
+            Route::post("/access/{accessUser}/tokens/generate", "generateToken")
+                ->name("access.tokens.generate")
+                ->middleware("can:update,accessUser");
         });
 
         /*

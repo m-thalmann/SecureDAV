@@ -47,10 +47,8 @@ class Server extends Dav\Server {
 
         $this->setBaseUri("/dav");
 
-        $this->addPlugin(new DAV\Browser\Plugin()); // TODO: remove
         $this->addPlugin($authPlugin);
         $this->addPlugin($locksPlugin);
-
     }
 
     /**
