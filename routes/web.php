@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Access\AccessController;
 use App\Http\Controllers\Files\AddFileController;
 use App\Http\Controllers\Files\FilesController;
 use App\Http\Controllers\Files\FileVersionsController;
@@ -35,9 +36,9 @@ Route::middleware(["auth", "verified"])->group(function () {
          */
 
         Route::controller(FilesController::class)->group(function () {
-            Route::get("/files", "create")->name("files");
+            Route::view("/files", "files.index")->name("files");
 
-            Route::get("/files/trash", "createTrash")->name("files.trash");
+            Route::view("/files/trash", "files.trash")->name("files.trash");
 
             Route::delete("/files/trash", "clearTrash")->name(
                 "files.trash.clear"
@@ -63,7 +64,7 @@ Route::middleware(["auth", "verified"])->group(function () {
         });
 
         Route::controller(AddFileController::class)->group(function () {
-            Route::get("/files/add", "create")->name("files.add");
+            Route::view("/files/add", "files.add")->name("files.add");
             Route::post("/files/add", "store")->name("files.add.store");
         });
 
@@ -128,44 +129,39 @@ Route::middleware(["auth", "verified"])->group(function () {
         });
 
         /*
-         * SECURITY
+         * ACCESS
          */
 
-        Route::get("/security", function () {
-            return view("security");
-        })->name("security");
+        Route::controller(AccessController::class)->group(function () {
+            Route::view("/access", "access.index")->name("access");
+        });
 
         /*
          * BACKUPS
          */
 
-        Route::get("/backups", function () {
-            return view("backups");
-        })->name("backups");
+        Route::view("/backups", "backups")->name("backups");
 
         /*
          * SETTINGS
          */
 
-        Route::get("/settings", [SettingsController::class, "create"])->name(
-            "settings"
-        );
-        Route::put("/settings", [SettingsController::class, "update"])->name(
-            "settings.update"
-        );
-        Route::delete("/settings", [
-            SettingsController::class,
-            "destroy",
-        ])->name("settings.destroy");
+        Route::controller(SettingsController::class)->group(function () {
+            Route::view("/settings", "settings.index")->name("settings");
+            Route::put("/settings", "update")->name("settings.update");
+            Route::delete("/settings", "destroy")->name("settings.destroy");
+        });
 
-        Route::get("/settings/password", [
-            SettingsPasswordController::class,
-            "create",
-        ])->name("settings.password");
-        Route::put("/settings/password", [
-            SettingsPasswordController::class,
-            "update",
-        ])->name("settings.password.update");
+        Route::controller(SettingsPasswordController::class)->group(
+            function () {
+                Route::get("/settings/password", "create")->name(
+                    "settings.password"
+                );
+                Route::put("/settings/password", "update")->name(
+                    "settings.password.update"
+                );
+            }
+        );
     });
 });
 

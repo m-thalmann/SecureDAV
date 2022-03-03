@@ -11,10 +11,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class AddFileController extends Controller {
-    public function create() {
-        return view("files.add");
-    }
-
     public function store(Request $request) {
         $request->validate([
             "name" => [

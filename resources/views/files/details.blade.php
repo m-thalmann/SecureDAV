@@ -65,11 +65,11 @@
         </table>
 
         <div>
-            <x-button :href="route('files.versions.download.latest', ['file' => $file->uuid])" class="mr-2">
+            <x-button :href="route('files.versions.download.latest', ['file' => $file->uuid])" class="mr-2 mb-2">
                 <i class="fa-solid fa-download mr-2"></i> {{ __('Download latest version') }}
             </x-button>
 
-            <form method="POST" action="{{ route('files.delete', ['file' => $file->uuid]) }}" class="inline-block mr-2">
+            <form method="POST" action="{{ route('files.delete', ['file' => $file->uuid]) }}" class="inline-block mr-2 mb-2">
                 @method('DELETE')
                 @csrf
     

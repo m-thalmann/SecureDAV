@@ -19,16 +19,8 @@ class FilesController extends Controller {
         ]);
     }
 
-    public function create() {
-        return view("files.index");
-    }
-
     public function createDetails(File $file) {
         return view("files.details", ["file" => $file]);
-    }
-
-    public function createTrash() {
-        return view("files.trash");
     }
 
     public function clearTrash(Request $request) {

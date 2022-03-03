@@ -10,10 +10,6 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rules;
 
 class SettingsPasswordController extends Controller {
-    public function create() {
-        return view("settings.password");
-    }
-
     public function update(Request $request) {
         $request->validate([
             "current_password" => ["required", "current_password"],

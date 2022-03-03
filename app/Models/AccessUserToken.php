@@ -13,4 +13,8 @@ class AccessUserToken extends Model {
     protected $hidden = ["token", "last_access"];
 
     public $timestamps = false;
+
+    public function accessUser() {
+        return $this->belongsTo(AccessUser::class);
+    }
 }

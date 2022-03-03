@@ -11,10 +11,6 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller {
-    public function create() {
-        return view("settings.index");
-    }
-
     public function update(Request $request) {
         $fields = $request->validate([
             "email" => [

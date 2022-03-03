@@ -11,14 +11,14 @@
             "icon" => "fa-solid fa-folder"
         ],
         [
+            "route" => "access",
+            "name" => __("Access"),
+            "icon" => "fa-solid fa-shield-alt"
+        ],
+        [
             "route" => "backups",
             "name" => __("Backups"),
             "icon" => "fa-solid fa-sync-alt"
-        ],
-        [
-            "route" => "security",
-            "name" => __("Security"),
-            "icon" => "fa-solid fa-shield-alt"
         ],
     ];
 @endphp
