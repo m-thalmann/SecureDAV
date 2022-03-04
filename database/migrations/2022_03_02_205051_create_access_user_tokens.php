@@ -14,6 +14,7 @@ return new class extends Migration {
         Schema::create("access_user_tokens", function (Blueprint $table) {
             $table->id();
             $table->string("token");
+            $table->string("label")->nullable();
             $table
                 ->foreignId("access_user_id")
                 ->constrained("access_users")
@@ -21,7 +22,7 @@ return new class extends Migration {
                 ->cascadeOnDelete();
             $table->boolean("active")->default(true);
             $table->timestamp("last_access")->nullable();
-            $table->string("label")->nullable();
+            $table->timestamp("created_at");
         });
     }
 

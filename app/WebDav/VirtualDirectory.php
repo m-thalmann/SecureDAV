@@ -29,13 +29,19 @@ class VirtualDirectory extends DAV\Collection {
     private function loadChildren() {
         $this->children = [];
 
-        foreach (Authentication::getUser()->files() as $file) {
+        foreach (
+            Authentication::getUser()
+                ->getFiles()
+                ->get()
+            as $file
+        ) {
             if ($file instanceof File) {
                 if ($file->getAmountVersions() === 0) {
                     continue;
                 }
+
+                $this->children[] = new VirtualFile($file);
             }
-            $this->children[] = new VirtualFile($file);
         }
     }
 

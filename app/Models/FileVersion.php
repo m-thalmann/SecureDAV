@@ -203,7 +203,7 @@ class FileVersion extends Model {
      *
      * @return number
      */
-    public function bytesOnDisk() {
+    public function getBytesOnDisk() {
         return Storage::disk("files")->size($this->path);
     }
 

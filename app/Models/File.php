@@ -37,6 +37,10 @@ class File extends Model {
     }
 
     public function accessUsers() {
+        return $this->belongsToMany(AccessUser::class, "access_user_files");
+    }
+
+    public function getAccessUsers() {
         return AccessUser::query()
             ->where(function ($query) {
                 $query

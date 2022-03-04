@@ -14,6 +14,7 @@ return new class extends Migration {
         Schema::create("access_users", function (Blueprint $table) {
             $table->id();
             $table->string("username")->unique();
+            $table->string("label")->nullable();
             $table->boolean("readonly");
             $table->boolean("access_all");
             $table

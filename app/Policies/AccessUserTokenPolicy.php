@@ -17,7 +17,7 @@ class AccessUserTokenPolicy {
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function view(User $user, AccessUserToken $accessUserToken) {
-        return $user->id === $accessUserToken->accessUser()->user_id;
+        return $user->id === $accessUserToken->accessUser->user_id;
     }
 
     /**
@@ -28,7 +28,7 @@ class AccessUserTokenPolicy {
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function update(User $user, AccessUserToken $accessUserToken) {
-        return $user->id === $accessUserToken->accessUser()->user_id;
+        return $user->id === $accessUserToken->accessUser->user_id;
     }
 
     /**
@@ -39,6 +39,6 @@ class AccessUserTokenPolicy {
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function forceDelete(User $user, AccessUserToken $accessUserToken) {
-        return $user->id === $accessUserToken->accessUser()->user_id;
+        return $user->id === $accessUserToken->accessUser->user_id;
     }
 }

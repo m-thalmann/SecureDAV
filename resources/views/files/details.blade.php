@@ -81,11 +81,11 @@
     </x-content-card>
 
     @php
-        $accessUsers = $file->accessUsers();
+        $accessUsers = $file->getAccessUsers();
     @endphp
     <x-content-card :title="__('Access users') . ' (' . count($accessUsers) . ')'" class="mb-4">
         <div class="mb-4">
-            <x-button href="#" class="mb-4"> <!-- TODO: add route -->
+            <x-button :href="route('access.add')" class="mb-4">
                 <i class="fa-solid fa-user-plus mr-2"></i> {{ __('Create new access user') }}
             </x-button>
         </div>
@@ -95,41 +95,43 @@
                 <thead class="bg-gray-100 text-gray-500 dark:bg-gray-900 dark:text-gray-300 whitespace-nowrap">
                     <tr>
                         <th class="px-6 py-2">{{ __('Username') }}</th>
-                        <th class="px-6 py-2">{{ __('Write') }}</th>
-                        <th class="px-6 py-2">{{ __('Access all files') }}</th>
+                        <th class="px-6 py-2">{{ __('Label') }}</th>
+                        <th class="px-2 py-2">{{ __('Read only') }}</th>
+                        <th class="px-2 py-2">{{ __('Access all files') }}</th>
                         <th class="px-6 py-2">{{ __('Last access') }}</th>
                         <th class="px-6 py-2">{{ __('Active tokens') }}</th>
-                        <th class="px-6 py-2">{{ __('Generate token') }}</th>
-                        <th class="px-6 py-2">{{ __('View') }}</th>
+                        <th class="px-2 py-2">{{ __('Generate token') }}</th>
+                        <th class="px-2 py-2">{{ __('View') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-700 whitespace-nowrap">
                     @foreach ($accessUsers as $accessUser)
                         <tr>
                             <td class="px-6 py-3">{{ $accessUser->username }}</td>
-                            <td class="px-6 py-3">
+                            <td class="px-6 py-3">{{ $accessUser->label ? $accessUser->label : '-' }}</td>
+                            <td class="px-2 py-3">
                                 <input
                                     type="checkbox"
                                     class="rounded border-gray-300 text-orange-500 shadow-sm dark:border-none cursor-not-allowed"
-                                    @checked(!$accessUser->readonly) disabled>
+                                    @checked($accessUser->readonly) disabled>
                             </td>
-                            <td class="px-6 py-3">
+                            <td class="px-2 py-3">
                                 <input
                                     type="checkbox"
                                     class="rounded border-gray-300 text-orange-500 shadow-sm dark:border-none cursor-not-allowed"
                                     @checked($accessUser->access_all) disabled>
                             </td>
                             <td class="px-6 py-3">
-                                @if($accessUser->lastAccess() !== null)
-                                    <x-tooltip-element class="cursor-default" :tooltip="$accessUser->lastAccess()->format('d/m/Y H:i:s P')">
-                                        {{ $accessUser->lastAccess()->diffForHumans() }}
+                                @if($accessUser->getLastAccess() !== null)
+                                    <x-tooltip-element class="cursor-default" :tooltip="$accessUser->getLastAccess()->format('d/m/Y H:i:s P')">
+                                        {{ $accessUser->getLastAccess()->diffForHumans() }}
                                     </x-tooltip-element>
                                 @else
                                     {{ __('Never') }}
                                 @endif
                             </td>
                             <td class="px-6 py-3">
-                                {{ $accessUser->activeTokens()->count() }}
+                                {{ $accessUser->getActiveTokens()->count() }}
                                 /
                                 {{ $accessUser->tokens()->count() }}
                             </td>
@@ -143,7 +145,7 @@
                                 </form>
                             </td>
                             <td class="px-2 py-2 text-xl">
-                                <a href="#"> <!-- TODO: add route -->
+                                <a href="{{ route('access.details', ["accessUser" => $accessUser->id]) }}">
                                     <i class="fa-solid fa-eye"></i>
                                 </a>
                             </td>
@@ -151,7 +153,7 @@
                     @endforeach
                     @if(count($accessUsers) === 0)
                         <tr>
-                            <td class="px-6 py-3 text-center" colspan="7"><i class="fa-solid fa-info-circle mr-2"></i> {{ __('No access-users for this file') }}</td>
+                            <td class="px-6 py-3 text-center" colspan="8"><i class="fa-solid fa-info-circle mr-2"></i> {{ __('No access-users for this file') }}</td>
                         </tr>
                     @endif
                 </tbody>
@@ -196,10 +198,10 @@
                         @if ($file->encrypted)
                             <th class="px-6 py-2">{{ __('Size on disk') }}</th>
                         @endif
-                        <th class="px-3 py-2">{{ __('Delete') }}</th>
-                        {{-- <th class="px-3 py-2">{{ __('Share') }}</th> --}}
+                        <th class="px-2 py-2">{{ __('Delete') }}</th>
+                        {{-- <th class="px-2 py-2">{{ __('Share') }}</th> --}}
                         <!-- TODO: share -->
-                        <th class="px-3 py-2">{{ __('Download') }}</th>
+                        <th class="px-2 py-2">{{ __('Download') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-700 whitespace-nowrap">
@@ -221,7 +223,7 @@
                             </td>
                             @if ($file->encrypted)
                                 <td class="px-6 py-3">
-                                    {{ formatBytes($version->bytesOnDisk()) }}
+                                    {{ formatBytes($version->getBytesOnDisk()) }}
                                 </td>
                             @endif
                             <td class="px-2 py-2 text-xl">

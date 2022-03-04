@@ -16,7 +16,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      *
      * @var array<int, string>
      */
-    protected $fillable = ['name', 'email', 'password'];
+    protected $fillable = ["name", "email", "password"];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -24,14 +24,14 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
-        'created_at',
-        'updated_at',
+        "password",
+        "remember_token",
+        "created_at",
+        "updated_at",
     ];
 
     protected $attributes = [
-        'isAdmin' => false,
+        "isAdmin" => false,
     ];
 
     /**
@@ -40,10 +40,14 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        "email_verified_at" => "datetime",
     ];
 
     public function files() {
         return $this->hasMany(File::class);
+    }
+
+    public function accessUsers() {
+        return $this->hasMany(AccessUser::class);
     }
 }

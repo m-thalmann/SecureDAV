@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Access\AccessController;
+use App\Http\Controllers\Access\AccessUserTokenController;
 use App\Http\Controllers\Files\AddFileController;
 use App\Http\Controllers\Files\FilesController;
 use App\Http\Controllers\Files\FileVersionsController;
@@ -135,9 +136,51 @@ Route::middleware(["auth", "verified"])->group(function () {
         Route::controller(AccessController::class)->group(function () {
             Route::view("/access", "access.index")->name("access");
 
-            Route::post("/access/{accessUser}/tokens/generate", "generateToken")
+            Route::view("/access/add", "access.add")->name("access.add");
+
+            Route::post("/access/add", "storeUser")->name("access.add.store");
+
+            Route::get("/access/users/{accessUser}/details", "createDetails")
+                ->name("access.details")
+                ->middleware("can:view,accessUser");
+
+            Route::post(
+                "/access/users/{accessUser}/tokens/generate",
+                "generateToken"
+            )
                 ->name("access.tokens.generate")
                 ->middleware("can:update,accessUser");
+
+            Route::put("/access/users/{accessUser}/readonly", "updateReadOnly")
+                ->name("access.readonly.update")
+                ->middleware("can:update,accessUser");
+
+            Route::put(
+                "/access/users/{accessUser}/accessAll",
+                "updateAccessAll"
+            )
+                ->name("access.access_all.update")
+                ->middleware("can:update,accessUser");
+
+            Route::delete(
+                "/access/users/{accessUser}/files/{file}",
+                "revokeFileAccess"
+            )
+                ->name("access.files.revoke")
+                ->middleware("can:update,accessUser");
+        });
+
+        Route::controller(AccessUserTokenController::class)->group(function () {
+            Route::put(
+                "/access/tokens/{accessUserToken}/active",
+                "updateActive"
+            )
+                ->name("access.tokens.active.update")
+                ->middleware("can:update,accessUserToken");
+
+            Route::delete("/access/tokens/{accessUserToken}", "destroy")
+                ->name("access.tokens.destroy")
+                ->middleware("can:forceDelete,accessUserToken");
         });
 
         /*
