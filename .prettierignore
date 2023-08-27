@@ -1,0 +1,11 @@
+/node_modules
+/vendor
+/storage
+/public/build
+/public/hot
+/public/storage
+/coverage
+/coverage.xml
+
+composer.lock
+package-lock.json
