@@ -6,6 +6,12 @@ use Illuminate\View\Component;
 use Illuminate\View\View;
 
 class AppLayout extends Component {
+    public function __construct(
+        public readonly ?string $title = null,
+        public readonly mixed $header = null
+    ) {
+    }
+
     public function render(): View {
         return view('layouts.app');
     }

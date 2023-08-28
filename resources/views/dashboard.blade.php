@@ -1,3 +1,3 @@
-<x-guest-layout>
-    Hey SecueDAV!
-</x-guest-layout>
+<x-app-layout>
+    Hey SecureDAV!
+</x-app-layout>

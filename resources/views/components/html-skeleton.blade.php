@@ -27,7 +27,7 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body {{ $attributes->merge(['class' => 'antialiased bg-gray-900 text-white']) }}>
+    <body {{ $attributes->merge(['class' => 'antialiased']) }}>
         {{ $slot }}
     </body>
 </html>
