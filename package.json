@@ -6,6 +6,7 @@
     "build": "vite build"
   },
   "devDependencies": {
+    "@fortawesome/fontawesome-free": "^6.4.2",
     "@prettier/plugin-php": "^0.18.8",
     "autoprefixer": "^10.4.15",
     "daisyui": "^3.6.3",

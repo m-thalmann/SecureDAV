@@ -3,7 +3,7 @@
     <h1 class="text-3xl">{{ config('app.name') }}</h1>
 </div>
 
-<div class="card bg-base-200 shadow-xl mt-6 w-full sm:max-w-md max-sm:rounded-none">
+<div class="sm:card sm:bg-base-200 sm:shadow-xl sm:max-w-md w-full mt-6">
     <div class="card-body items-center text-center">
         {{ $slot }}
     </div>

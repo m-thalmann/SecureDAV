@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Http\Controllers\Auth\LoginController;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use App\View\Helpers\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -36,17 +37,39 @@ class LoginTest extends TestCase {
         ]);
 
         $this->assertGuest();
-        $response->assertInvalid();
+        $response->assertSessionHas('session-message', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_WARNING, $message->type);
+            $this->assertEquals(__('auth.failed'), $message->message);
+
+            return true;
+        });
     }
 
     public function testRateLimitsAfterCertainAmountOfBadRequests(): void {
+        // TODO: enable when https://github.com/laravel/framework/issues/48248 is fixed (and use it below in assert -> 'auth.throttle')
+        // RateLimiter::partialMock()
+        //     ->shouldReceive('availableIn')
+        //     ->once()
+        //     ->andReturn(60);
+
         for ($i = 0; $i < LoginController::MAX_ATTEMPTS; $i++) {
             $response = $this->post('/login', [
                 'email' => 'wrong-email@example.com',
                 'password' => 'wrong-password',
             ]);
 
-            $response->assertInvalid(['form' => __('auth.failed')]);
+            $response->assertSessionHas('session-message', function (
+                SessionMessage $message
+            ) {
+                $this->assertEquals(
+                    SessionMessage::TYPE_WARNING,
+                    $message->type
+                );
+
+                return true;
+            });
         }
 
         $response = $this->post('/login', [
@@ -54,12 +77,14 @@ class LoginTest extends TestCase {
             'password' => 'wrong-password',
         ]);
 
-        $response->assertInvalid([
-            'form' => __('auth.throttle', [
-                'seconds' => 59,
-                'minutes' => 0,
-            ]),
-        ]);
+        $response->assertSessionHas('session-message', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
+            $this->assertNotEquals(__('auth.failed'), $message->message);
+
+            return true;
+        });
     }
 
     public function testRedirectsToHomeRouteIfIsAuthenticated(): void {

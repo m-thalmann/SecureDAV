@@ -9,6 +9,8 @@ export default {
     './resources/views/**/*.blade.php',
   ],
 
+  safelist: ['alert-success', 'alert-error', 'alert-warning', 'alert-info'],
+
   theme: {
     extend: {
       fontFamily: {

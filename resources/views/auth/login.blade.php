@@ -1,17 +1,9 @@
 <x-guest-layout :title="__('Login')">
     <x-auth-card>
+        <x-session-message :message="session('session-message')" class="mb-3"></x-session-message>
+
         <form method="POST" action="{{ route('login') }}" class="w-full">
             @csrf
-
-            @if ($errors->has('form'))
-                <div class="form-errors text-left mb-3">
-                    <div class="font-medium text-error mb-3">
-                        {{ __('Whoops! Something went wrong.') }}
-                    </div>
-
-                    <x-input-error :messages="$errors->get('form')" />
-                </div>
-            @endif
 
             <div class="form-control w-full">
                 <label class="label" for="email">
@@ -39,7 +31,7 @@
 
             <div class="form-control w-fit">
                 <label class="label cursor-pointer gap-4">
-                    <input type="checkbox" checked="checked" class="checkbox checkbox-secondary" name="remember" />
+                    <input type="checkbox" {{ old('remember') ? 'checked' : '' }} class="checkbox checkbox-secondary" name="remember" />
                     <span class="label-text">{{ __('Remember me') }}</span> 
                 </label>
             </div>
@@ -49,7 +41,7 @@
                     <a class="link" href="{{ route('password.request') }}">{{ __('Forgot your password?') }}</a>
                 @endif
 
-                <button class="btn btn-secondary">{{ __('Log in') }}</button>
+                <input type="submit" value="{{ __('Log in') }}" class="btn btn-secondary" />
             </div>
         </form>
     </x-auth-card>
