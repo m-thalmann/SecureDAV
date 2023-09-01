@@ -3,9 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable {
     use HasFactory, Notifiable;
@@ -33,4 +36,24 @@ class User extends Authenticatable {
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    protected function initials(): Attribute {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                $names = explode(' ', $attributes['name']);
+                $initials = '';
+
+                if (count($names) >= 2) {
+                    $first = Arr::first($names)[0];
+                    $last = Arr::last($names)[0];
+
+                    $initials = $first . $last;
+                } else {
+                    $initials = Str::substr($attributes['name'], 0, 2);
+                }
+
+                return Str::upper($initials);
+            }
+        );
+    }
 }
