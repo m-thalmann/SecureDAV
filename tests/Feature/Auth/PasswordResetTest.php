@@ -22,7 +22,7 @@ class PasswordResetTest extends TestCase {
     public function testPasswordResetEmailCanBeRequested(): void {
         Notification::fake();
 
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $this->post('/forgot-password', ['email' => $user->email]);
 
@@ -44,7 +44,7 @@ class PasswordResetTest extends TestCase {
     public function testPasswordResetEmailRequestIsRateLimitedAfterOneSuccessfulRequest(): void {
         Notification::fake();
 
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $request1 = $this->post('/forgot-password', ['email' => $user->email]);
 
@@ -80,7 +80,7 @@ class PasswordResetTest extends TestCase {
     public function testResetPasswordScreenCanBeRendered(): void {
         Notification::fake();
 
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $this->post('/forgot-password', ['email' => $user->email]);
 
@@ -98,7 +98,7 @@ class PasswordResetTest extends TestCase {
     public function testPasswordCanBeResetWithValidToken(): void {
         Notification::fake();
 
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $this->post('/forgot-password', ['email' => $user->email]);
 
@@ -121,7 +121,7 @@ class PasswordResetTest extends TestCase {
     public function testPasswordResetFailsWithInvalidEmail(): void {
         Notification::fake();
 
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $this->post('/forgot-password', ['email' => $user->email]);
 
@@ -144,8 +144,8 @@ class PasswordResetTest extends TestCase {
     public function testPasswordResetFailsWithInvalidToken(): void {
         Notification::fake();
 
-        $user = User::factory()->create();
-        $otherUser = User::factory()->create();
+        $user = $this->createUser();
+        $otherUser = $this->createUser();
 
         $this->post('/forgot-password', ['email' => $user->email]);
 

@@ -20,7 +20,7 @@ class LoginTest extends TestCase {
     }
 
     public function testUserCanAuthenticateUsingTheLoginScreen(): void {
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $response = $this->post('/login', [
             'email' => $user->email,
@@ -73,7 +73,7 @@ class LoginTest extends TestCase {
     }
 
     public function testRedirectsToHomeRouteIfIsAuthenticated(): void {
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $response = $this->actingAs($user)->get('/login');
 

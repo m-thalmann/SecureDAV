@@ -33,6 +33,7 @@ class FortifyServiceProvider extends ServiceProvider {
      */
     public function boot(): void {
         $this->configureLogin();
+        $this->configureConfirmPassword();
         $this->configurePasswordReset();
 
         $this->configureRateLimiting();
@@ -47,6 +48,10 @@ class FortifyServiceProvider extends ServiceProvider {
 
     protected function configureLogin(): void {
         Fortify::loginView('auth.login');
+    }
+
+    protected function configureConfirmPassword(): void {
+        Fortify::confirmPasswordView('auth.confirm-password');
     }
 
     protected function registerPasswordResetResponses(): void {

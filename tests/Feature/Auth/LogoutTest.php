@@ -10,7 +10,7 @@ class LogoutTest extends TestCase {
     use LazilyRefreshDatabase;
 
     public function testLogoutWorks(): void {
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $this->actingAs($user);
 
