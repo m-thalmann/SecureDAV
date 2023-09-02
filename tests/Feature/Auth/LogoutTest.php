@@ -3,7 +3,6 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -15,10 +14,10 @@ class LogoutTest extends TestCase {
 
         $this->actingAs($user);
 
-        $response = $this->get('/logout');
+        $response = $this->post('/logout');
 
         $this->assertGuest();
 
-        $response->assertRedirect(RouteServiceProvider::HOME);
+        $response->assertRedirect('/');
     }
 }

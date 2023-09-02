@@ -37,9 +37,7 @@
             </div>
 
             <div class="card-actions justify-end items-center gap-6 mt-6">
-                @if (Route::has('password.request'))
-                    <a class="link" href="{{ route('password.request') }}">{{ __('Forgot your password?') }}</a>
-                @endif
+                <a class="link" href="{{ route('password.request') }}">{{ __('Forgot your password?') }}</a>
 
                 <input type="submit" value="{{ __('Log in') }}" class="btn btn-secondary" />
             </div>

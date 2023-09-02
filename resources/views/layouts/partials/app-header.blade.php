@@ -41,12 +41,17 @@
                             {{ __('Settings') }}
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ route('logout') }}" class="hover:bg-error hover:text-error-content">
-                            <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i>
-                            {{ __('Log out') }}
-                        </a>
-                    </li>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        
+                        <li>
+                            <a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();" class="hover:bg-error hover:text-error-content">
+                                <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i>
+                                {{ __('Log out') }}
+                            </a>
+                        </li>
+                    </form>
                 </ul>
             </div>
         </div>

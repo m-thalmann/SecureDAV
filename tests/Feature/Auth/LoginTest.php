@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Http\Controllers\Auth\LoginController;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use App\View\Helpers\SessionMessage;
@@ -11,6 +10,8 @@ use Tests\TestCase;
 
 class LoginTest extends TestCase {
     use LazilyRefreshDatabase;
+
+    protected const LOGIN_THROTTLE_LIMIT = 5;
 
     public function testLoginScreenCanBeRendered(): void {
         $response = $this->get('/login');
@@ -37,14 +38,7 @@ class LoginTest extends TestCase {
         ]);
 
         $this->assertGuest();
-        $response->assertSessionHas('session-message', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_WARNING, $message->type);
-            $this->assertEquals(__('auth.failed'), $message->message);
-
-            return true;
-        });
+        $response->assertSessionHasErrors(['email' => __('auth.failed')]);
     }
 
     public function testRateLimitsAfterCertainAmountOfBadRequests(): void {
@@ -54,22 +48,13 @@ class LoginTest extends TestCase {
         //     ->once()
         //     ->andReturn(60);
 
-        for ($i = 0; $i < LoginController::MAX_ATTEMPTS; $i++) {
+        for ($i = 0; $i < static::LOGIN_THROTTLE_LIMIT; $i++) {
             $response = $this->post('/login', [
                 'email' => 'wrong-email@example.com',
                 'password' => 'wrong-password',
             ]);
 
-            $response->assertSessionHas('session-message', function (
-                SessionMessage $message
-            ) {
-                $this->assertEquals(
-                    SessionMessage::TYPE_WARNING,
-                    $message->type
-                );
-
-                return true;
-            });
+            $response->assertSessionHasErrors(['email' => __('auth.failed')]);
         }
 
         $response = $this->post('/login', [

@@ -2,7 +2,7 @@
     <x-auth-card>
         <x-session-message :message="session('session-message')" class="mb-3"></x-session-message>
 
-        <form method="POST" action="{{ route('password.store') }}" class="w-full">
+        <form method="POST" action="{{ route('password.update') }}" class="w-full">
             @csrf
 
             <input type="hidden" name="token" value="{{ $request->route('token') }}">
