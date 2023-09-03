@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\ProfileSettingsController;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Route;
 
@@ -21,5 +22,21 @@ Route::middleware('auth')->group(function () {
     Route::view('files', 'files.index')->name('files.index');
     Route::view('access', 'access.index')->name('access.index');
     Route::view('backups', 'backups.index')->name('backups.index');
-    Route::view('settings', 'settings.index')->name('settings.index');
+
+    Route::prefix('settings')
+        ->as('settings.')
+        ->group(function () {
+            Route::any(
+                '/',
+                fn() => redirect()->route('settings.profile.edit')
+            )->name('index');
+
+            Route::controller(ProfileSettingsController::class)
+                ->prefix('profile')
+                ->as('profile.')
+                ->group(function () {
+                    Route::get('', 'edit')->name('edit');
+                });
+        });
 });
+
