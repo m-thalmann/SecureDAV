@@ -82,4 +82,27 @@ class ProfileSettingsTest extends TestCase {
 
         Notification::assertSentTo($this->user, VerifyEmail::class);
     }
+
+    public function testPasswordCanBeUpdated(): void {
+        $this->get('/settings/profile');
+
+        $response = $this->put('/user/password', [
+            'current_password' => 'password',
+            'password' => 'new-password',
+            'password_confirmation' => 'new-password',
+        ]);
+
+        $response->assertRedirect('/settings/profile');
+        $response->assertSessionHas(
+            'session-message[update-password]',
+            function (SessionMessage $message) {
+                $this->assertEquals(
+                    SessionMessage::TYPE_SUCCESS,
+                    $message->type
+                );
+
+                return true;
+            }
+        );
+    }
 }

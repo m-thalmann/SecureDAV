@@ -3,11 +3,13 @@
 namespace App\Providers;
 
 use App\Auth\Fortify\Actions\ResetsUserPasswords;
+use App\Auth\Fortify\Actions\UpdatesUserPasswords;
 use App\Auth\Fortify\Actions\UpdatesUserProfileInformation;
 use App\Auth\Fortify\Responses\FailedPasswordResetLinkRequestResponse;
 use App\Auth\Fortify\Responses\FailedPasswordResetResponse;
 use App\Auth\Fortify\Responses\LoginLockoutResponse;
 use App\Auth\Fortify\Responses\PasswordResetResponse;
+use App\Auth\Fortify\Responses\PasswordUpdateResponse;
 use App\Auth\Fortify\Responses\ProfileInformationUpdatedResponse;
 use App\Auth\Fortify\Responses\SuccessfulPasswordResetLinkRequestResponse;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -18,6 +20,7 @@ use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse as FailedPa
 use Laravel\Fortify\Contracts\FailedPasswordResetResponse as FailedPasswordResetResponseContract;
 use Laravel\Fortify\Contracts\LockoutResponse as LockoutResponseContract;
 use Laravel\Fortify\Contracts\PasswordResetResponse as PasswordResetResponseContract;
+use Laravel\Fortify\Contracts\PasswordUpdateResponse as PasswordUpdateResponseContract;
 use Laravel\Fortify\Contracts\ProfileInformationUpdatedResponse as ProfileInformationUpdatedResponseContract;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse as SuccessfulPasswordResetLinkRequestResponseContract;
 use Laravel\Fortify\Fortify;
@@ -30,6 +33,7 @@ class FortifyServiceProvider extends ServiceProvider {
         $this->registerLoginResponses();
         $this->registerPasswordResetResponses();
         $this->registerUpdateProfileInformationResponses();
+        $this->registerUpdatePasswordResponses();
     }
 
     /**
@@ -40,6 +44,7 @@ class FortifyServiceProvider extends ServiceProvider {
         $this->configureConfirmPassword();
         $this->configurePasswordReset();
         $this->configureUpdateProfileInformation();
+        $this->configureUpdatePassword();
 
         $this->configureRateLimiting();
     }
@@ -97,6 +102,17 @@ class FortifyServiceProvider extends ServiceProvider {
         Fortify::updateUserProfileInformationUsing(
             UpdatesUserProfileInformation::class
         );
+    }
+
+    protected function registerUpdatePasswordResponses(): void {
+        $this->app->singleton(
+            PasswordUpdateResponseContract::class,
+            PasswordUpdateResponse::class
+        );
+    }
+
+    protected function configureUpdatePassword(): void {
+        Fortify::updateUserPasswordsUsing(UpdatesUserPasswords::class);
     }
 
     protected function configureRateLimiting(): void {
