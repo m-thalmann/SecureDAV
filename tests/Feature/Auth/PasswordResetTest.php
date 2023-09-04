@@ -16,7 +16,7 @@ class PasswordResetTest extends TestCase {
     public function testRequestPasswordResetScreenCanBeRendered(): void {
         $response = $this->get('/forgot-password');
 
-        $response->assertStatus(200);
+        $response->assertOk();
     }
 
     public function testPasswordResetEmailCanBeRequested(): void {
@@ -89,7 +89,7 @@ class PasswordResetTest extends TestCase {
         ) {
             $response = $this->get('/reset-password/' . $notification->token);
 
-            $response->assertStatus(200);
+            $response->assertOk();
 
             return true;
         });

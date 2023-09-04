@@ -10,7 +10,8 @@ class SessionMessage {
 
     protected function __construct(
         public readonly string $type,
-        public readonly string $message
+        public readonly string $message,
+        public readonly ?int $duration = null
     ) {
     }
 
@@ -24,19 +25,25 @@ class SessionMessage {
         };
     }
 
-    public static function success(string $message): self {
-        return new self(self::TYPE_SUCCESS, $message);
+    public static function success(
+        string $message,
+        ?int $duration = null
+    ): self {
+        return new self(self::TYPE_SUCCESS, $message, $duration);
     }
 
-    public static function error(string $message): self {
-        return new self(self::TYPE_ERROR, $message);
+    public static function error(string $message, ?int $duration = null): self {
+        return new self(self::TYPE_ERROR, $message, $duration);
     }
 
-    public static function warning(string $message): self {
-        return new self(self::TYPE_WARNING, $message);
+    public static function warning(
+        string $message,
+        ?int $duration = null
+    ): self {
+        return new self(self::TYPE_WARNING, $message, $duration);
     }
 
-    public static function info(string $message): self {
-        return new self(self::TYPE_INFO, $message);
+    public static function info(string $message, ?int $duration = null): self {
+        return new self(self::TYPE_INFO, $message, $duration);
     }
 }

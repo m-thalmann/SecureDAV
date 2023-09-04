@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('settings')
         ->as('settings.')
+        ->middleware('password.confirm')
         ->group(function () {
             Route::any(
                 '/',

@@ -25,6 +25,17 @@
     </head>
     <body class="antialiased {{ $bodyClass ?? "" }}">
         @yield('htmlBody')
+
+        @if (session('snackbar'))
+            <div
+                class="toast"
+                @if (session('snackbar')->duration !== null)
+                    x-init="setTimeout(function() { $el.remove() }, {{ session('snackbar')->duration * 1000 }})"
+                @endif
+            >
+                <x-session-message :message="session('snackbar')" />
+            </div>
+        @endif
     </body>
 </html>
 
