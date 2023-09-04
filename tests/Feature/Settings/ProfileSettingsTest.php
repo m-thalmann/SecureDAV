@@ -35,7 +35,7 @@ class ProfileSettingsTest extends TestCase {
             'email' => 'j.d@example.com',
         ]);
 
-        $response->assertRedirect('/settings/profile');
+        $response->assertRedirect('/settings/profile#update-information');
         $response->assertSessionHas(
             'session-message[update-profile-information]',
             function (SessionMessage $message) {
@@ -59,7 +59,7 @@ class ProfileSettingsTest extends TestCase {
             'email' => $otherUser->email,
         ]);
 
-        $response->assertRedirect('/settings/profile');
+        $response->assertRedirect('/settings/profile#update-information');
         $response->assertSessionHasErrors(
             'email',
             errorBag: 'updateProfileInformation'
@@ -78,7 +78,7 @@ class ProfileSettingsTest extends TestCase {
             'email' => 'new-email@example.com',
         ]);
 
-        $response->assertRedirect('/settings/profile');
+        $response->assertRedirect('/settings/profile#update-information');
 
         Notification::assertSentTo($this->user, VerifyEmail::class);
     }
@@ -92,7 +92,7 @@ class ProfileSettingsTest extends TestCase {
             'password_confirmation' => 'new-password',
         ]);
 
-        $response->assertRedirect('/settings/profile');
+        $response->assertRedirect('/settings/profile#update-password');
         $response->assertSessionHas(
             'session-message[update-password]',
             function (SessionMessage $message) {

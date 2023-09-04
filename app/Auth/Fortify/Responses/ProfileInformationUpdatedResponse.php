@@ -8,9 +8,11 @@ use Laravel\Fortify\Http\Responses\ProfileInformationUpdatedResponse as BaseProf
 class ProfileInformationUpdatedResponse extends
     BaseProfileInformationUpdatedResponse {
     public function toResponse($request) {
-        return back()->with(
-            'session-message[update-profile-information]',
-            SessionMessage::success(__('Profile updated'))
-        );
+        return back()
+            ->withFragment('update-information')
+            ->with(
+                'session-message[update-profile-information]',
+                SessionMessage::success(__('Profile updated'))
+            );
     }
 }

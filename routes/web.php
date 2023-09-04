@@ -28,15 +28,12 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
             Route::any(
                 '/',
-                fn() => redirect()->route('settings.profile.edit')
+                fn() => redirect()->route('settings.profile.show')
             )->name('index');
 
-            Route::controller(ProfileSettingsController::class)
-                ->prefix('profile')
-                ->as('profile.')
-                ->group(function () {
-                    Route::get('', 'edit')->name('edit');
-                });
+            Route::singleton('profile', ProfileSettingsController::class)
+                ->only(['show', 'destroy'])
+                ->destroyable();
         });
 });
 

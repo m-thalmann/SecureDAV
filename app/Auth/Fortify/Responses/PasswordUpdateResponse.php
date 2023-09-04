@@ -7,9 +7,11 @@ use Laravel\Fortify\Http\Responses\PasswordUpdateResponse as BasePasswordUpdateR
 
 class PasswordUpdateResponse extends BasePasswordUpdateResponse {
     public function toResponse($request) {
-        return back()->with(
-            'session-message[update-password]',
-            SessionMessage::success(__('Password updated successfully.'))
-        );
+        return back()
+            ->withFragment('update-password')
+            ->with(
+                'session-message[update-password]',
+                SessionMessage::success(__('Password updated successfully.'))
+            );
     }
 }

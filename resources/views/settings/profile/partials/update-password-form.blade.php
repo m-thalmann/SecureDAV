@@ -1,4 +1,4 @@
-<x-form-section>
+<x-form-section id="update-password">
     <x-slot name="title">
         {{ __('Update Password') }}
     </x-slot>

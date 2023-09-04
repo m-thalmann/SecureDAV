@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ProfileSettingsController extends Controller {
-    public function edit(Request $request): View {
-        return view('settings.profile.edit', [
+    public function show(Request $request): View {
+        return view('settings.profile.show', [
             'user' => $request->user(),
         ]);
     }
