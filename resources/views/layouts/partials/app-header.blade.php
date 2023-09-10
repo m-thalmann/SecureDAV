@@ -1,4 +1,4 @@
-<nav class="bg-base-300 drop-shadow-md relative z-40">
+<nav class="bg-base-300 drop-shadow-md z-40 sticky top-0">
     <div class="navbar gap-6 h-full w-full max-w-7xl mx-auto py-0 sm:px-6 lg:px-8">
         <div class="flex gap-2">
             <div class="lg:hidden">
