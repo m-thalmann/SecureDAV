@@ -17,24 +17,24 @@ use Illuminate\Support\Facades\Route;
 
 Route::permanentRedirect('/', RouteServiceProvider::HOME);
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     // TODO: replace with resource controllers
     Route::view('files', 'files.index')->name('files.index');
     Route::view('access', 'access.index')->name('access.index');
     Route::view('backups', 'backups.index')->name('backups.index');
-
-    Route::prefix('settings')
-        ->as('settings.')
-        ->middleware('password.confirm')
-        ->group(function () {
-            Route::any(
-                '/',
-                fn() => redirect()->route('settings.profile.show')
-            )->name('index');
-
-            Route::singleton('profile', ProfileSettingsController::class)
-                ->only(['show', 'destroy'])
-                ->destroyable();
-        });
 });
+
+Route::prefix('settings')
+    ->as('settings.')
+    ->middleware(['auth', 'password.confirm'])
+    ->group(function () {
+        Route::any(
+            '/',
+            fn() => redirect()->route('settings.profile.show')
+        )->name('index');
+
+        Route::singleton('profile', ProfileSettingsController::class)
+            ->only(['show', 'destroy'])
+            ->destroyable();
+    });
 

@@ -28,7 +28,23 @@
 
             <div class="form-control col-span-6 md:col-span-4">
                 <label class="label" for="email">
-                    <span class="label-text">{{ __('Email') }}</span>
+                    <span class="label-text flex gap-4">
+                        {{ __('Email') }}
+
+                        @if(config('app.email_verification_enabled'))
+                            @if($user->hasVerifiedEmail())
+                                <span class="badge badge-success gap-1">
+                                    <i class="fa-solid fa-circle-check text-xs"></i>
+                                    {{ __('Verified') }}
+                                </span>
+                            @else
+                                <span class="badge badge-error gap-1">
+                                    <i class="fa-solid fa-triangle-exclamation text-xs"></i>
+                                    {{ __('Not verified') }}
+                                </span>
+                            @endif
+                        @endif
+                    </span>
                 </label>
                 <input id="email" type="email" name="email" class="input input-md w-full{{ $errors->updateProfileInformation->get('email') ? ' input-error' : '' }}" value="{{ $user->email }}" required />
                 <label class="label">
@@ -37,8 +53,6 @@
                     </span>
                 </label>
             </div>
-
-            <!-- TODO: Email verification -->
 
             <div class="card-actions col-span-6 justify-end mt-6">
                 <input type="submit" value="{{ __('Save') }}" class="btn btn-neutral" />

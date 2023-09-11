@@ -12,6 +12,7 @@ use App\Auth\Fortify\Responses\PasswordResetResponse;
 use App\Auth\Fortify\Responses\PasswordUpdateResponse;
 use App\Auth\Fortify\Responses\ProfileInformationUpdatedResponse;
 use App\Auth\Fortify\Responses\SuccessfulPasswordResetLinkRequestResponse;
+use App\Auth\Fortify\Responses\VerifyEmailResponse;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -23,6 +24,7 @@ use Laravel\Fortify\Contracts\PasswordResetResponse as PasswordResetResponseCont
 use Laravel\Fortify\Contracts\PasswordUpdateResponse as PasswordUpdateResponseContract;
 use Laravel\Fortify\Contracts\ProfileInformationUpdatedResponse as ProfileInformationUpdatedResponseContract;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse as SuccessfulPasswordResetLinkRequestResponseContract;
+use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider {
@@ -34,6 +36,7 @@ class FortifyServiceProvider extends ServiceProvider {
         $this->registerPasswordResetResponses();
         $this->registerUpdateProfileInformationResponses();
         $this->registerUpdatePasswordResponses();
+        $this->registerVerifyEmailResponses();
     }
 
     /**
@@ -45,6 +48,7 @@ class FortifyServiceProvider extends ServiceProvider {
         $this->configurePasswordReset();
         $this->configureUpdateProfileInformation();
         $this->configureUpdatePassword();
+        $this->configureVerifyEmail();
 
         $this->configureRateLimiting();
     }
@@ -113,6 +117,17 @@ class FortifyServiceProvider extends ServiceProvider {
 
     protected function configureUpdatePassword(): void {
         Fortify::updateUserPasswordsUsing(UpdatesUserPasswords::class);
+    }
+
+    protected function registerVerifyEmailResponses(): void {
+        $this->app->singleton(
+            VerifyEmailResponseContract::class,
+            VerifyEmailResponse::class
+        );
+    }
+
+    protected function configureVerifyEmail(): void {
+        Fortify::verifyEmailView('auth.verify-email');
     }
 
     protected function configureRateLimiting(): void {
