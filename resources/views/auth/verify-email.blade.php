@@ -4,10 +4,7 @@
             {{ __('It seems like you haven\'t yet verified your email by clicking on the link we just emailed to you. If you didn\'t receive the email, we will gladly send you another.') }}
         </div>
 
-        {{-- The response of the "verification.send" endpoint can't be modified --}}
-        @if (session('status') == 'verification-link-sent')
-            <x-session-message :message="\App\View\Helpers\SessionMessage::success('A new verification link has been sent to the email address you\'ve provided.')" class="my-3"></x-session-message>
-        @endif
+        <x-session-message :message="session('session-message')" class="my-3"></x-session-message>
 
         <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
             <form method="POST" action="{{ route('verification.send') }}">

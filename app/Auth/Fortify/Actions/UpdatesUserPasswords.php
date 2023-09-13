@@ -33,7 +33,7 @@ class UpdatesUserPasswords implements UpdatesUserPasswordsContract {
         } catch (ValidationException $e) {
             $e->redirectTo(
                 back()
-                    ->withFragment('#update-password')
+                    ->withFragment('update-password')
                     ->getTargetUrl()
             );
 
@@ -47,3 +47,4 @@ class UpdatesUserPasswords implements UpdatesUserPasswordsContract {
             ->save();
     }
 }
+

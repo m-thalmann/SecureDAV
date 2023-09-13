@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Auth\Fortify\Actions\ResetsUserPasswords;
 use App\Auth\Fortify\Actions\UpdatesUserPasswords;
 use App\Auth\Fortify\Actions\UpdatesUserProfileInformation;
+use App\Auth\Fortify\Responses\EmailVerificationNotificationSentResponse;
 use App\Auth\Fortify\Responses\FailedPasswordResetLinkRequestResponse;
 use App\Auth\Fortify\Responses\FailedPasswordResetResponse;
 use App\Auth\Fortify\Responses\LoginLockoutResponse;
@@ -17,6 +18,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Fortify\Contracts\EmailVerificationNotificationSentResponse as EmailVerificationNotificationSentResponseContract;
 use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse as FailedPasswordResetLinkRequestResponseContract;
 use Laravel\Fortify\Contracts\FailedPasswordResetResponse as FailedPasswordResetResponseContract;
 use Laravel\Fortify\Contracts\LockoutResponse as LockoutResponseContract;
@@ -123,6 +125,10 @@ class FortifyServiceProvider extends ServiceProvider {
         $this->app->singleton(
             VerifyEmailResponseContract::class,
             VerifyEmailResponse::class
+        );
+        $this->app->singleton(
+            EmailVerificationNotificationSentResponseContract::class,
+            EmailVerificationNotificationSentResponse::class
         );
     }
 

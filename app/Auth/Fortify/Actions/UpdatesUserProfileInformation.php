@@ -26,7 +26,7 @@ class UpdatesUserProfileInformation implements
         } catch (ValidationException $e) {
             $e->redirectTo(
                 back()
-                    ->withFragment('#update-information')
+                    ->withFragment('update-information')
                     ->getTargetUrl()
             );
 
@@ -60,3 +60,4 @@ class UpdatesUserProfileInformation implements
         $user->sendEmailVerificationNotification();
     }
 }
+

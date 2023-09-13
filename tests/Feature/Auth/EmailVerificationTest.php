@@ -60,11 +60,18 @@ class EmailVerificationTest extends TestCase {
 
         $this->actingAs($user);
 
-        $this->get('/email/verify');
-
-        $response = $this->post('/email/verification-notification');
+        $response = $this->from('/email/verify')->post(
+            '/email/verification-notification'
+        );
 
         $response->assertRedirect('/email/verify');
+        $response->assertSessionHas('session-message', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
 
         Notification::assertSentTo($user, VerifyEmail::class);
     }
