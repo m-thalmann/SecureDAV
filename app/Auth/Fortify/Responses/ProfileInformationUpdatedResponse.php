@@ -11,8 +11,8 @@ class ProfileInformationUpdatedResponse extends
         return back()
             ->withFragment('update-information')
             ->with(
-                'session-message[update-profile-information]',
-                SessionMessage::success(__('Profile updated'))
+                'snackbar',
+                SessionMessage::success(__('Profile updated'), duration: 5)
             );
     }
 }

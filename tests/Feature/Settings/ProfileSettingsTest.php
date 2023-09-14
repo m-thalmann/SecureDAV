@@ -46,17 +46,13 @@ class ProfileSettingsTest extends TestCase {
         ]);
 
         $response->assertRedirect('/settings/profile#update-information');
-        $response->assertSessionHas(
-            'session-message[update-profile-information]',
-            function (SessionMessage $message) {
-                $this->assertEquals(
-                    SessionMessage::TYPE_SUCCESS,
-                    $message->type
-                );
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
 
-                return true;
-            }
-        );
+            return true;
+        });
     }
 
     public function testProfileInformationCantBeUpdatedWithDuplicateEmail(): void {
@@ -97,17 +93,13 @@ class ProfileSettingsTest extends TestCase {
         ]);
 
         $response->assertRedirect('/settings/profile#update-password');
-        $response->assertSessionHas(
-            'session-message[update-password]',
-            function (SessionMessage $message) {
-                $this->assertEquals(
-                    SessionMessage::TYPE_SUCCESS,
-                    $message->type
-                );
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
 
-                return true;
-            }
-        );
+            return true;
+        });
     }
 
     public function testPasswordUpdateFailsIfCurrentPasswordIsIncorrect(): void {

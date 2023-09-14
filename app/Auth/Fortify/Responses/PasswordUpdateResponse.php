@@ -10,8 +10,11 @@ class PasswordUpdateResponse extends BasePasswordUpdateResponse {
         return back()
             ->withFragment('update-password')
             ->with(
-                'session-message[update-password]',
-                SessionMessage::success(__('Password updated successfully.'))
+                'snackbar',
+                SessionMessage::success(
+                    __('Password updated successfully.'),
+                    duration: 5
+                )
             );
     }
 }

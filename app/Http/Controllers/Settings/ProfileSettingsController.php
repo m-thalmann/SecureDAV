@@ -20,7 +20,7 @@ class ProfileSettingsController extends Controller {
     public function destroy(Request $request): RedirectResponse {
         if (!$request->user()->delete()) {
             return back()
-                ->withFragment('#delete-account')
+                ->withFragment('delete-account')
                 ->with(
                     'session-message[delete-account]',
                     SessionMessage::error(__('Failed to delete your account.'))
