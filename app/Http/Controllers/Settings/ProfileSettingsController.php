@@ -12,8 +12,15 @@ use Illuminate\View\View;
 
 class ProfileSettingsController extends Controller {
     public function show(Request $request): View {
+        $twoFactorEnabled = $request->user()->two_factor_secret !== null;
+        $twoFactorConfirmed =
+            $twoFactorEnabled &&
+            $request->user()->two_factor_confirmed_at !== null;
+
         return view('settings.profile.show', [
             'user' => $request->user(),
+            'twoFactorEnabled' => $twoFactorEnabled,
+            'twoFactorConfirmed' => $twoFactorConfirmed,
         ]);
     }
 

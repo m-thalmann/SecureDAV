@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Auth\Fortify\Actions\ConfirmTwoFactorAuthentication;
 use App\Auth\Fortify\Actions\ResetsUserPasswords;
 use App\Auth\Fortify\Actions\UpdatesUserPasswords;
 use App\Auth\Fortify\Actions\UpdatesUserProfileInformation;
@@ -12,12 +13,17 @@ use App\Auth\Fortify\Responses\LoginLockoutResponse;
 use App\Auth\Fortify\Responses\PasswordResetResponse;
 use App\Auth\Fortify\Responses\PasswordUpdateResponse;
 use App\Auth\Fortify\Responses\ProfileInformationUpdatedResponse;
+use App\Auth\Fortify\Responses\RecoveryCodesGeneratedResponse;
 use App\Auth\Fortify\Responses\SuccessfulPasswordResetLinkRequestResponse;
+use App\Auth\Fortify\Responses\TwoFactorDisabledResponse;
+use App\Auth\Fortify\Responses\TwoFactorConfirmedResponse;
+use App\Auth\Fortify\Responses\TwoFactorEnabledResponse;
 use App\Auth\Fortify\Responses\VerifyEmailResponse;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication as BaseConfirmTwoFactorAuthentication;
 use Laravel\Fortify\Contracts\EmailVerificationNotificationSentResponse as EmailVerificationNotificationSentResponseContract;
 use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse as FailedPasswordResetLinkRequestResponseContract;
 use Laravel\Fortify\Contracts\FailedPasswordResetResponse as FailedPasswordResetResponseContract;
@@ -25,7 +31,11 @@ use Laravel\Fortify\Contracts\LockoutResponse as LockoutResponseContract;
 use Laravel\Fortify\Contracts\PasswordResetResponse as PasswordResetResponseContract;
 use Laravel\Fortify\Contracts\PasswordUpdateResponse as PasswordUpdateResponseContract;
 use Laravel\Fortify\Contracts\ProfileInformationUpdatedResponse as ProfileInformationUpdatedResponseContract;
+use Laravel\Fortify\Contracts\RecoveryCodesGeneratedResponse as RecoveryCodesGeneratedResponseContract;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse as SuccessfulPasswordResetLinkRequestResponseContract;
+use Laravel\Fortify\Contracts\TwoFactorConfirmedResponse as TwoFactorConfirmedResponseContract;
+use Laravel\Fortify\Contracts\TwoFactorDisabledResponse as TwoFactorDisabledResponseContract;
+use Laravel\Fortify\Contracts\TwoFactorEnabledResponse as TwoFactorEnabledResponseContract;
 use Laravel\Fortify\Contracts\VerifyEmailResponse as VerifyEmailResponseContract;
 use Laravel\Fortify\Fortify;
 
@@ -39,6 +49,7 @@ class FortifyServiceProvider extends ServiceProvider {
         $this->registerUpdateProfileInformationResponses();
         $this->registerUpdatePasswordResponses();
         $this->registerVerifyEmailResponses();
+        $this->registerTwoFactorAuthenticationResponses();
     }
 
     /**
@@ -51,6 +62,7 @@ class FortifyServiceProvider extends ServiceProvider {
         $this->configureUpdateProfileInformation();
         $this->configureUpdatePassword();
         $this->configureVerifyEmail();
+        $this->configureTwoFactorAuthentication();
 
         $this->configureRateLimiting();
     }
@@ -136,6 +148,34 @@ class FortifyServiceProvider extends ServiceProvider {
         Fortify::verifyEmailView('auth.verify-email');
     }
 
+    protected function registerTwoFactorAuthenticationResponses(): void {
+        $this->app->singleton(
+            TwoFactorEnabledResponseContract::class,
+            TwoFactorEnabledResponse::class
+        );
+        $this->app->singleton(
+            TwoFactorDisabledResponseContract::class,
+            TwoFactorDisabledResponse::class
+        );
+        $this->app->singleton(
+            TwoFactorConfirmedResponseContract::class,
+            TwoFactorConfirmedResponse::class
+        );
+        $this->app->singleton(
+            RecoveryCodesGeneratedResponseContract::class,
+            RecoveryCodesGeneratedResponse::class
+        );
+    }
+
+    protected function configureTwoFactorAuthentication(): void {
+        Fortify::twoFactorChallengeView('auth.two-factor-challenge');
+
+        $this->app->bind(
+            BaseConfirmTwoFactorAuthentication::class,
+            ConfirmTwoFactorAuthentication::class
+        );
+    }
+
     protected function configureRateLimiting(): void {
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by(
@@ -144,3 +184,4 @@ class FortifyServiceProvider extends ServiceProvider {
         });
     }
 }
+
