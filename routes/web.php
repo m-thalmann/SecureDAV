@@ -3,6 +3,20 @@
 use App\Http\Controllers\Settings\ProfileSettingsController;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
+use Laravel\Fortify\Http\Controllers\ConfirmablePasswordController;
+use Laravel\Fortify\Http\Controllers\ConfirmedPasswordStatusController;
+use Laravel\Fortify\Http\Controllers\ConfirmedTwoFactorAuthenticationController;
+use Laravel\Fortify\Http\Controllers\EmailVerificationNotificationController;
+use Laravel\Fortify\Http\Controllers\EmailVerificationPromptController;
+use Laravel\Fortify\Http\Controllers\NewPasswordController;
+use Laravel\Fortify\Http\Controllers\PasswordController;
+use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
+use Laravel\Fortify\Http\Controllers\ProfileInformationController;
+use Laravel\Fortify\Http\Controllers\RecoveryCodeController;
+use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
+use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticationController;
+use Laravel\Fortify\Http\Controllers\VerifyEmailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +30,120 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::permanentRedirect('/', RouteServiceProvider::HOME);
+
+Route::controller(AuthenticatedSessionController::class)->group(function () {
+    Route::get('login', 'create')
+        ->middleware('guest')
+        ->name('login');
+
+    Route::post('login', 'store')->middleware('guest');
+
+    Route::post('logout', 'destroy')->name('logout');
+});
+
+Route::as('password.')->group(function () {
+    Route::controller(PasswordResetLinkController::class)
+        ->prefix('forgot-password')
+        ->group(function () {
+            Route::get('/', 'create')
+                ->middleware('guest')
+                ->name('request');
+
+            Route::post('/', 'store')
+                ->middleware('guest')
+                ->name('email');
+        });
+
+    Route::controller(NewPasswordController::class)->group(function () {
+        Route::get('reset-password/{token}', 'create')
+            ->middleware('guest')
+            ->name('reset');
+
+        Route::post('reset-password', 'store')
+            ->middleware('guest')
+            ->name('update');
+    });
+
+    Route::get('user/confirmed-password-status', [
+        ConfirmedPasswordStatusController::class,
+        'show',
+    ])
+        ->middleware('auth')
+        ->name('confirmation');
+
+    Route::controller(ConfirmablePasswordController::class)
+        ->middleware('auth')
+        ->group(function () {
+            Route::get('user/confirm-password', 'show')->name(
+                'show-confirmation'
+            );
+
+            Route::post('user/confirm-password', 'store')->name('confirm');
+        });
+});
+
+Route::as('verification.')->group(function () {
+    Route::get('email/verify', EmailVerificationPromptController::class)
+        ->middleware('auth')
+        ->name('notice');
+
+    Route::get('email/verify/{id}/{hash}', VerifyEmailController::class)
+        ->middleware(['auth', 'signed', 'throttle:6,1'])
+        ->name('verify');
+
+    Route::post('email/verification-notification', [
+        EmailVerificationNotificationController::class,
+        'store',
+    ])
+        ->middleware(['auth', 'throttle:6,1'])
+        ->name('send');
+});
+
+Route::put('user/profile-information', [
+    ProfileInformationController::class,
+    'update',
+])
+    ->middleware('auth')
+    ->name('user-profile-information.update');
+
+Route::put('user/password', [PasswordController::class, 'update'])
+    ->middleware('auth')
+    ->name('user-password.update');
+
+Route::as('two-factor.')->group(function () {
+    Route::controller(TwoFactorAuthenticatedSessionController::class)
+        ->middleware('guest')
+        ->group(function () {
+            Route::get('two-factor-challenge', 'create')->name('login');
+
+            Route::post('two-factor-challenge', 'store')
+                ->middleware('throttle:two-factor')
+                ->name('authenticate');
+        });
+
+    Route::controller(TwoFactorAuthenticationController::class)
+        ->prefix('user/two-factor-authentication')
+        ->middleware(['auth', 'password.confirm'])
+        ->group(function () {
+            Route::post('/', 'store')->name('enable');
+
+            Route::delete('/', 'destroy')->name('disable');
+        });
+
+    Route::post('user/confirmed-two-factor-authentication', [
+        ConfirmedTwoFactorAuthenticationController::class,
+        'store',
+    ])
+        ->middleware(['auth', 'password.confirm'])
+        ->name('confirm');
+
+    Route::post('user/two-factor-recovery-codes', [
+        RecoveryCodeController::class,
+        'store',
+    ])
+        ->middleware(['auth', 'password.confirm'])
+        ->name('regenerate-recovery-codes');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // TODO: replace with resource controllers
