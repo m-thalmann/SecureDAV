@@ -11,7 +11,7 @@
                 <label class="label" for="password">
                     <span class="label-text">{{ __('Password') }}</span>
                 </label>
-                <input id="password" type="password" name="password" class="input input-md w-full{{ $errors->get('password') ? ' input-error' : '' }}" required autocomplete="current-password" />
+                <input id="password" type="password" name="password" class="input input-md w-full{{ $errors->get('password') ? ' input-error' : '' }}" required autocomplete="current-password" autofocus />
                 <label class="label">
                     <span class="label-text-alt">
                         <x-input-error :messages="$errors->get('password')" />

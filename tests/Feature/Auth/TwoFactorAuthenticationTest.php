@@ -19,7 +19,7 @@ class TwoFactorAuthenticationTest extends TestCase {
 
         $this->user = $this->createUser();
 
-        $this->session(['auth.password_confirmed_at' => time()]);
+        $this->passwordConfirmed();
     }
 
     public function testTwoFactorAuthenticationCanBeEnabledAndConfirmedForUser(): void {

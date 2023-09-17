@@ -17,5 +17,9 @@ abstract class TestCase extends BaseTestCase {
 
         return $user->create();
     }
+
+    protected function passwordConfirmed(): void {
+        $this->session(['auth.password_confirmed_at' => time()]);
+    }
 }
 

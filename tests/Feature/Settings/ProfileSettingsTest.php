@@ -22,7 +22,7 @@ class ProfileSettingsTest extends TestCase {
         $this->user = $this->createUser();
         $this->actingAs($this->user);
 
-        $this->session(['auth.password_confirmed_at' => time()]);
+        $this->passwordConfirmed();
 
         $this->settingsViewResponse = $this->get('/settings/profile');
     }
@@ -33,7 +33,7 @@ class ProfileSettingsTest extends TestCase {
         $confirmResponse = $this->get('/settings/profile');
         $confirmResponse->assertRedirectToRoute('password.confirm');
 
-        $this->session(['auth.password_confirmed_at' => time()]);
+        $this->passwordConfirmed();
 
         $response = $this->get('/settings/profile');
         $response->assertOk();
@@ -113,6 +113,67 @@ class ProfileSettingsTest extends TestCase {
         $response->assertSessionHasErrors(
             'current_password',
             errorBag: 'updatePassword'
+        );
+    }
+
+    public function testManageBrowserSessionsShowsAllSessionsForUser(): void {
+        config(['session.driver' => 'database']);
+
+        $this->passwordConfirmed();
+        $this->actingAs($this->user)->get('/'); // needed to store data to database
+
+        $response = $this->get('/settings/profile');
+
+        $response->assertViewHas('sessions', function (array $sessions) {
+            $this->assertCount(1, $sessions);
+            $this->assertIsBool($sessions[0]->isCurrentDevice);
+
+            return true;
+        });
+    }
+
+    public function testUserCanBeLoggedOutFromAllSessions() {
+        config(['session.driver' => 'database']);
+
+        $this->passwordConfirmed();
+        $this->actingAs($this->user)->get('/');
+
+        $this->assertDatabaseHas(
+            config('session.table', 'sessions'),
+            ['user_id' => $this->user->getAuthIdentifier()],
+            connection: config('session.connection')
+        );
+
+        $response = $this->delete('/settings/profile/sessions');
+
+        $response->assertRedirectToRoute('login');
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $this->assertDatabaseMissing(
+            config('session.table', 'sessions'),
+            ['user_id' => $this->user->getAuthIdentifier()],
+            connection: config('session.connection')
+        );
+        $this->assertGuest();
+    }
+
+    public function testLogoutFromAllSessionsFailsIfSessionDriverIsNotDatabase(): void {
+        $response = $this->delete('/settings/profile/sessions');
+
+        $response->assertRedirect('/settings/profile#browser-sessions');
+        $response->assertSessionHas(
+            'session-message[browser-sessions]',
+            function (SessionMessage $message) {
+                $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
+
+                return true;
+            }
         );
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\LogoutBrowserSessionsController;
 use App\Http\Controllers\Settings\ProfileSettingsController;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Route;
@@ -161,8 +162,17 @@ Route::prefix('settings')
             fn() => redirect()->route('settings.profile.show')
         )->name('index');
 
-        Route::singleton('profile', ProfileSettingsController::class)
-            ->only(['show', 'destroy'])
-            ->destroyable();
+        Route::prefix('profile')
+            ->as('profile.')
+            ->group(function () {
+                Route::singleton('/', ProfileSettingsController::class)
+                    ->only(['show', 'destroy'])
+                    ->destroyable();
+
+                Route::delete(
+                    'sessions',
+                    LogoutBrowserSessionsController::class
+                )->name('sessions.destroy');
+            });
     });
 
