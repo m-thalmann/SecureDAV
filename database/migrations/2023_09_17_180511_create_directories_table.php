@@ -22,7 +22,6 @@ return new class extends Migration {
                 ->cascadeOnUpdate();
             $table->string('name');
             $table->timestamps();
-            $table->softDeletes();
 
             $table->unique(['directory_id', 'name']);
         });

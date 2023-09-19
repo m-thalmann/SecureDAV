@@ -8,7 +8,7 @@
             </div> 
     
             <h1>
-                <a href="{{ route('files.index') }}" class="flex items-center gap-2 text-xl sm:text-2xl">
+                <a href="{{ route('browse.index') }}" class="flex items-center gap-2 text-xl sm:text-2xl">
                     <img src="{{ asset('images/icon.png') }}" alt="SecureDAV Icon" class="h-10 w-auto" />
                     <span class="lg:sr-only">{{ config('app.name') }}</span>
                 </a>

@@ -3,7 +3,7 @@
 @section('htmlBody')
     <div class="drawer">
         <input id="navigation-drawer" type="checkbox" class="drawer-toggle" /> 
-        <div class="drawer-content flex flex-col">
+        <div class="drawer-content flex flex-col overflow-hidden">
             @include('layouts.partials.app-header')
             
             <main {{ $attributes->merge(['class' => 'py-12 w-full max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6']) }}>

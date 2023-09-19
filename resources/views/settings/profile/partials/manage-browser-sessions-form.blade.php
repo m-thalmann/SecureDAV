@@ -29,7 +29,7 @@
 
                             <div>
                                 <div class="text-xs">
-                                    <span class="opacity-60">
+                                    <span class="text-base-content/60">
                                         {{ $session->ipAddress }}
                                     </span>
                                     

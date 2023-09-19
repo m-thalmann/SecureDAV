@@ -29,9 +29,5 @@ class DirectoryPolicy {
     public function restore(User $user, Directory $directory): bool {
         return $directory->user_id === $user->id;
     }
-
-    public function forceDelete(User $user, Directory $directory): bool {
-        return $directory->user_id === $user->id;
-    }
 }
 

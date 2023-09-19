@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,6 +32,24 @@ class Directory extends Model {
 
     public function files(): HasMany {
         return $this->hasMany(File::class);
+    }
+
+    protected function breadcrumbs(): Attribute {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                $breadcrumbs = [];
+
+                $directory = $this;
+
+                while ($directory) {
+                    array_unshift($breadcrumbs, $directory);
+
+                    $directory = $directory->parentDirectory;
+                }
+
+                return $breadcrumbs;
+            }
+        );
     }
 }
 

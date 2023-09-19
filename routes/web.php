@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\Settings\LogoutBrowserSessionsController;
 use App\Http\Controllers\Settings\ProfileSettingsController;
 use App\Providers\RouteServiceProvider;
@@ -147,8 +148,11 @@ Route::as('two-factor.')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('browse/{directory:uuid?}', BrowseController::class)->name(
+        'browse.index'
+    );
+
     // TODO: replace with resource controllers
-    Route::view('files', 'files.index')->name('files.index');
     Route::view('access', 'access.index')->name('access.index');
     Route::view('backups', 'backups.index')->name('backups.index');
 });

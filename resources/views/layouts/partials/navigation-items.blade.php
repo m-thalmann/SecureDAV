@@ -1,7 +1,7 @@
 @php
     $navigationItems = [
         [
-            "route" => "files.index",
+            "route" => "browse.index",
             "name" => __("Files"),
             "icon" => "fa-solid fa-folder"
         ],
