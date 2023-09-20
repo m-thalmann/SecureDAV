@@ -53,6 +53,18 @@
                             {{ __('Edit directory') }}
                         </a>
                     </li>
+
+                    <form method="POST" action="{{ route('directories.destroy', ['directory' => $currentDirectory->uuid]) }}">
+                        @method('DELETE')
+                        @csrf
+                        
+                        <li>
+                            <a href="{{ route('directories.destroy', ['directory' => $currentDirectory->uuid]) }}" onclick="event.preventDefault(); this.closest('form').submit();" class="hover:bg-error hover:text-error-content">
+                                <i class="fas fa-trash mr-2"></i>
+                                {{ __('Delete directory') }}
+                            </a>
+                        </li>
+                    </form>
                 </ul>
             </div>
         @endif

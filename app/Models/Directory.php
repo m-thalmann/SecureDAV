@@ -51,5 +51,14 @@ class Directory extends Model {
             }
         );
     }
+
+    protected function isEmpty(): Attribute {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                return $this->directories()->count() === 0 &&
+                    $this->files()->count() === 0;
+            }
+        );
+    }
 }
 

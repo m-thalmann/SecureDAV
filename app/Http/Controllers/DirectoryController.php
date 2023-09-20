@@ -51,5 +51,29 @@ class DirectoryController extends Controller {
                 )->forDuration()
             );
     }
+
+    public function destroy(Directory $directory): RedirectResponse {
+        if (!$directory->isEmpty) {
+            return back()->with(
+                'snackbar',
+                SessionMessage::error(
+                    __('Directory is not empty')
+                )->forDuration()
+            );
+        }
+
+        $parentDirectory = $directory->parentDirectory;
+
+        $directory->delete();
+
+        return redirect()
+            ->route('browse.index', $parentDirectory->uuid)
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('Directory deleted permanently')
+                )->forDuration()
+            );
+    }
 }
 

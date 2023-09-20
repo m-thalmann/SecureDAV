@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Directory;
+use App\Models\File;
 use App\Models\User;
 use App\View\Helpers\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -107,6 +108,99 @@ class DirectoryTest extends TestCase {
         $response = $this->put("/directories/{$directory->uuid}", [
             'name' => 'NewName',
         ]);
+
+        $response->assertForbidden();
+    }
+
+    public function testDirectoryCanBeDeleted(): void {
+        $parentDirectory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create(['parent_directory_id' => $parentDirectory->id]);
+
+        $response = $this->delete("/directories/{$directory->uuid}");
+
+        $response->assertRedirect("/browse/{$parentDirectory->uuid}");
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $this->assertDatabaseMissing('directories', [
+            'id' => $directory->id,
+        ]);
+    }
+
+    public function testDirectoryCantBeDeletedIfContainsDirectory(): void {
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        Directory::factory()
+            ->for($this->user)
+            ->create(['parent_directory_id' => $directory->id]);
+
+        $response = $this->from("/browse/{$directory->uuid}")->delete(
+            "/directories/{$directory->uuid}"
+        );
+
+        $response->assertRedirect("/browse/{$directory->uuid}");
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
+
+            return true;
+        });
+
+        $this->assertDatabaseHas('directories', [
+            'id' => $directory->id,
+        ]);
+    }
+
+    public function testDirectoryCantBeDeletedIfContainsFile(): void {
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create([
+                'directory_id' => $directory->id,
+            ]);
+
+        $response = $this->from("/browse/{$directory->uuid}")->delete(
+            "/directories/{$directory->uuid}"
+        );
+
+        $response->assertRedirect("/browse/{$directory->uuid}");
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
+
+            return true;
+        });
+
+        $this->assertDatabaseHas('directories', [
+            'id' => $directory->id,
+        ]);
+    }
+
+    public function testDirectoryCantBeDeletedForOtherUser(): void {
+        $otherUser = $this->createUser();
+
+        $directory = Directory::factory()
+            ->for($otherUser)
+            ->create();
+
+        $response = $this->delete("/directories/{$directory->uuid}");
 
         $response->assertForbidden();
     }
