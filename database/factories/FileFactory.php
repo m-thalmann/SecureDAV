@@ -22,7 +22,8 @@ class FileFactory extends Factory {
             $directory = Directory::factory();
         }
 
-        $fileName = fake()->word();
+        $fileExtension = fake()->fileExtension();
+        $fileName = fake()->words(4, true) . '.' . $fileExtension;
 
         return [
             'uuid' => fake()->uuid(),
@@ -32,7 +33,7 @@ class FileFactory extends Factory {
             'client_name' => $fileName,
             'description' => null,
             'mime_type' => fake()->mimeType(),
-            'extension' => fake()->fileExtension(),
+            'extension' => $fileExtension,
             'encrypted' => false,
         ];
     }

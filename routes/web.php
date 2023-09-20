@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BrowseController;
+use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\Settings\LogoutBrowserSessionsController;
 use App\Http\Controllers\Settings\ProfileSettingsController;
 use App\Providers\RouteServiceProvider;
@@ -151,6 +152,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('browse/{directory:uuid?}', BrowseController::class)->name(
         'browse.index'
     );
+
+    Route::resource('directories', DirectoryController::class)
+        ->scoped(['directory' => 'uuid'])
+        ->except(['index', 'show']);
 
     // TODO: replace with resource controllers
     Route::view('access', 'access.index')->name('access.index');

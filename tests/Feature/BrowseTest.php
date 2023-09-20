@@ -87,10 +87,20 @@ class BrowseTest extends TestCase {
     public function testViewShowsAllFilesAndDirectoriesInDirectoryForUser(): void {
         $currentDirectory = Directory::factory()
             ->for($this->user)
+            ->sequence(
+                fn(Sequence $sequence) => [
+                    'name' => 'DirectoryName ' . $sequence->index,
+                ]
+            )
             ->create();
 
         $files = File::factory(5)
             ->for($this->user)
+            ->sequence(
+                fn(Sequence $sequence) => [
+                    'display_name' => 'FileName ' . $sequence->index,
+                ]
+            )
             ->create(['directory_id' => $currentDirectory->id]);
 
         $directories = Directory::factory(5)

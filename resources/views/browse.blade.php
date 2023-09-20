@@ -38,6 +38,24 @@
                 </li>
             </ul>
         </div>
+
+        @if ($currentDirectory)
+            <span class="flex-1"></span>
+
+            <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-sm btn-circle">
+                    <i class="fa-solid fa-ellipsis"></i>
+                </label>
+                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 mt-1 shadow bg-base-200 rounded-box w-48">
+                    <li>
+                        <a href="{{ route('directories.edit', ['directory' => $currentDirectory->uuid]) }}">
+                            <i class="fas fa-edit mr-2"></i>
+                            {{ __('Edit directory') }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        @endif
     </div>
 
     <div class="overflow-auto w-full">
