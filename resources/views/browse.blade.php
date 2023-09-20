@@ -8,7 +8,7 @@
 
                 @foreach ($breadcrumbs as $breadcrumb)
                     <li>
-                        <a href="{{ route('browse.index', ['directory' => $breadcrumb->uuid]) }}">{{ $breadcrumb->name }}</a>
+                        <a href="{{ route('browse.index', ['directory' => $breadcrumb->uuid]) }}" class="!inline-block max-w-[16ch] overflow-hidden text-ellipsis">{{ $breadcrumb->name }}</a>
                     </li>
                 @endforeach
 
@@ -23,11 +23,11 @@
             <label tabindex="0" class="btn btn-sm btn-circle">
                 <i class="fas fa-add"></i>
             </label>
-            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 mt-1 shadow bg-base-200 rounded-box w-52">
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 mt-1 shadow bg-base-200 rounded-box w-44">
                 <li>
                     <a href="#">
                         <i class="fas fa-folder w-6"></i>
-                        {{ __('New folder') }}
+                        {{ __('New directory') }}
                     </a>
                 </li>
                 <li>
@@ -56,7 +56,7 @@
                         <td>
                             <a href="{{ route('browse.index', ['directory' => $directory->uuid]) }}" class="flex items-center group">
                                 <i class="fas fa-folder text-secondary w-6"></i>
-                                <span class="group-hover:underline">
+                                <span class="group-hover:underline max-w-[48ch] overflow-hidden text-ellipsis">
                                     {{ $directory->name }}
                                 </span>
                             </a>

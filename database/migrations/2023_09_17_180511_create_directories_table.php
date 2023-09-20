@@ -23,7 +23,7 @@ return new class extends Migration {
             $table->string('name');
             $table->timestamps();
 
-            $table->unique(['directory_id', 'name']);
+            $table->unique(['parent_directory_id', 'name']);
         });
     }
 
