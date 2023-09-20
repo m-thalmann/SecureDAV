@@ -52,9 +52,8 @@ class ProfileSettingsController extends Controller {
             ->with(
                 'snackbar',
                 SessionMessage::success(
-                    __('Your account has been deleted.'),
-                    duration: 5
-                )
+                    __('Your account has been deleted.')
+                )->forDuration()
             );
     }
 

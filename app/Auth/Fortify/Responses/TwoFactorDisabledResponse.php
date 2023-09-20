@@ -12,9 +12,9 @@ class TwoFactorDisabledResponse extends BaseTwoFactorDisabledResponse {
             ->with(
                 'snackbar',
                 SessionMessage::success(
-                    __('Two-factor authentication has been disabled.'),
-                    duration: 5
-                )
+                    __('Two-factor authentication has been disabled.')
+                )->forDuration()
             );
     }
 }
+

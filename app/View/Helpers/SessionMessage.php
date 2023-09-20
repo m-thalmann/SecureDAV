@@ -11,8 +11,13 @@ class SessionMessage {
     protected function __construct(
         public readonly string $type,
         public readonly string $message,
-        public readonly ?int $duration = null
+        public ?int $duration = null
     ) {
+    }
+
+    public function forDuration(int $duration = 5): self {
+        $this->duration = $duration;
+        return $this;
     }
 
     public function getIcon(): string {

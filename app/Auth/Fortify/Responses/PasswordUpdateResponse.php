@@ -12,9 +12,8 @@ class PasswordUpdateResponse extends BasePasswordUpdateResponse {
             ->with(
                 'snackbar',
                 SessionMessage::success(
-                    __('Password updated successfully.'),
-                    duration: 5
-                )
+                    __('Password updated successfully.')
+                )->forDuration()
             );
     }
 }

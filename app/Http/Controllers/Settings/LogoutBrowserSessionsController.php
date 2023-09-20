@@ -33,9 +33,8 @@ class LogoutBrowserSessionsController extends Controller {
             ->with(
                 'snackbar',
                 SessionMessage::success(
-                    __('Logged out of all browser sessions.'),
-                    duration: 5
-                )
+                    __('Logged out of all browser sessions.')
+                )->forDuration()
             );
     }
 }

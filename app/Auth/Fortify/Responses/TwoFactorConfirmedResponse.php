@@ -13,9 +13,8 @@ class TwoFactorConfirmedResponse extends BaseTwoFactorConfirmedResponse {
             ->with(
                 'snackbar',
                 SessionMessage::success(
-                    __('Two-factor authentication has been enabled.'),
-                    duration: 5
-                )
+                    __('Two-factor authentication has been enabled.')
+                )->forDuration()
             );
     }
 }

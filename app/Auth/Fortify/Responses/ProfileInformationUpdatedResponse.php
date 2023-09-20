@@ -12,7 +12,7 @@ class ProfileInformationUpdatedResponse extends
             ->withFragment('update-information')
             ->with(
                 'snackbar',
-                SessionMessage::success(__('Profile updated'), duration: 5)
+                SessionMessage::success(__('Profile updated'))->forDuration()
             );
     }
 }

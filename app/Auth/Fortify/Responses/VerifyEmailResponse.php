@@ -13,9 +13,9 @@ class VerifyEmailResponse extends BaseVerifyEmailResponse {
             ->with(
                 'snackbar',
                 SessionMessage::success(
-                    __('Your email has been verified'),
-                    duration: 5
-                )
+                    __('Your email has been verified')
+                )->forDuration()
             );
     }
 }
+
