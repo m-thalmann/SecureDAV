@@ -20,8 +20,7 @@ return new class extends Migration {
                 ->constrained('directories')
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
-            $table->string('display_name');
-            $table->string('client_name');
+            $table->string('name');
             $table->string('description')->nullable();
             $table->string('mime_type');
             $table->string('extension');
@@ -29,7 +28,7 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
-            $table->unique(['directory_id', 'display_name']);
+            $table->unique(['directory_id', 'name']);
         });
     }
 

@@ -6,10 +6,6 @@ use App\Models\File;
 use App\Models\User;
 
 class FilePolicy {
-    public function viewAny(User $user): bool {
-        return false;
-    }
-
     public function view(User $user, File $file): bool {
         return $file->user_id === $user->id;
     }

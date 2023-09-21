@@ -42,7 +42,7 @@ class BrowseTest extends TestCase {
         $response->assertOk();
 
         foreach ($files as $file) {
-            $response->assertSee($file->display_name);
+            $response->assertSee($file->name);
         }
 
         foreach ($directories as $directory) {
@@ -57,7 +57,7 @@ class BrowseTest extends TestCase {
             ->for($otherUser)
             ->sequence(
                 fn(Sequence $sequence) => [
-                    'display_name' => 'FileName ' . $sequence->index,
+                    'name' => 'FileName ' . $sequence->index,
                 ]
             )
             ->create(['directory_id' => null]);
@@ -76,7 +76,7 @@ class BrowseTest extends TestCase {
         $response->assertOk();
 
         foreach ($files as $file) {
-            $response->assertDontSee($file->display_name);
+            $response->assertDontSee($file->name);
         }
 
         foreach ($directories as $directory) {
@@ -98,7 +98,7 @@ class BrowseTest extends TestCase {
             ->for($this->user)
             ->sequence(
                 fn(Sequence $sequence) => [
-                    'display_name' => 'FileName ' . $sequence->index,
+                    'name' => 'FileName ' . $sequence->index,
                 ]
             )
             ->create(['directory_id' => $currentDirectory->id]);
@@ -112,7 +112,7 @@ class BrowseTest extends TestCase {
         $response->assertOk();
 
         foreach ($files as $file) {
-            $response->assertSee($file->display_name);
+            $response->assertSee($file->name);
         }
 
         foreach ($directories as $directory) {

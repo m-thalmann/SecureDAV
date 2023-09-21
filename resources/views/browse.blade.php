@@ -101,10 +101,10 @@
                     <tr class="hover">
                         <!-- TODO: use better file icons for mime types -->
                         <td>
-                            <a href="#" class="flex items-center group">
+                            <a href="{{ route('files.show', ['file' => $file->uuid]) }}" class="flex items-center group">
                                 <i class="fas fa-file w-6"></i>
                                 <span class="group-hover:underline">
-                                    {{ $file->display_name }}
+                                    {{ $file->name }}
                                 </span>
                             </a>
                         </td>

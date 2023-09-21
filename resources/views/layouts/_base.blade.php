@@ -28,7 +28,7 @@
 
         @if (session('snackbar'))
             <div
-                class="toast"
+                class="toast m-6"
                 @if (session('snackbar')->duration !== null)
                     x-init="setTimeout(function() { $el.remove() }, {{ session('snackbar')->duration * 1000 }})"
                 @endif

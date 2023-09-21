@@ -31,7 +31,7 @@
 
             <div class="form-control w-fit">
                 <label class="label cursor-pointer gap-4">
-                    <input type="checkbox" {{ old('remember') ? 'checked' : '' }} class="checkbox checkbox-secondary" name="remember" />
+                    <input type="checkbox" @checked(old('remember')) class="checkbox checkbox-secondary" name="remember" />
                     <span class="label-text">{{ __('Remember me') }}</span> 
                 </label>
             </div>

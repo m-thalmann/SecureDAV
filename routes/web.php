@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\Settings\LogoutBrowserSessionsController;
 use App\Http\Controllers\Settings\ProfileSettingsController;
 use App\Providers\RouteServiceProvider;
@@ -156,6 +157,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('directories', DirectoryController::class)
         ->scoped(['directory' => 'uuid'])
         ->except(['index', 'show']);
+
+    Route::resource('files', FileController::class)
+        ->scoped(['file' => 'uuid'])
+        ->except('index');
 
     // TODO: replace with resource controllers
     Route::view('access', 'access.index')->name('access.index');
