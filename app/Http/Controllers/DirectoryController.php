@@ -14,6 +14,66 @@ class DirectoryController extends Controller {
         $this->authorizeResource(Directory::class);
     }
 
+    public function create(Request $request): View {
+        $parentDirectoryUuid = $request->get('directory', null);
+        $parentDirectory = $parentDirectoryUuid
+            ? Directory::where('uuid', $parentDirectoryUuid)->firstOrFail()
+            : null;
+
+        if ($parentDirectory) {
+            $this->authorize('update', $parentDirectory);
+        }
+
+        return view('directories.create', [
+            'parentDirectory' => $parentDirectory,
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse {
+        $parentDirectoryUuid = $request->get('parent_directory_uuid', null);
+        $parentDirectory = $parentDirectoryUuid
+            ? Directory::where('uuid', $parentDirectoryUuid)->firstOrFail()
+            : null;
+
+        if ($parentDirectory) {
+            $this->authorize('update', $parentDirectory);
+        }
+
+        $data = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:128',
+                Rule::unique('directories', 'name')
+                    ->where('parent_directory_id', $parentDirectory?->id)
+                    ->where('user_id', $request->user()->id),
+            ],
+        ]);
+
+        /**
+         * @var Directory
+         */
+        $directory = Directory::make([
+            'parent_directory_id' => $parentDirectory?->id,
+            'name' => $data['name'],
+        ]);
+
+        $directory->forceFill([
+            'user_id' => $request->user()->id,
+        ]);
+
+        $directory->save();
+
+        return redirect()
+            ->route('browse.index', $directory->uuid)
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('Directory created successfully')
+                )->forDuration()
+            );
+    }
+
     public function edit(Directory $directory): View {
         return view('directories.edit', [
             'directory' => $directory,
@@ -67,7 +127,7 @@ class DirectoryController extends Controller {
         $directory->delete();
 
         return redirect()
-            ->route('browse.index', $parentDirectory->uuid)
+            ->route('browse.index', $parentDirectory?->uuid)
             ->with(
                 'snackbar',
                 SessionMessage::success(

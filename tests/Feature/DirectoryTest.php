@@ -22,6 +22,149 @@ class DirectoryTest extends TestCase {
         $this->actingAs($this->user);
     }
 
+    public function testCreateDirectoryViewCanBeRendered(): void {
+        $response = $this->get('/directories/create');
+
+        $response->assertOk();
+    }
+
+    public function testCreateDirectoryViewCanBeRenderedWithParentDirectory(): void {
+        $parentDirectory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get(
+            "/directories/create?directory={$parentDirectory->uuid}"
+        );
+
+        $response->assertOk();
+
+        $response->assertSee($parentDirectory->name);
+    }
+
+    public function testCreateDirectoryViewFailsIfParentDirectoryDoesntExist(): void {
+        $response = $this->get('/directories/create?directory=nonexistent');
+
+        $response->assertNotFound();
+    }
+
+    public function testCreateDirectoryViewFailsIfUserCantUpdateParentDirectory(): void {
+        $otherUser = $this->createUser();
+
+        $parentDirectory = Directory::factory()
+            ->for($otherUser)
+            ->create();
+
+        $response = $this->get(
+            "/directories/create?directory={$parentDirectory->uuid}"
+        );
+
+        $response->assertForbidden();
+    }
+
+    public function testDirectoryCanBeCreated(): void {
+        $directoryName = 'NewDirectory';
+
+        $response = $this->post('/directories', [
+            'name' => $directoryName,
+        ]);
+
+        $this->assertDatabaseHas('directories', [
+            'name' => $directoryName,
+            'user_id' => $this->user->id,
+        ]);
+
+        $createdDirectory = Directory::query()
+            ->where('name', $directoryName)
+            ->first();
+
+        $response->assertRedirect("/browse/{$createdDirectory->uuid}");
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+    }
+
+    public function testDirectoryCanBeCreatedWithParentDirectory(): void {
+        $parentDirectory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $directoryName = 'NewDirectory';
+
+        $response = $this->post('/directories', [
+            'name' => $directoryName,
+            'parent_directory_uuid' => $parentDirectory->uuid,
+        ]);
+
+        $this->assertDatabaseHas('directories', [
+            'name' => $directoryName,
+            'parent_directory_id' => $parentDirectory->id,
+            'user_id' => $this->user->id,
+        ]);
+
+        $createdDirectory = Directory::query()
+            ->where('name', $directoryName)
+            ->first();
+
+        $response->assertRedirect("/browse/{$createdDirectory->uuid}");
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+    }
+
+    public function testDirectoryCantBeCreatedIfParentDirectoryDoesntExist(): void {
+        $response = $this->post('/directories', [
+            'name' => 'NewDirectory',
+            'parent_directory_uuid' => 'nonexistent',
+        ]);
+
+        $response->assertNotFound();
+    }
+
+    public function testDirectoryCantBeCreatedIfUserCantUpdateParentDirectory(): void {
+        $otherUser = $this->createUser();
+
+        $parentDirectory = Directory::factory()
+            ->for($otherUser)
+            ->create();
+
+        $response = $this->post('/directories', [
+            'name' => 'NewDirectory',
+            'parent_directory_uuid' => $parentDirectory->uuid,
+        ]);
+
+        $response->assertForbidden();
+    }
+
+    public function testDirectoryCantBeCreatedIfNameIsNotUniqueInParentDirectory(): void {
+        $parentDirectory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create(['parent_directory_id' => $parentDirectory->id]);
+
+        $response = $this->from('/directories/create')->post('/directories', [
+            'name' => $directory->name,
+            'parent_directory_uuid' => $parentDirectory->uuid,
+        ]);
+
+        $response->assertRedirect('/directories/create');
+
+        $response->assertSessionHasErrors('name');
+    }
+
     public function testEditDirectoryViewCanBeRendered(): void {
         $directory = Directory::factory()
             ->for($this->user)

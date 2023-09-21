@@ -25,14 +25,14 @@
             </label>
             <ul tabindex="0" class="dropdown-content z-[1] menu p-2 mt-1 shadow bg-base-200 rounded-box w-44">
                 <li>
-                    <a href="#">
-                        <i class="fas fa-folder w-6"></i>
+                    <a href="{{ route('directories.create') . ($currentDirectory ? "?directory={$currentDirectory->uuid}" : '') }}">
+                        <i class="fa-solid fa-folder-plus w-6"></i>
                         {{ __('New directory') }}
                     </a>
                 </li>
                 <li>
                     <a href="#">
-                        <i class="fas fa-file w-6"></i>
+                        <i class="fa-solid fa-file-circle-plus w-6"></i>
                         {{ __('New file') }}
                     </a>
                 </li>
