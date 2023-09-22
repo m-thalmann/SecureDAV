@@ -60,10 +60,15 @@
                     {{ __('Download latest version') }}
                 </a>
 
-                <a href="#" class="btn btn-error" onclick="return confirm('{{ __('Are you sure you want to move this file to trash?') }}')">
-                    <i class="fas fa-trash"></i>
-                    {{ __('Move file to trash') }}
-                </a>
+                <form method="POST" action="{{ route('files.destroy', ['file' => $file->uuid]) }}" onsubmit="return confirm('{{ __('Are you sure you want to move this file to trash?') }}')">
+                    @method('DELETE')
+                    @csrf
+                    
+                    <button class="btn btn-error">
+                        <i class="fas fa-trash"></i>
+                        {{ __('Move file to trash') }}
+                    </button>
+                </form>
             </div>
         </div>
     </div>
