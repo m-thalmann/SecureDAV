@@ -34,7 +34,7 @@
                         <span class="text-l">{{ $user->initials }}</span>
                     </div>
                 </label>
-                <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52">
+                <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-300 rounded-box w-52">
                     <li>
                         <a href="{{ route('settings.index') }}">
                             <i class="fa-solid fa-gear mr-2"></i>
@@ -46,10 +46,10 @@
                         @csrf
                         
                         <li>
-                            <a href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();" class="hover:bg-error hover:text-error-content">
+                            <button class="hover:bg-error hover:text-error-content">
                                 <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i>
                                 {{ __('Log out') }}
-                            </a>
+                            </button>
                         </li>
                     </form>
                 </ul>

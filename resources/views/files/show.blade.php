@@ -1,21 +1,37 @@
 <x-app-layout :title="$file->name">
-    <h2 class="px-4">
-        <div class="breadcrumbs">
-            <ul>
-                <li class="h-6">
-                    <a href="{{ route('browse.index') }}" class="!no-underline"><i class="fas fa-home"></i></a>
+    <div class="files-breadcrumbs flex items-center px-4">
+        <x-breadcrumbs :directories="$file->directory?->breadcrumbs">
+            <li class="flex items-center gap-2"><i class="fas fa-file"></i> {{ $file->name }}</li>
+        </x-breadcrumbs>
+
+        <span class="flex-1"></span>
+
+        <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-sm btn-circle">
+                <i class="fa-solid fa-ellipsis"></i>
+            </label>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 mt-1 shadow bg-base-300 rounded-box w-48">
+                <li>
+                    <a href="#">
+                        <i class="fas fa-edit mr-2"></i>
+                        {{ __('Edit file') }}
+                    </a>
                 </li>
 
-                @foreach ($file->directory?->breadcrumbs ?? [] as $breadcrumb)
+                <form method="POST" action="{{ route('files.destroy', ['file' => $file->uuid]) }}" onsubmit="return confirm('{{ __('Are you sure you want to move this file to trash?') }}')">
+                    @method('DELETE')
+                    @csrf
+                    
                     <li>
-                        <a href="{{ route('browse.index', ['directory' => $breadcrumb->uuid]) }}" class="!inline-block max-w-[16ch] overflow-hidden text-ellipsis">{{ $breadcrumb->name }}</a>
+                        <button class="hover:bg-error hover:text-error-content">
+                            <i class="fas fa-trash mr-2"></i>
+                            {{ __('Move file to trash') }}
+                        </button>
                     </li>
-                @endforeach
-
-                <li class="flex items-center gap-2"><i class="fas fa-file"></i> {{ $file->name }}</li>
+                </form>
             </ul>
         </div>
-    </h2>
+    </div>
 
     <div class="card bg-base-200 shadow-lg max-sm:rounded-none">
         <div class="card-body">
@@ -59,16 +75,6 @@
                     <i class="fas fa-download"></i>
                     {{ __('Download latest version') }}
                 </a>
-
-                <form method="POST" action="{{ route('files.destroy', ['file' => $file->uuid]) }}" onsubmit="return confirm('{{ __('Are you sure you want to move this file to trash?') }}')">
-                    @method('DELETE')
-                    @csrf
-                    
-                    <button class="btn btn-error">
-                        <i class="fas fa-trash"></i>
-                        {{ __('Move file to trash') }}
-                    </button>
-                </form>
             </div>
         </div>
     </div>

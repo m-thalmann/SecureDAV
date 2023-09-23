@@ -1,19 +1,12 @@
 <x-app-layout :title="__('Edit directory')">
+    <x-breadcrumbs :directories="$directory->breadcrumbs" class="px-4"></x-breadcrumbs>
+
     <div class="card bg-base-200 shadow-lg max-sm:rounded-none md:w-2/3 md:mx-auto">
         <div class="card-body">
             <h2 class="card-title">
                 <i class="fas fa-edit mr-2"></i>
                 {{ __('Edit directory') }}
             </h2>
-            <h3 class="breadcrumbs text-sm text-base-content/80">
-                <ul>
-                    <li class="h-6"><i class="fas fa-home"></i></li>
-
-                    @foreach ($directory->breadcrumbs as $breadcrumb)
-                        <li>{{ $breadcrumb->name }}</li>
-                    @endforeach
-                </ul>
-            </h3>
 
             <form action="{{ route('directories.update', ['directory' => $directory->uuid]) }}" method="post">
                 @method('PUT')

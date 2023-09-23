@@ -12,17 +12,12 @@
 
         {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
 
-        <form method="POST" action="{{ route('settings.profile.destroy') }}">
+        <form method="POST" action="{{ route('settings.profile.destroy') }}" onsubmit="return confirm('{{ __('Are you sure you want to permanently delete your account?') }}')">
             @method('DELETE')
             @csrf
 
             <div class="card-actions mt-6">
-                <input
-                    type="submit"
-                    value="{{ __('Delete Account') }}"
-                    class="btn btn-error"
-                    onclick="if(!confirm('{{ __('Are you sure you want to permanently delete your account?') }}')) event.preventDefault();"
-                />
+                <button class="btn btn-error">{{ __('Delete Account') }}</button>
             </div>
         </form>
     </x-slot>

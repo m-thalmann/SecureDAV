@@ -1,20 +1,8 @@
 <x-app-layout :title="__('Browse files')">
     <div class="files-breadcrumbs flex items-center px-4">
-        <div class="breadcrumbs">
-            <ul>
-                <li class="h-6">
-                    <a href="{{ route('browse.index') }}" class="!no-underline"><i class="fas fa-home"></i></a>
-                </li>
-
-                @foreach ($breadcrumbs as $breadcrumb)
-                    <li>
-                        <a href="{{ route('browse.index', ['directory' => $breadcrumb->uuid]) }}" class="!inline-block max-w-[16ch] overflow-hidden text-ellipsis">{{ $breadcrumb->name }}</a>
-                    </li>
-                @endforeach
-
-                <li></li>
-            </ul>
-        </div>
+        <x-breadcrumbs :directories="$breadcrumbs">
+            <li></li>
+        </x-breadcrumbs>
 
         <div @class([
             'dropdown',
@@ -23,7 +11,7 @@
             <label tabindex="0" class="btn btn-sm btn-circle">
                 <i class="fas fa-add"></i>
             </label>
-            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 mt-1 shadow bg-base-200 rounded-box w-44">
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 mt-1 shadow bg-base-300 rounded-box w-44">
                 <li>
                     <a href="{{ route('directories.create') . ($currentDirectory ? "?directory={$currentDirectory->uuid}" : '') }}">
                         <i class="fa-solid fa-folder-plus w-6"></i>
@@ -46,7 +34,7 @@
                 <label tabindex="0" class="btn btn-sm btn-circle">
                     <i class="fa-solid fa-ellipsis"></i>
                 </label>
-                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 mt-1 shadow bg-base-200 rounded-box w-48">
+                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 mt-1 shadow bg-base-300 rounded-box w-48">
                     <li>
                         <a href="{{ route('directories.edit', ['directory' => $currentDirectory->uuid]) }}">
                             <i class="fas fa-edit mr-2"></i>
@@ -59,10 +47,10 @@
                         @csrf
                         
                         <li>
-                            <a href="{{ route('directories.destroy', ['directory' => $currentDirectory->uuid]) }}" onclick="event.preventDefault(); this.closest('form').submit();" class="hover:bg-error hover:text-error-content">
+                            <button class="hover:bg-error hover:text-error-content">
                                 <i class="fas fa-trash mr-2"></i>
                                 {{ __('Delete directory') }}
-                            </a>
+                            </button>
                         </li>
                     </form>
                 </ul>
