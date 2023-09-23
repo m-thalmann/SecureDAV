@@ -92,7 +92,7 @@
                             <a href="{{ route('files.show', ['file' => $file->uuid]) }}" class="flex items-center group">
                                 <i class="fas fa-file w-6"></i>
                                 <span class="group-hover:underline">
-                                    {{ $file->name }}
+                                    {{ $file->fileName }}
                                 </span>
                             </a>
                         </td>

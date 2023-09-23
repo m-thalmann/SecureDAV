@@ -31,7 +31,7 @@ class FileTest extends TestCase {
 
         $response->assertOk();
 
-        $response->assertSee($file->name);
+        $response->assertSee($file->fileName);
     }
 
     public function testShowFileViewFailsIfFileDoesNotBelongToUser(): void {
@@ -46,6 +46,89 @@ class FileTest extends TestCase {
         $response = $this->get('/files/does-not-exist');
 
         $response->assertNotFound();
+    }
+
+    public function testEditFileViewCanBeRendered(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get("/files/{$file->uuid}/edit");
+
+        $response->assertOk();
+
+        $response->assertSee($file->fileName);
+    }
+
+    public function testEditFileViewFailsIfFileDoesNotBelongToUser(): void {
+        $file = File::factory()->create();
+
+        $response = $this->get("/files/{$file->uuid}/edit");
+
+        $response->assertForbidden();
+    }
+
+    public function testEditFileViewFailsIfFileDoesNotExist(): void {
+        $response = $this->get('/files/does-not-exist/edit');
+
+        $response->assertNotFound();
+    }
+
+    public function testFileCanBeEdited(): void {
+        $newName = 'New Name';
+        $newDescription = 'New Description';
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->put("/files/{$file->uuid}", [
+            'name' => $newName,
+            'description' => $newDescription,
+        ]);
+
+        $response->assertRedirect("/files/{$file->uuid}");
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $file->refresh();
+
+        $this->assertEquals($newName, $file->name);
+        $this->assertEquals($newDescription, $file->description);
+    }
+
+    public function testFileCannotBeEditedIfItDoesNotBelongToUser(): void {
+        $file = File::factory()->create();
+
+        $response = $this->put("/files/{$file->uuid}", [
+            'name' => 'New Name',
+            'description' => 'New Description',
+        ]);
+
+        $response->assertForbidden();
+    }
+
+    public function testFileCantBeRenamedIfNameAlreadyExistsInSameDirectoryForUser(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $otherFile = File::factory()
+            ->for($this->user)
+            ->create(['directory_id' => $file->directory_id]);
+
+        $response = $this->put("/files/{$file->uuid}", [
+            'name' => $otherFile->name,
+            'description' => 'New Description',
+        ]);
+
+        $response->assertSessionHasErrors('name');
     }
 
     public function testFileCanBeMovedToTrash(): void {

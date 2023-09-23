@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -34,6 +35,20 @@ class File extends Model {
 
     public function directory(): BelongsTo {
         return $this->belongsTo(Directory::class);
+    }
+
+    protected function fileName(): Attribute {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                $name = $attributes['name'];
+
+                if ($attributes['extension'] !== null) {
+                    $name .= ".{$attributes['extension']}";
+                }
+
+                return $name;
+            }
+        );
     }
 }
 

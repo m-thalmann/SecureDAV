@@ -1,7 +1,7 @@
-<x-app-layout :title="$file->name">
+<x-app-layout :title="$file->fileName">
     <div class="files-breadcrumbs flex items-center px-4">
         <x-breadcrumbs :directories="$file->directory?->breadcrumbs">
-            <li class="flex items-center gap-2"><i class="fas fa-file"></i> {{ $file->name }}</li>
+            <li class="flex items-center gap-2"><i class="fas fa-file"></i> {{ $file->fileName }}</li>
         </x-breadcrumbs>
 
         <span class="flex-1"></span>
@@ -12,7 +12,7 @@
             </label>
             <ul tabindex="0" class="dropdown-content z-[1] menu p-2 mt-1 shadow bg-base-300 rounded-box w-48">
                 <li>
-                    <a href="#">
+                    <a href="{{ route('files.edit', ['file' => $file->uuid]) }}">
                         <i class="fas fa-edit mr-2"></i>
                         {{ __('Edit file') }}
                     </a>
@@ -32,6 +32,18 @@
             </ul>
         </div>
     </div>
+
+    @if ($file->description)
+        <div class="card bg-base-200 shadow-lg max-sm:rounded-none">
+            <div class="card-body">
+                <h2 class="card-title mb-4">{{ __('Description') }}</h2>
+
+                <p>
+                    {{ $file->description }}
+                </p>
+            </div>
+        </div>
+    @endif
 
     <div class="card bg-base-200 shadow-lg max-sm:rounded-none">
         <div class="card-body">
