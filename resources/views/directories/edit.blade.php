@@ -12,17 +12,11 @@
                 @method('PUT')
                 @csrf
 
-                <div class="form-control md:w-2/3">
-                    <label class="label" for="name">
-                        <span class="label-text">{{ __('Name') }}</span>
-                    </label>
-                    <input id="name" type="text" name="name" class="input input-md w-full{{ $errors->get('name') ? ' input-error' : '' }}" value="{{ $directory->name }}" autofocus required />
-                    <label class="label">
-                        <span class="label-text-alt">
-                            <x-input-error :messages="$errors->get('name')" />
-                        </span>
-                    </label>
-                </div>
+                <x-form-field name="name" class="md:w-2/3">
+                    <x-slot:label>{{ __('Name') }}</x-slot:label>
+
+                    <x-input name="name" :value="$directory->name" autofocus required />
+                </x-form-field>
 
                 <div class="card-actions justify-end">
                     <a href="{{ url()->previous() }}" class="btn btn-neutral">{{ __('Cancel') }}</a>

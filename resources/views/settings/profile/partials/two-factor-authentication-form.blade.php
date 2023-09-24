@@ -41,17 +41,11 @@
                 <form method="POST" action="{{ route('two-factor.confirm') }}" id="two-factor-confirm-form">
                     @csrf
 
-                    <div class="form-control mt-4 sm:w-1/2">
-                        <label class="label" for="code">
-                            <span class="label-text">{{ __('Code') }}</span>
-                        </label>
-                        <input id="code" type="text" inputmode="numeric" name="code" class="input input-md w-full{{ $errors->confirmTwoFactorAuthentication->get('code') ? ' input-error' : '' }}" required autocomplete="one-time-code" />
-                        <label class="label">
-                            <span class="label-text-alt">
-                                <x-input-error :messages="$errors->confirmTwoFactorAuthentication->get('code')" />
-                                </span>
-                        </label>
-                    </div>
+                    <x-form-field name="code" errorBag="confirmTwoFactorAuthentication" class="mt-4 sm:w-1/2">
+                        <x-slot:label>{{ __('Code') }}</x-slot:label>
+
+                        <x-input name="code" inputmode="numeric" errorBag="confirmTwoFactorAuthentication" required autocomplete="one-time-code" />
+                    </x-form-field>
                 </form>
 
             @endif

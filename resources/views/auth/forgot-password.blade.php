@@ -9,17 +9,11 @@
         <form method="POST" action="{{ route('password.email') }}" class="w-full">
             @csrf
 
-            <div class="form-control w-full">
-                <label class="label" for="email">
-                    <span class="label-text">{{ __('Email') }}</span>
-                </label>
-                <input id="email" type="email" name="email" class="input input-md w-full{{ $errors->get('email') ? ' input-error' : '' }}" value="{{ old('email') }}" required autofocus />
-                <label class="label">
-                    <span class="label-text-alt">
-                        <x-input-error :messages="$errors->get('email')" />
-                    </span>
-                </label>
-            </div>
+            <x-form-field name="email" class="w-full">
+                <x-slot:label>{{ __('Email') }}</x-slot:label>
+
+                <x-input name="email" type="email" :value="old('email')" required autofocus />
+            </x-form-field>
 
             <div class="card-actions justify-end items-center gap-6 mt-6">
                 <input type="submit" value="{{ __('Email Password Reset Link') }}" class="btn btn-secondary max-sm:w-full max-sm:text-xs" />

@@ -7,17 +7,11 @@
         <form method="POST" action="{{ route('password.confirm') }}" class="w-full">
             @csrf
 
-            <div class="form-control w-full">
-                <label class="label" for="password">
-                    <span class="label-text">{{ __('Password') }}</span>
-                </label>
-                <input id="password" type="password" name="password" class="input input-md w-full{{ $errors->get('password') ? ' input-error' : '' }}" required autocomplete="current-password" autofocus />
-                <label class="label">
-                    <span class="label-text-alt">
-                        <x-input-error :messages="$errors->get('password')" />
-                    </span>
-                </label>
-            </div>
+            <x-form-field name="password" class="w-full">
+                <x-slot:label>{{ __('Password') }}</x-slot:label>
+
+                <x-input name="password" type="password" required autocomplete="current-password" autofocus />
+            </x-form-field>
 
             <div class="card-actions justify-end mt-6">
                 <input type="submit" value="{{ __('Confirm') }}" class="btn btn-secondary" />

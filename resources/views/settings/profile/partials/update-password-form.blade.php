@@ -14,41 +14,23 @@
             @method('PUT')
             @csrf
 
-            <div class="form-control col-span-6 md:col-span-4">
-                <label class="label" for="current_password">
-                    <span class="label-text">{{ __('Current Password') }}</span>
-                </label>
-                <input id="current_password" type="password" name="current_password" class="input input-md w-full{{ $errors->updatePassword->get('current_password') ? ' input-error' : '' }}" required autocomplete="current-password" />
-                <label class="label">
-                    <span class="label-text-alt">
-                        <x-input-error :messages="$errors->updatePassword->get('current_password')" />
-                    </span>
-                </label>
-            </div>
+            <x-form-field name="current_password" errorBag="updatePassword" class="col-span-6 md:col-span-4">
+                <x-slot:label>{{ __('Current Password') }}</x-slot:label>
 
-            <div class="form-control col-span-6 md:col-span-4">
-                <label class="label" for="password">
-                    <span class="label-text">{{ __('New Password') }}</span>
-                </label>
-                <input id="password" type="password" name="password" class="input input-md w-full{{ $errors->updatePassword->get('password') ? ' input-error' : '' }}" required autocomplete="new-password" />
-                <label class="label">
-                    <span class="label-text-alt">
-                        <x-input-error :messages="$errors->updatePassword->get('password')" />
-                    </span>
-                </label>
-            </div>
+                <x-input name="current_password" type="password" errorBag="updatePassword" required autocomplete="current-password" />
+            </x-form-field>
 
-            <div class="form-control col-span-6 md:col-span-4">
-                <label class="label" for="password_confirmation">
-                    <span class="label-text">{{ __('Confirm Password') }}</span>
-                </label>
-                <input id="password_confirmation" type="password" name="password_confirmation" class="input input-md w-full{{ $errors->updatePassword->get('password_confirmation') ? ' input-error' : '' }}" required autocomplete="new-password" />
-                <label class="label">
-                    <span class="label-text-alt">
-                        <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" />
-                    </span>
-                </label>
-            </div>
+            <x-form-field name="password" errorBag="updatePassword" class="col-span-6 md:col-span-4">
+                <x-slot:label>{{ __('New Password') }}</x-slot:label>
+
+                <x-input name="password" type="password" errorBag="updatePassword" required autocomplete="new-password" />
+            </x-form-field>
+
+            <x-form-field name="password_confirmation" errorBag="updatePassword" class="col-span-6 md:col-span-4">
+                <x-slot:label>{{ __('Confirm Password') }}</x-slot:label>
+
+                <x-input name="password_confirmation" type="password" errorBag="updatePassword" required autocomplete="new-password" />
+            </x-form-field>
 
             <div class="card-actions col-span-6 justify-end mt-6">
                 <input type="submit" value="{{ __('Save') }}" class="btn btn-neutral" />

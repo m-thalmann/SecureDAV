@@ -7,41 +7,23 @@
 
             <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-            <div class="form-control w-full">
-                <label class="label" for="email">
-                    <span class="label-text">{{ __('Email') }}</span>
-                </label>
-                <input id="email" type="email" name="email" class="input input-md w-full{{ $errors->get('email') ? ' input-error' : '' }}" value="{{ old('email', $request->email) }}" required autocomplete="username" />
-                <label class="label">
-                    <span class="label-text-alt">
-                        <x-input-error :messages="$errors->get('email')" />
-                    </span>
-                </label>
-            </div>
+            <x-form-field name="email" class="w-full">
+                <x-slot:label>{{ __('Email') }}</x-slot:label>
 
-            <div class="form-control w-full">
-                <label class="label" for="password">
-                    <span class="label-text">{{ __('Password') }}</span>
-                </label>
-                <input id="password" type="password" name="password" class="input input-md w-full{{ $errors->get('password') ? ' input-error' : '' }}" required autofocus autocomplete="new-password" />
-                <label class="label">
-                    <span class="label-text-alt">
-                        <x-input-error :messages="$errors->get('password')" />
-                    </span>
-                </label>
-            </div>
+                <x-input name="email" type="email" :value="old('email', $request->email)" required autocomplete="username" />
+            </x-form-field>
 
-            <div class="form-control w-full">
-                <label class="label" for="password-confirmation">
-                    <span class="label-text">{{ __('Confirm Password') }}</span>
-                </label>
-                <input id="password-confirmation" type="password" name="password_confirmation" class="input input-md w-full{{ $errors->get('password_confirmation') ? ' input-error' : '' }}" required autocomplete="new-password" />
-                <label class="label">
-                    <span class="label-text-alt">
-                        <x-input-error :messages="$errors->get('password_confirmation')" />
-                    </span>
-                </label>
-            </div>
+            <x-form-field name="password" class="w-full">
+                <x-slot:label>{{ __('Password') }}</x-slot:label>
+
+                <x-input name="password" type="password" required autofocus autocomplete="new-password" />
+            </x-form-field>
+
+            <x-form-field name="password_confirmation" class="w-full">
+                <x-slot:label>{{ __('Confirm Password') }}</x-slot:label>
+
+                <x-input name="password_confirmation" type="password" required autocomplete="new-password" />
+            </x-form-field>
 
             <div class="card-actions justify-end items-center gap-6 mt-6">
                 <input type="submit" value="{{ __('Reset Password') }}" class="btn btn-secondary max-sm:w-full max-sm:text-xs" />
