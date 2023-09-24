@@ -24,10 +24,12 @@
                             <span class="absolute top-0 bottom-0 right-0 px-4 flex items-center bg-base-200/50 text-base-content/70 rounded-lg">.{{ $file->extension }}</span>
                         @endif
                     </div>
+
+                    <x-slot:hint>{{ __('Info') }}: {{ __('Without file extension') }}</x-slot:hint>
                 </x-form-field>
 
                 <x-form-field name="description" class="md:w-2/3">
-                    <x-slot:label>{{ __('Description') }} <small class="font-extralight">({{ __('optional') }})</small></x-slot:label>
+                    <x-slot:label optional>{{ __('Description') }}</x-slot:label>
 
                     <textarea
                         id="description"

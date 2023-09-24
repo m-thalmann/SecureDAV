@@ -7,6 +7,7 @@ use App\Models\File;
 use App\Models\User;
 use App\View\Helpers\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class FileTest extends TestCase {
@@ -20,6 +21,165 @@ class FileTest extends TestCase {
         $this->user = $this->createUser();
 
         $this->actingAs($this->user);
+    }
+
+    public function testCreateFileViewCanBeRendered(): void {
+        $response = $this->get('/files/create');
+
+        $response->assertOk();
+    }
+
+    public function testCreateFileViewCanBeRenderedWithDirectory(): void {
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get("/files/create?directory={$directory->uuid}");
+
+        $response->assertOk();
+
+        $response->assertSee($directory->name);
+    }
+
+    public function testCreateFileViewFailsIfDirectoryDoesntExist(): void {
+        $response = $this->get('/files/create?directory=nonexistent');
+
+        $response->assertNotFound();
+    }
+
+    public function testCreateFileViewFailsIfUserCantUpdateDirectory(): void {
+        $otherUser = $this->createUser();
+
+        $directory = Directory::factory()
+            ->for($otherUser)
+            ->create();
+
+        $response = $this->get("/files/create?directory={$directory->uuid}");
+
+        $response->assertForbidden();
+    }
+
+    public function testFileCanBeCreated(): void {
+        $fileName = 'NewFile';
+        $fileExtension = 'txt';
+        $uploadFile = UploadedFile::fake()->create("$fileName.$fileExtension");
+
+        $description = 'New Description';
+
+        $response = $this->post('/files', [
+            'file' => $uploadFile,
+            'name' => $fileName,
+            'encrypt' => true,
+            'description' => $description,
+        ]);
+
+        $this->assertDatabaseHas('files', [
+            'user_id' => $this->user->id,
+            'name' => $fileName,
+            'extension' => $fileExtension,
+            'description' => $description,
+            'encrypted' => true,
+        ]);
+
+        $createdFile = File::query()
+            ->where('name', $fileName)
+            ->first();
+
+        $response->assertRedirect("/files/{$createdFile->uuid}");
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+    }
+
+    public function testFileCanBeCreatedWithDirectory(): void {
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $fileName = 'NewFile';
+        $fileExtension = 'txt';
+        $uploadFile = UploadedFile::fake()->create("$fileName.$fileExtension");
+
+        $response = $this->post('/files', [
+            'file' => $uploadFile,
+            'name' => $fileName,
+            'directory_uuid' => $directory->uuid,
+        ]);
+
+        $this->assertDatabaseHas('files', [
+            'name' => $fileName,
+            'directory_id' => $directory->id,
+            'user_id' => $this->user->id,
+        ]);
+
+        $createdFile = File::query()
+            ->where('name', $fileName)
+            ->first();
+
+        $response->assertRedirect("/files/{$createdFile->uuid}");
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+    }
+
+    public function testFileCantBeCreatedIfDirectoryDoesntExist(): void {
+        $uploadFile = UploadedFile::fake()->create('test-file.txt');
+
+        $response = $this->post('/files', [
+            'file' => $uploadFile,
+            'directory_uuid' => 'nonexistent',
+        ]);
+
+        $response->assertNotFound();
+    }
+
+    public function testFileCantBeCreatedIfUserCantUpdateDirectory(): void {
+        $otherUser = $this->createUser();
+
+        $directory = Directory::factory()
+            ->for($otherUser)
+            ->create();
+
+        $uploadFile = UploadedFile::fake()->create('test-file.txt');
+
+        $response = $this->post('/files', [
+            'file' => $uploadFile,
+            'directory_uuid' => $directory->uuid,
+        ]);
+
+        $response->assertForbidden();
+    }
+
+    public function testFileCantBeCreatedIfNameIsNotUniqueInFileDirectory(): void {
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create(['directory_id' => $directory->id]);
+
+        $uploadFile = UploadedFile::fake()->create('test-file.txt');
+
+        $response = $this->from('/files/create')->post('/files', [
+            'file' => $uploadFile,
+            'name' => $file->name,
+            'directory_uuid' => $directory->uuid,
+        ]);
+
+        $response->assertRedirect('/files/create');
+
+        $response->assertSessionHasErrors('name');
     }
 
     public function testShowFileViewCanBeRendered(): void {

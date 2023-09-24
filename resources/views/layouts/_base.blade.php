@@ -36,6 +36,8 @@
                 <x-session-message :message="session('snackbar')" />
             </div>
         @endif
+
+        @stack('scripts')
     </body>
 </html>
 

@@ -19,7 +19,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="{{ route('files.create') . ($currentDirectory ? "?directory={$currentDirectory->uuid}" : '') }}">
                         <i class="fa-solid fa-file-circle-plus w-6"></i>
                         {{ __('New file') }}
                     </a>

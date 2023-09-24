@@ -22,7 +22,7 @@ return new class extends Migration {
                 ->cascadeOnUpdate();
             $table->string('name');
             $table->string('description')->nullable();
-            $table->string('mime_type');
+            $table->string('mime_type')->nullable();
             $table->string('extension')->nullable();
             $table->boolean('encrypted'); // TODO: add encryption key per file
             $table->timestamps();

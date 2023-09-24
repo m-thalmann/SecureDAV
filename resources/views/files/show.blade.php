@@ -53,7 +53,7 @@
                 <table class="mb-4 w-full">
                     <tr>
                         <td class="pr-4 font-bold w-px whitespace-nowrap">{{ __('MIME-Type') }}:</td>
-                        <td>{{ $file->mime_type }}</td>
+                        <td>{{ $file->mime_type ?? '-' }}</td>
                     </tr>
                     <tr>
                         <td class="pr-4 font-bold w-px whitespace-nowrap">{{ __('Created') }}:</td>
