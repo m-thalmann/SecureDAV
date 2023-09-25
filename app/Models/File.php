@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class File extends Model {
@@ -35,6 +36,10 @@ class File extends Model {
 
     public function directory(): BelongsTo {
         return $this->belongsTo(Directory::class);
+    }
+
+    public function versions(): HasMany {
+        return $this->hasMany(FileVersion::class);
     }
 
     protected function fileName(): Attribute {
