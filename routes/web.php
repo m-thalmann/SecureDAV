@@ -3,6 +3,7 @@
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\FileVersionController;
 use App\Http\Controllers\Settings\LogoutBrowserSessionsController;
 use App\Http\Controllers\Settings\ProfileSettingsController;
 use App\Providers\RouteServiceProvider;
@@ -161,6 +162,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('files', FileController::class)
         ->scoped(['file' => 'uuid'])
         ->except('index');
+
+    Route::resource('files.file-versions', FileVersionController::class)
+        ->shallow()
+        ->scoped(['file' => 'uuid'])
+        ->except(['index', 'create', 'show']);
 
     // TODO: replace with resource controllers
     Route::view('access', 'access.index')->name('access.index');

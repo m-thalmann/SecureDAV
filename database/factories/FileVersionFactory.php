@@ -3,8 +3,10 @@
 namespace Database\Factories;
 
 use App\Models\File;
+use App\Models\FileVersion;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Http\Testing\File as TestingFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FileVersion>
@@ -16,19 +18,31 @@ class FileVersionFactory extends Factory {
      * @return array<string, mixed>
      */
     public function definition(): array {
-        // TODO: improve factory
-        $file = File::factory()->create();
-
-        $path = TestingFile::create($file->name)->store('files');
-
         return [
-            'file_id' => $file->id,
+            'file_id' => File::factory(),
             'label' => null,
             'version' => 1,
-            'storage_path' => $path,
+            'storage_path' => null,
             'etag' => $this->faker->md5(),
             'bytes' => $this->faker->numberBetween(1, 1000000),
         ];
+    }
+
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): static {
+        return $this->afterMaking(function (FileVersion $fileVersion) {
+            if ($fileVersion->storage_path !== null) {
+                return;
+            }
+
+            $path = Str::uuid()->toString();
+
+            Storage::disk('files')->put($path, $this->faker->text(50));
+
+            $fileVersion->storage_path = $path;
+        });
     }
 }
 
