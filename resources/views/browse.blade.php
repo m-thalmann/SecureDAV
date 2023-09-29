@@ -66,6 +66,7 @@
                     <th class="max-sm:hidden">{{ __('Size') }}</th>
                     <th>{{ __('Current version') }}</th>
                     <th>{{ __('Last updated') }}</th>
+                    <th class="w-0"></th>
                 </tr>
             </thead>
             <tbody>
@@ -81,13 +82,20 @@
                         </td>
                         <td class="max-sm:hidden">-</td>
                         <td>-</td>
-                        <td>TODO</td>
+                        <td>
+                            <span class="tooltip" data-tip="{{ $directory->updated_at }}">{{ $directory->updated_at->diffForHumans() }}</span>
+                        </td>
+                        <td></td>
                     </tr>
                 @endforeach
 
                 @foreach ($files as $file)
+                    @php
+                        $latestVersion = $file->versions()->latest()->first();
+                    @endphp
+
                     <tr class="hover">
-                        <!-- TODO: use better file icons for mime types -->
+                        <!-- TODO: use better file icons for file extension -->
                         <td>
                             <a href="{{ route('files.show', ['file' => $file->uuid]) }}" class="flex items-center group">
                                 <i class="fas fa-file w-6"></i>
@@ -96,15 +104,33 @@
                                 </span>
                             </a>
                         </td>
-                        <td class="max-sm:hidden">TODO</td>
-                        <td>TODO</td>
-                        <td>{{ $file->updated_at->diffForHumans() }}</td>
+                        <td class="max-sm:hidden">
+                            @if ($latestVersion)
+                                {{ formatBytes($latestVersion->bytes) }}
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td>
+                            @if ($latestVersion)
+                                <i class="fa-solid fa-clock-rotate-left mr-1"></i>
+                                {{ $latestVersion->version }}
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td>
+                            <span class="tooltip" data-tip="{{ $file->updated_at }}">{{ $file->updated_at->diffForHumans() }}</span>
+                        </td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-square"><i class="fas fa-download"></i></a>
+                        </td>
                     </tr>
                 @endforeach
 
                 @if (count($directories) === 0 && count($files) === 0)
                     <tr>
-                        <td colspan="4" class="text-center italic text-base-content/70">{{ __('This directory is empty') }}</td>
+                        <td colspan="5" class="text-center italic text-base-content/70">{{ __('This directory is empty') }}</td>
                     </tr>
                 @endif
             </tbody>

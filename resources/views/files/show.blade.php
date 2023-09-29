@@ -83,11 +83,13 @@
             </div>
 
             <div class="card-actions">
-                <a href="#" class="btn btn-neutral">
+                <a href="#" class="btn btn-neutral btn-sm">
                     <i class="fas fa-download"></i>
                     {{ __('Download latest version') }}
                 </a>
             </div>
         </div>
     </div>
+
+    @include('files.partials.file-versions')
 </x-app-layout>

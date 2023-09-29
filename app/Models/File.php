@@ -39,7 +39,7 @@ class File extends Model {
     }
 
     public function versions(): HasMany {
-        return $this->hasMany(FileVersion::class);
+        return $this->hasMany(FileVersion::class)->orderBy('version', 'desc');
     }
 
     protected function fileName(): Attribute {
