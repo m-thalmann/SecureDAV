@@ -14,12 +14,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class File extends Model {
     use HasFactory, HasUuids, SoftDeletes;
 
+    protected $hidden = ['next_version'];
+
     protected $fillable = [
         'directory_id',
         'name',
         'description',
         'mime_type',
         'extension',
+    ];
+
+    protected $attributes = [
+        'next_version' => 1,
     ];
 
     public function uniqueIds(): array {

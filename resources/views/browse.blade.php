@@ -120,7 +120,7 @@
                             @endif
                         </td>
                         <td>
-                            <span class="tooltip" data-tip="{{ $file->updated_at }}">{{ $file->updated_at->diffForHumans() }}</span>
+                            <span class="tooltip" data-tip="{{ $latestVersion?->updated_at ?? __('No versions yet') }}">{{ $latestVersion?->updated_at?->diffForHumans() ?? '-' }}</span>
                         </td>
                         <td>
                             <a href="#" class="btn btn-sm btn-square"><i class="fas fa-download"></i></a>

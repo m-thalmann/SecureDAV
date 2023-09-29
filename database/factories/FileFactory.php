@@ -26,6 +26,7 @@ class FileFactory extends Factory {
             'mime_type' => fake()->mimeType(),
             'extension' => fake()->fileExtension(),
             'encrypted' => false,
+            'next_version' => 1,
         ];
     }
 }

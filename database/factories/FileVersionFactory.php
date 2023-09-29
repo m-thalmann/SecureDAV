@@ -33,6 +33,15 @@ class FileVersionFactory extends Factory {
      */
     public function configure(): static {
         return $this->afterMaking(function (FileVersion $fileVersion) {
+            $file = $fileVersion->file;
+
+            $fileVersion->version = $file->next_version;
+            $file
+                ->forceFill([
+                    'next_version' => $file->next_version + 1,
+                ])
+                ->save();
+
             if ($fileVersion->storage_path !== null) {
                 return;
             }

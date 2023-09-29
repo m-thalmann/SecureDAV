@@ -71,6 +71,30 @@ class FileVersionTest extends TestCase {
         );
     }
 
+    public function testNewFileVersionReceivesNextHighestVersionNumberWhenCreated(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $fileVersion = FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        $trashedFileVersion = FileVersion::factory()
+            ->for($file)
+            ->trashed()
+            ->create(['version' => $fileVersion->version + 1]);
+
+        $response = $this->post("/files/{$file->uuid}/file-versions");
+
+        $response->assertRedirect("/files/{$file->uuid}");
+
+        $this->assertDatabaseHas('file_versions', [
+            'file_id' => $file->id,
+            'version' => $trashedFileVersion->version + 1,
+        ]);
+    }
+
     public function testNewFileVersionCantBeCreatedIfFileDoesntExist(): void {
         $response = $this->post('/files/doesnt-exist/file-versions', [
             'label' => 'New version',

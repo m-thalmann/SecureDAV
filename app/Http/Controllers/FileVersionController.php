@@ -58,13 +58,23 @@ class FileVersionController extends Controller {
                 $newVersion->forceFill([
                     'file_id' => $file->id,
                     'label' => $data['label'] ?? null,
-                    'version' => $latestVersion->version + 1,
+                    'version' => $file->next_version,
                     'storage_path' => $newPath,
                     'etag' => $latestVersion->etag,
                     'bytes' => $latestVersion->bytes,
                 ]);
 
                 $newVersion->save();
+
+                $nextVersionSetSuccessfully = $file
+                    ->forceFill([
+                        'next_version' => $file->next_version + 1,
+                    ])
+                    ->save();
+
+                if (!$nextVersionSetSuccessfully) {
+                    throw new Exception('Next version could not be set');
+                }
 
                 $fileCopiedSuccessfully = Storage::disk('files')->copy(
                     $latestVersion->storage_path,

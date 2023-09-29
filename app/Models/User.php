@@ -24,6 +24,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         'password' => 'hashed',
     ];
 
+    protected $attributes = [
+        'is_admin' => false,
+    ];
+
     public function files(): HasMany {
         return $this->hasMany(File::class);
     }
