@@ -23,7 +23,7 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th><i class="fa-solid fa-clock-rotate-left"></i></th>
+                            <th class="text-center w-0"><i class="fa-solid fa-clock-rotate-left"></i></th>
                             <th>{{ __('Label') }}</th>
                             <th>{{ __('Size') }}</th>
                             <th>{{ __('Created') }}</th>
@@ -34,7 +34,7 @@
                     <tbody>
                         @foreach ($file->versions as $version)
                             <tr class="hover:bg-base-100">
-                                <td>{{ $version->version }}</td>
+                                <td class="text-center">{{ $version->version }}</td>
                                 <td>{{ $version->label ?? '-' }}</td>
                                 <td>{{ formatBytes($version->bytes) }}</td>
                                 <td>
@@ -70,12 +70,17 @@
                                                 </a>
                                             </li>
 
-                                            <li>
-                                                <button class="hover:bg-error hover:text-error-content">
-                                                    <i class="fas fa-trash mr-2"></i>
-                                                    {{ __('Move to trash') }}
-                                                </button>
-                                            </li>
+                                            <form method="POST" action="{{ route('file-versions.destroy', ['file_version' => $version->id]) }}">
+                                                @method('DELETE')
+                                                @csrf
+                                                
+                                                <li>
+                                                    <button class="hover:bg-error hover:text-error-content">
+                                                        <i class="fas fa-trash mr-2"></i>
+                                                        {{ __('Move to trash') }}
+                                                    </button>
+                                                </li>
+                                            </form>
                                         </ul>
                                     </div>
                                 </td>

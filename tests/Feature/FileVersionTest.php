@@ -187,4 +187,52 @@ class FileVersionTest extends TestCase {
             return true;
         });
     }
+
+    public function testFileVersionCanBeMovedToTrash(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $fileVersion = FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        $response = $this->delete("/file-versions/{$fileVersion->id}");
+
+        $response->assertRedirect("/files/{$file->uuid}");
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $this->assertSoftDeleted('file_versions', [
+            'id' => $fileVersion->id,
+        ]);
+    }
+
+    public function testFileVersionCannotBeMovedToTrashIfItDoesNotBelongToUser(): void {
+        $otherUser = User::factory()->create();
+
+        $file = File::factory()
+            ->for($otherUser)
+            ->create();
+
+        $fileVersion = FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        $response = $this->delete("/file-versions/{$fileVersion->id}");
+
+        $response->assertForbidden();
+    }
+
+    public function testFileVersionCannotBeMovedToTrashIfItDoesNotExist(): void {
+        $response = $this->delete('/file-versions/doesnt-exist');
+
+        $response->assertNotFound();
+    }
 }

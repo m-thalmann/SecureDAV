@@ -105,5 +105,20 @@ class FileVersionController extends Controller {
                 )->forDuration()
             );
     }
+
+    public function destroy(FileVersion $fileVersion): RedirectResponse {
+        $file = $fileVersion->file;
+
+        $fileVersion->delete();
+
+        return redirect()
+            ->route('files.show', $file->uuid)
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('Version successfully moved to trash.')
+                )->forDuration()
+            );
+    }
 }
 
