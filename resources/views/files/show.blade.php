@@ -1,8 +1,6 @@
 <x-app-layout :title="$file->fileName">
     <div class="files-breadcrumbs flex items-center px-4">
-        <x-breadcrumbs :directories="$file->directory?->breadcrumbs">
-            <li class="flex items-center gap-2"><i class="fas fa-file"></i> {{ $file->fileName }}</li>
-        </x-breadcrumbs>
+        <x-breadcrumbs :file="$file" />
 
         <span class="flex-1"></span>
 

@@ -1,7 +1,5 @@
 <x-app-layout :title="__('Edit file')">
-    <x-breadcrumbs :directories="$file->directory?->breadcrumbs" class="px-4">
-        <li class="flex items-center gap-2"><i class="fas fa-file"></i> {{ $file->fileName }}</li>
-    </x-breadcrumbs>
+    <x-breadcrumbs :file="$file" class="px-4" />
 
     <div class="card bg-base-200 shadow-lg max-sm:rounded-none md:w-2/3 md:mx-auto">
         <div class="card-body">

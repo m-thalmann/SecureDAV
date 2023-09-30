@@ -1,5 +1,5 @@
 <x-app-layout :title="__('Create file')">
-    <x-breadcrumbs :directories="$directory?->breadcrumbs" class="px-4"></x-breadcrumbs>
+    <x-breadcrumbs :directories="$directory?->breadcrumbs" class="px-4"/>
 
     <div class="card bg-base-200 shadow-lg max-sm:rounded-none md:w-2/3 md:mx-auto">
         <div class="card-body">

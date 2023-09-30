@@ -1,4 +1,17 @@
-@props(['directories' => []])
+@props([
+    'directories' => null,
+    'file' => null,
+])
+
+@php
+    if ($directories === null) {
+        if ($file !== null) {
+            $directories = $file->directory?->breadcrumbs;
+        } else {
+            $directories = [];
+        }
+    }
+@endphp
 
 <div {{ $attributes->merge(['class' => 'breadcrumbs']) }}>
     <ul>
@@ -11,6 +24,14 @@
                 <a href="{{ route('browse.index', ['directory' => $breadcrumb->uuid]) }}" class="!inline-block max-w-[16ch] overflow-hidden text-ellipsis">{{ $breadcrumb->name }}</a>
             </li>
         @endforeach
+
+        @if ($file)
+            <li>
+                <a href="{{ route('files.show', ['file' => $file->uuid]) }}" class="flex items-center gap-2">
+                    <i class="fas fa-file"></i> {{ $file->fileName }}
+                </a>
+            </li>
+        @endif
 
         {{ $slot }}
     </ul>
