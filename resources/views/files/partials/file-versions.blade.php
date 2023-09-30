@@ -64,7 +64,7 @@
                                             ])
                                         >
                                             <li>
-                                                <a href="#">
+                                                <a href="{{ route('file-versions.edit', ['file_version' => $version->id]) }}">
                                                     <i class="fas fa-edit mr-2"></i>
                                                     {{ __('Edit label') }}
                                                 </a>

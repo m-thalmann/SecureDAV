@@ -188,6 +188,87 @@ class FileVersionTest extends TestCase {
         });
     }
 
+    public function testEditFileVersionViewCanBeRendered(): void {
+        $version = 632;
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create(['next_version' => $version]);
+
+        $fileVersion = FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        $response = $this->get("/file-versions/{$fileVersion->id}/edit");
+
+        $response->assertOk();
+
+        $response->assertSee($file->fileName);
+        $response->assertSee($version);
+    }
+
+    public function testEditFileVersionViewFailsIfFileDoesNotBelongToUser(): void {
+        $file = File::factory()->create();
+
+        $fileVersion = FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        $response = $this->get("/file-versions/{$fileVersion->id}/edit");
+
+        $response->assertForbidden();
+    }
+
+    public function testEditFileVersionViewFailsIfFileDoesNotExist(): void {
+        $response = $this->get('/file-versions/does-not-exist/edit');
+
+        $response->assertNotFound();
+    }
+
+    public function testFileVersionCanBeEdited(): void {
+        $newLabel = 'New Label';
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $fileVersion = FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        $response = $this->put("/file-versions/{$fileVersion->id}", [
+            'label' => $newLabel,
+        ]);
+
+        $response->assertRedirect("/files/{$file->uuid}");
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $fileVersion->refresh();
+
+        $this->assertEquals($newLabel, $fileVersion->label);
+    }
+
+    public function testFileVersionCannotBeEditedIfItDoesNotBelongToUser(): void {
+        $file = File::factory()->create();
+
+        $fileVersion = FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        $response = $this->put("/file-versions/{$fileVersion->id}", [
+            'label' => 'New Label',
+        ]);
+
+        $response->assertForbidden();
+    }
+
     public function testFileVersionCanBeMovedToTrash(): void {
         $file = File::factory()
             ->for($this->user)

@@ -106,6 +106,30 @@ class FileVersionController extends Controller {
             );
     }
 
+    public function edit(FileVersion $fileVersion): View {
+        return view('file-versions.edit', ['fileVersion' => $fileVersion]);
+    }
+
+    public function update(
+        Request $request,
+        FileVersion $fileVersion
+    ): RedirectResponse {
+        $data = $request->validate([
+            'label' => ['nullable', 'string', 'max:64'],
+        ]);
+
+        $fileVersion->update($data);
+
+        return redirect()
+            ->route('files.show', $fileVersion->file->uuid)
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('File version updated successfully')
+                )->forDuration()
+            );
+    }
+
     public function destroy(FileVersion $fileVersion): RedirectResponse {
         $file = $fileVersion->file;
 
