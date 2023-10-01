@@ -78,12 +78,13 @@ class FileTest extends TestCase {
             'name' => $fileName,
             'extension' => $fileExtension,
             'description' => $description,
-            'encrypted' => true,
         ]);
 
         $createdFile = File::query()
             ->where('name', $fileName)
             ->first();
+
+        $this->assertIsString($createdFile->encryption_key);
 
         $response->assertRedirect("/files/{$createdFile->uuid}");
 

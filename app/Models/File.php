@@ -48,6 +48,14 @@ class File extends Model {
         return $this->hasMany(FileVersion::class)->orderBy('version', 'desc');
     }
 
+    protected function encrypted(): Attribute {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                return $attributes['encryption_key'] !== null;
+            }
+        );
+    }
+
     protected function fileName(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {

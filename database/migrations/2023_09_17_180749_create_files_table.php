@@ -24,7 +24,7 @@ return new class extends Migration {
             $table->string('description')->nullable();
             $table->string('mime_type')->nullable();
             $table->string('extension')->nullable();
-            $table->boolean('encrypted'); // TODO: add encryption key per file
+            $table->string('encryption_key', 16)->nullable();
             $table->integer('next_version');
             $table->timestamps();
             $table->softDeletes();

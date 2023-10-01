@@ -7,6 +7,8 @@ use App\Models\File;
 use App\View\Helpers\SessionMessage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File as FileRule;
 use Illuminate\View\View;
@@ -62,6 +64,10 @@ class FileController extends Controller {
 
         $extension = $requestFile->getClientOriginalExtension();
 
+        $encryptionKey = Arr::get($data, 'encrypt', false)
+            ? Str::random(16)
+            : null;
+
         $file = File::make([
             'directory_id' => $directory?->id,
             'name' => $data['name'],
@@ -72,7 +78,7 @@ class FileController extends Controller {
 
         $file->forceFill([
             'user_id' => $request->user()->id,
-            'encrypted' => $data['encrypt'] ?? false,
+            'encryption_key' => $encryptionKey,
         ]);
 
         $file->save();
