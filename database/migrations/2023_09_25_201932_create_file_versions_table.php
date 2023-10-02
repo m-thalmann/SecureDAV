@@ -20,6 +20,8 @@ return new class extends Migration {
             $table->unsignedBigInteger('bytes');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->unique(['file_id', 'version']);
         });
     }
 

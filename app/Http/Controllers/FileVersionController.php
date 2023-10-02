@@ -21,10 +21,7 @@ class FileVersionController extends Controller {
     public function store(Request $request, File $file): RedirectResponse {
         $this->authorize('update', $file);
 
-        $latestVersion = $file
-            ->versions()
-            ->latest()
-            ->first();
+        $latestVersion = $file->latestVersion;
 
         if ($latestVersion === null) {
             return back()->with(

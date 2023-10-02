@@ -90,10 +90,6 @@
                 @endforeach
 
                 @foreach ($files as $file)
-                    @php
-                        $latestVersion = $file->versions()->latest()->first();
-                    @endphp
-
                     <tr class="hover">
                         <!-- TODO: use better file icons for file extension -->
                         <td>
@@ -105,22 +101,22 @@
                             </a>
                         </td>
                         <td class="max-sm:hidden">
-                            @if ($latestVersion)
-                                {{ formatBytes($latestVersion->bytes) }}
+                            @if ($file->latestVersion)
+                                {{ formatBytes($file->latestVersion->bytes) }}
                             @else
                                 -
                             @endif
                         </td>
                         <td>
-                            @if ($latestVersion)
+                            @if ($file->latestVersion)
                                 <i class="fa-solid fa-clock-rotate-left mr-1"></i>
-                                {{ $latestVersion->version }}
+                                {{ $file->latestVersion->version }}
                             @else
                                 -
                             @endif
                         </td>
                         <td>
-                            <span class="tooltip" data-tip="{{ $latestVersion?->updated_at ?? __('No versions yet') }}">{{ $latestVersion?->updated_at?->diffForHumans() ?? '-' }}</span>
+                            <span class="tooltip" data-tip="{{ $file->latestVersion?->updated_at ?? __('No versions yet') }}">{{ $file->latestVersion?->updated_at?->diffForHumans() ?? '-' }}</span>
                         </td>
                         <td>
                             <a href="#" class="btn btn-sm btn-square"><i class="fas fa-download"></i></a>

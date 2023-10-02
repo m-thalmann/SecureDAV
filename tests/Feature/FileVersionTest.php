@@ -58,10 +58,7 @@ class FileVersionTest extends TestCase {
             'version' => $fileVersion->version + 1,
         ]);
 
-        $newVersion = $file
-            ->versions()
-            ->latest()
-            ->first();
+        $newVersion = $file->latestVersion;
 
         $this->assertNotNull($newVersion->storage_path);
 

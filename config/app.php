@@ -185,6 +185,7 @@ return [
              */
 
             App\Providers\FileEncryptionServiceProvider::class,
+            App\Providers\FileVersionServiceProvider::class,
         ])
         ->toArray(),
 
