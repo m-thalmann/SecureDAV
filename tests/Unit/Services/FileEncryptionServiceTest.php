@@ -2,7 +2,9 @@
 
 namespace Tests\Unit\Services;
 
+use App\Exceptions\FileWriteException;
 use App\Services\FileEncryptionService;
+use Exception;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -76,6 +78,29 @@ class FileEncryptionServiceTest extends TestCase {
         $this->service->encrypt($this->encryptionKey, 'invalid', 'invalid');
     }
 
+    public function testEncryptThrowsAnExceptionIfOutputIsNotWritable(): void {
+        $this->expectException(FileWriteException::class);
+
+        $inputResource = fopen($this->inputPath, 'rb');
+        $encryptedResource = fopen($this->encryptedPath, 'r');
+
+        try {
+            $this->service->encrypt(
+                $this->encryptionKey,
+                $inputResource,
+                $encryptedResource
+            );
+        } catch (Exception $e) {
+            fclose($inputResource);
+            fclose($encryptedResource);
+
+            throw $e;
+        }
+
+        fclose($inputResource);
+        fclose($encryptedResource);
+    }
+
     public function testFileCanBeDecrypted(): void {
         $inputResource = fopen($this->inputPath, 'rb');
         $encryptedResource = fopen($this->encryptedPath, 'w');
@@ -139,5 +164,40 @@ class FileEncryptionServiceTest extends TestCase {
         fclose($decryptedResource);
 
         $this->assertEmpty(file_get_contents($this->decryptedPath));
+    }
+
+    public function testDecryptThrowsAnExceptionIfOutputIsNotWritable(): void {
+        $this->expectException(FileWriteException::class);
+
+        $inputResource = fopen($this->inputPath, 'rb');
+        $encryptedResource = fopen($this->encryptedPath, 'w');
+
+        $this->service->encrypt(
+            $this->encryptionKey,
+            $inputResource,
+            $encryptedResource
+        );
+
+        fclose($inputResource);
+        fclose($encryptedResource);
+
+        $encryptedResource = fopen($this->encryptedPath, 'rb');
+        $decryptedResource = fopen($this->decryptedPath, 'r');
+
+        try {
+            $this->service->decrypt(
+                $this->encryptionKey,
+                $encryptedResource,
+                $decryptedResource
+            );
+        } catch (Exception $e) {
+            fclose($encryptedResource);
+            fclose($decryptedResource);
+
+            throw $e;
+        }
+
+        fclose($encryptedResource);
+        fclose($decryptedResource);
     }
 }

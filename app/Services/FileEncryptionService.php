@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\FileWriteException;
 use InvalidArgumentException;
 
 class FileEncryptionService {
@@ -16,7 +17,8 @@ class FileEncryptionService {
      * @param resource $inputResource
      * @param resource $outputResource
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
+     * @throws \App\Exceptions\FileWriteException
      */
     public function encrypt(
         string $key,
@@ -32,7 +34,9 @@ class FileEncryptionService {
         $ivLength = openssl_cipher_iv_length(static::CIPHER);
         $iv = openssl_random_pseudo_bytes($ivLength);
 
-        fwrite($outputResource, $iv);
+        if (@fwrite($outputResource, $iv) === false) {
+            throw new FileWriteException();
+        }
 
         while (!feof($inputResource)) {
             $plainText = fread(
@@ -61,7 +65,8 @@ class FileEncryptionService {
      * @param resource $inputResource
      * @param resource $outputResource
      *
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
+     * @throws \App\Exceptions\FileWriteException
      */
     public function decrypt(
         string $key,
@@ -92,7 +97,9 @@ class FileEncryptionService {
 
             $iv = substr($plainText, 0, $ivLength);
 
-            fwrite($outputResource, $plainText);
+            if (@fwrite($outputResource, $plainText) === false) {
+                throw new FileWriteException();
+            }
         }
     }
 }
