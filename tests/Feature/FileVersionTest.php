@@ -5,9 +5,12 @@ namespace Tests\Feature;
 use App\Models\File;
 use App\Models\FileVersion;
 use App\Models\User;
+use App\Services\FileVersionService;
 use App\View\Helpers\SessionMessage;
+use Exception;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -28,7 +31,47 @@ class FileVersionTest extends TestCase {
         $this->storage = Storage::fake('files');
     }
 
-    public function testNewFileVersionCanBeCreated(): void {
+    public function testNewFileVersionCanBeCreatedWithUploadFile(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $uploadedFile = UploadedFile::fake()->create('new-version.txt');
+
+        $label = 'New version';
+
+        $response = $this->post("/files/{$file->uuid}/file-versions", [
+            'label' => $label,
+            'file' => $uploadedFile,
+        ]);
+
+        $response->assertRedirect("/files/{$file->uuid}");
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $this->assertDatabaseHas('file_versions', [
+            'file_id' => $file->id,
+            'label' => $label,
+            'version' => 1,
+        ]);
+
+        $newVersion = $file->latestVersion;
+
+        $this->assertNotNull($newVersion->storage_path);
+
+        $this->storage->assertExists(
+            $newVersion->storage_path,
+            $uploadedFile->getContent()
+        );
+    }
+
+    public function testNewFileVersionCanBeCreatedFromLatestVersion(): void {
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -114,7 +157,7 @@ class FileVersionTest extends TestCase {
         $response->assertForbidden();
     }
 
-    public function testNewFileVersionCantBeCreatedIfFileDoesntHaveAnyVersions(): void {
+    public function testNewFileVersionCantBeCreatedWithoutAUploadFileIfFileDoesntHaveAnyVersions(): void {
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -132,48 +175,21 @@ class FileVersionTest extends TestCase {
         });
     }
 
-    public function testCreateFileVersionFailsIfTargetFileAlreadyExists(): void {
-        $file = File::factory()
-            ->for($this->user)
-            ->create();
-
-        $fileVersion = FileVersion::factory()
-            ->for($file)
-            ->create();
-
-        $fileUuid = Str::freezeUuids();
-
-        $this->storage->put($fileUuid, '');
-
-        $response = $this->post("/files/{$file->uuid}/file-versions", [
-            'label' => 'New version',
-        ]);
-
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-
-            return true;
+    public function testCreateFileVersionFailsIfCreateCallFails(): void {
+        $this->mock(FileVersionService::class, function ($mock) {
+            $mock
+                ->shouldReceive('createNewVersion')
+                ->andThrow(new Exception('Test exception'));
         });
 
-        // cleanup
-        Str::createUuidsNormally();
-    }
-
-    public function testCreateFileVersionFailsIfFileCantBeCopied(): void {
         $file = File::factory()
             ->for($this->user)
             ->create();
 
-        $fileVersion = FileVersion::factory()
-            ->for($file)
-            ->create();
-
-        $this->storage->delete($fileVersion->storage_path);
+        $uploadedFile = UploadedFile::fake()->create('new-version.txt');
 
         $response = $this->post("/files/{$file->uuid}/file-versions", [
-            'label' => 'New version',
+            'file' => $uploadedFile,
         ]);
 
         $response->assertSessionHas('snackbar', function (

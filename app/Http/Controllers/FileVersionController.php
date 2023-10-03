@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\NoVersionFoundException;
 use App\Models\File;
 use App\Models\FileVersion;
+use App\Services\FileVersionService;
 use App\View\Helpers\SessionMessage;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\File as FileRule;
 use Illuminate\View\View;
 
 class FileVersionController extends Controller {
@@ -18,12 +18,34 @@ class FileVersionController extends Controller {
         $this->authorizeResource(FileVersion::class);
     }
 
-    public function store(Request $request, File $file): RedirectResponse {
+    public function store(
+        Request $request,
+        FileVersionService $fileVersionService,
+        File $file
+    ): RedirectResponse {
         $this->authorize('update', $file);
 
-        $latestVersion = $file->latestVersion;
+        $data = $request->validate([
+            'label' => ['nullable', 'string', 'max:64'],
+            'file' => ['nullable', FileRule::default()->max('1gb')],
+        ]);
 
-        if ($latestVersion === null) {
+        $uploadedFile = $request->file('file');
+
+        try {
+            if ($uploadedFile !== null) {
+                $fileVersionService->createNewVersion(
+                    $file,
+                    $uploadedFile,
+                    $data['label'] ?? null
+                );
+            } else {
+                $fileVersionService->copyLatestVersion(
+                    $file,
+                    $data['label'] ?? null
+                );
+            }
+        } catch (NoVersionFoundException $e) {
             return back()->with(
                 'snackbar',
                 SessionMessage::warning(
@@ -32,57 +54,6 @@ class FileVersionController extends Controller {
                     )
                 )->forDuration()
             );
-        }
-
-        $data = $request->validate([
-            'label' => ['nullable', 'string', 'max:64'],
-        ]);
-
-        $newPath = Str::uuid()->toString();
-
-        try {
-            if (Storage::disk('files')->exists($newPath)) {
-                throw new Exception('Path already exists. Try again');
-            }
-
-            DB::transaction(function () use (
-                $file,
-                $latestVersion,
-                $newPath,
-                $data
-            ) {
-                $newVersion = new FileVersion();
-
-                $newVersion->forceFill([
-                    'file_id' => $file->id,
-                    'label' => $data['label'] ?? null,
-                    'version' => $file->next_version,
-                    'storage_path' => $newPath,
-                    'etag' => $latestVersion->etag,
-                    'bytes' => $latestVersion->bytes,
-                ]);
-
-                $newVersion->save();
-
-                $nextVersionSetSuccessfully = $file
-                    ->forceFill([
-                        'next_version' => $file->next_version + 1,
-                    ])
-                    ->save();
-
-                if (!$nextVersionSetSuccessfully) {
-                    throw new Exception('Next version could not be set');
-                }
-
-                $fileCopiedSuccessfully = Storage::disk('files')->copy(
-                    $latestVersion->storage_path,
-                    $newPath
-                );
-
-                if (!$fileCopiedSuccessfully) {
-                    throw new Exception('File could not be copied');
-                }
-            });
         } catch (Exception $e) {
             return back()->with(
                 'snackbar',
