@@ -5,9 +5,13 @@ namespace Tests\Feature;
 use App\Models\Directory;
 use App\Models\File;
 use App\Models\User;
+use App\Services\FileVersionService;
 use App\View\Helpers\SessionMessage;
+use Exception;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Mockery\MockInterface;
 use Tests\TestCase;
 
 class FileTest extends TestCase {
@@ -21,6 +25,8 @@ class FileTest extends TestCase {
         $this->user = $this->createUser();
 
         $this->actingAs($this->user);
+
+        Storage::fake('files');
     }
 
     public function testCreateFileViewCanBeRendered(): void {
@@ -62,9 +68,31 @@ class FileTest extends TestCase {
     public function testFileCanBeCreated(): void {
         $fileName = 'NewFile';
         $fileExtension = 'txt';
-        $uploadFile = UploadedFile::fake()->create("$fileName.$fileExtension");
+        $content = fake()->text();
+
+        $uploadFile = UploadedFile::fake()->createWithContent(
+            "$fileName.$fileExtension",
+            $content
+        );
 
         $description = 'New Description';
+
+        $this->mock(
+            FileVersionService::class,
+            fn(MockInterface $mock) => $mock
+                ->shouldReceive('createNewVersion')
+                ->withArgs(function (
+                    File $createdFile,
+                    UploadedFile $receivedFile
+                ) use ($fileName, $uploadFile) {
+                    $this->assertEquals($fileName, $createdFile->name);
+                    $this->assertEquals($uploadFile, $receivedFile);
+
+                    $this->assertIsString($createdFile->encryption_key);
+
+                    return true;
+                })
+        );
 
         $response = $this->post('/files', [
             'file' => $uploadFile,
@@ -181,6 +209,39 @@ class FileTest extends TestCase {
         $response->assertRedirect('/files/create');
 
         $response->assertSessionHasErrors('name');
+    }
+
+    public function testCreateFileFailsAndDoesNotStoreFileAndVersionIfVersionCantBeCreated(): void {
+        $fileName = 'NewFile';
+        $fileExtension = 'txt';
+
+        $uploadFile = UploadedFile::fake()->create("$fileName.$fileExtension");
+
+        $this->mock(
+            FileVersionService::class,
+            fn(MockInterface $mock) => $mock
+                ->shouldReceive('createNewVersion')
+                ->andThrow(new Exception('Test exception'))
+        );
+
+        $response = $this->from('/files/create')->post('/files', [
+            'file' => $uploadFile,
+            'name' => $fileName,
+            'encrypt' => true,
+        ]);
+
+        $this->assertDatabaseEmpty('files');
+        $this->assertDatabaseEmpty('file_versions');
+
+        $response->assertRedirect('/files/create');
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
+
+            return true;
+        });
     }
 
     public function testShowFileViewCanBeRendered(): void {

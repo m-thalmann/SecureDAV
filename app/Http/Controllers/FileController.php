@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Directory;
 use App\Models\File;
+use App\Services\FileVersionService;
 use App\View\Helpers\SessionMessage;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File as FileRule;
@@ -33,7 +36,10 @@ class FileController extends Controller {
         ]);
     }
 
-    public function store(Request $request): RedirectResponse {
+    public function store(
+        Request $request,
+        FileVersionService $fileVersionService
+    ): RedirectResponse {
         $directoryUuid = $request->get('directory_uuid', null);
         $directory = $directoryUuid
             ? Directory::where('uuid', $directoryUuid)->firstOrFail()
@@ -81,9 +87,24 @@ class FileController extends Controller {
             'encryption_key' => $encryptionKey,
         ]);
 
-        $file->save();
+        try {
+            DB::transaction(function () use (
+                $fileVersionService,
+                $file,
+                $requestFile
+            ) {
+                $file->save();
 
-        // TODO: use transaction & store file
+                $fileVersionService->createNewVersion($file, $requestFile);
+            });
+        } catch (Exception $e) {
+            return back()->with(
+                'snackbar',
+                SessionMessage::error(
+                    __('File could not be created')
+                )->forDuration()
+            );
+        }
 
         return redirect()
             ->route('files.show', $file->uuid)
