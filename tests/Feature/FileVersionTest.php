@@ -31,6 +31,66 @@ class FileVersionTest extends TestCase {
         $this->storage = Storage::fake('files');
     }
 
+    public function testCreateFileVersionViewCanBeRendered(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get("/files/{$file->uuid}/file-versions/create");
+
+        $response->assertOk();
+
+        $response->assertSee($file->fileName);
+    }
+
+    public function testCreateFileVersionViewShowsFileInputIfFileHasNoVersion(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get("/files/{$file->uuid}/file-versions/create");
+
+        $response->assertOk();
+
+        $response->assertSee('data-file-input-is-shown="true"', escape: false);
+        $response->assertDontSee('input type="checkbox"', escape: false);
+    }
+
+    public function testCreateFileVersionViewDoesNotShowFileInputIfFileHasVersion(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        $response = $this->get("/files/{$file->uuid}/file-versions/create");
+
+        $response->assertOk();
+
+        $response->assertSee('data-file-input-is-shown="false"', escape: false);
+        $response->assertSee('input type="checkbox"', escape: false);
+    }
+
+    public function testCreateFileVersionViewFailsIfFileDoesntExist(): void {
+        $response = $this->get('/files/nonexistent/file-versions/create');
+
+        $response->assertNotFound();
+    }
+
+    public function testCreateFileVersionViewFailsIfUserCantUpdateFile(): void {
+        $otherUser = $this->createUser();
+
+        $file = File::factory()
+            ->for($otherUser)
+            ->create();
+
+        $response = $this->get("/files/{$file->uuid}/file-versions/create");
+
+        $response->assertForbidden();
+    }
+
     public function testNewFileVersionCanBeCreatedWithUploadFile(): void {
         $file = File::factory()
             ->for($this->user)
@@ -45,7 +105,7 @@ class FileVersionTest extends TestCase {
             'file' => $uploadedFile,
         ]);
 
-        $response->assertRedirect("/files/{$file->uuid}");
+        $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
         $response->assertSessionHas('snackbar', function (
             SessionMessage $message
@@ -85,7 +145,7 @@ class FileVersionTest extends TestCase {
             'label' => 'New version',
         ]);
 
-        $response->assertRedirect("/files/{$file->uuid}");
+        $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
         $response->assertSessionHas('snackbar', function (
             SessionMessage $message
@@ -127,7 +187,7 @@ class FileVersionTest extends TestCase {
 
         $response = $this->post("/files/{$file->uuid}/file-versions");
 
-        $response->assertRedirect("/files/{$file->uuid}");
+        $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
         $this->assertDatabaseHas('file_versions', [
             'file_id' => $file->id,
@@ -157,7 +217,7 @@ class FileVersionTest extends TestCase {
         $response->assertForbidden();
     }
 
-    public function testNewFileVersionCantBeCreatedWithoutAUploadFileIfFileDoesntHaveAnyVersions(): void {
+    public function testNewFileVersionCantBeCreatedWithoutAnUploadFileIfFileDoesntHaveAnyVersions(): void {
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -253,7 +313,7 @@ class FileVersionTest extends TestCase {
             'label' => $newLabel,
         ]);
 
-        $response->assertRedirect("/files/{$file->uuid}");
+        $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
         $response->assertSessionHas('snackbar', function (
             SessionMessage $message
@@ -293,7 +353,7 @@ class FileVersionTest extends TestCase {
 
         $response = $this->delete("/file-versions/{$fileVersion->id}");
 
-        $response->assertRedirect("/files/{$file->uuid}");
+        $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
         $response->assertSessionHas('snackbar', function (
             SessionMessage $message

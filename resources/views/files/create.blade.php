@@ -49,7 +49,7 @@
                 </x-form-field>
 
                 <div class="card-actions justify-end">
-                    <a href="{{ url()->previous() }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+                    <a href="{{ route('browse.index', ['directory' => $directory?->uuid]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
                     <input type="submit" value="{{ __('Create') }}" class="btn btn-primary">
                 </div>
             </form>

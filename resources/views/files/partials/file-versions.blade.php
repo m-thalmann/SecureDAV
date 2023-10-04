@@ -1,16 +1,12 @@
-<div class="card bg-base-200 shadow-lg max-sm:rounded-none">
+<div class="card bg-base-200 shadow-lg max-sm:rounded-none" id="file-versions">
     <div class="card-body">
         <h2 class="card-title mb-4">{{ __('Versions') }} ({{ $file->versions->count() }})</h2>
 
         <div class="actions flex gap-4 items-center mb-4">
-            <form method="POST" action="{{ route('files.file-versions.store', ['file' => $file->uuid]) }}">
-                @csrf
-                
-                <button class="btn btn-neutral btn-sm" @disabled($file->versions->isEmpty())>
-                    <i class="fa-solid fa-clock-rotate-left mr-2"></i>
-                    {{ __('Create new version') }}
-                </button>
-            </form>
+            <a href="{{ route('files.file-versions.create', ['file' => $file]) }}" class="btn btn-neutral btn-sm">
+                <i class="fa-solid fa-clock-rotate-left mr-2"></i>
+                {{ __('Create new version') }}
+            </a>
 
             <button class="btn btn-neutral btn-sm">
                 <i class="fa-solid fa-upload mr-2"></i>

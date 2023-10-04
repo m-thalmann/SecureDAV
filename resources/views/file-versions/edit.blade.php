@@ -24,7 +24,7 @@
                 </x-form-field>
 
                 <div class="card-actions justify-end">
-                    <a href="{{ url()->previous() }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+                    <a href="{{ route('files.show', ['file' => $fileVersion->file]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
                     <input type="submit" value="{{ __('Save') }}" class="btn btn-primary">
                 </div>
             </form>

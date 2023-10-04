@@ -166,7 +166,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('files.file-versions', FileVersionController::class)
         ->shallow()
         ->scoped(['file' => 'uuid'])
-        ->except(['index', 'create', 'show']);
+        ->except(['index', 'show']);
 
     // TODO: replace with resource controllers
     Route::view('access', 'access.index')->name('access.index');

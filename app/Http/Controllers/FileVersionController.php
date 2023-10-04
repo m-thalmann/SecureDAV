@@ -18,6 +18,12 @@ class FileVersionController extends Controller {
         $this->authorizeResource(FileVersion::class);
     }
 
+    public function create(File $file): View {
+        $this->authorize('update', $file);
+
+        return view('file-versions.create', ['file' => $file]);
+    }
+
     public function store(
         Request $request,
         FileVersionService $fileVersionService,
@@ -67,6 +73,7 @@ class FileVersionController extends Controller {
 
         return redirect()
             ->route('files.show', $file->uuid)
+            ->withFragment('file-versions')
             ->with(
                 'snackbar',
                 SessionMessage::success(
@@ -91,6 +98,7 @@ class FileVersionController extends Controller {
 
         return redirect()
             ->route('files.show', $fileVersion->file->uuid)
+            ->withFragment('file-versions')
             ->with(
                 'snackbar',
                 SessionMessage::success(
@@ -106,6 +114,7 @@ class FileVersionController extends Controller {
 
         return redirect()
             ->route('files.show', $file->uuid)
+            ->withFragment('file-versions')
             ->with(
                 'snackbar',
                 SessionMessage::success(
