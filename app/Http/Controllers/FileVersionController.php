@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\MimeTypeMismatchException;
 use App\Exceptions\NoVersionFoundException;
 use App\Models\File;
 use App\Models\FileVersion;
@@ -57,6 +58,15 @@ class FileVersionController extends Controller {
                 SessionMessage::warning(
                     __(
                         'This file doesn\'t have a version yet. Upload a file to create a new one.'
+                    )
+                )->forDuration()
+            );
+        } catch (MimeTypeMismatchException $e) {
+            return back()->with(
+                'snackbar',
+                SessionMessage::error(
+                    __(
+                        'The uploaded file has a different mime type than the current file.'
                     )
                 )->forDuration()
             );

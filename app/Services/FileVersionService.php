@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\FileAlreadyExistsException;
 use App\Exceptions\FileWriteException;
+use App\Exceptions\MimeTypeMismatchException;
 use App\Exceptions\NoVersionFoundException;
 use App\Models\File;
 use App\Models\FileVersion;
@@ -78,6 +79,15 @@ class FileVersionService {
         UploadedFile $uploadedFile,
         ?string $label = null
     ) {
+        $mimeType = $uploadedFile->getClientMimeType();
+
+        if ($mimeType !== $file->mime_type) {
+            throw new MimeTypeMismatchException(
+                expectedMimeType: $file->mime_type,
+                actualMimeType: $mimeType
+            );
+        }
+
         $fileSize = $uploadedFile->getSize();
         $etag = md5_file($uploadedFile->path());
 
@@ -172,6 +182,15 @@ class FileVersionService {
         File $file,
         UploadedFile $uploadedFile
     ) {
+        $mimeType = $uploadedFile->getClientMimeType();
+
+        if ($mimeType !== $file->mime_type) {
+            throw new MimeTypeMismatchException(
+                expectedMimeType: $file->mime_type,
+                actualMimeType: $mimeType
+            );
+        }
+
         $fileSize = $uploadedFile->getSize();
         $etag = md5_file($uploadedFile->path());
 

@@ -92,11 +92,11 @@ class FileVersionTest extends TestCase {
     }
 
     public function testNewFileVersionCanBeCreatedWithUploadFile(): void {
+        $uploadedFile = UploadedFile::fake()->create('new-version.txt');
+
         $file = File::factory()
             ->for($this->user)
-            ->create();
-
-        $uploadedFile = UploadedFile::fake()->create('new-version.txt');
+            ->create(['mime_type' => $uploadedFile->getClientMimeType()]);
 
         $label = 'New version';
 
@@ -196,9 +196,7 @@ class FileVersionTest extends TestCase {
     }
 
     public function testNewFileVersionCantBeCreatedIfFileDoesntExist(): void {
-        $response = $this->post('/files/doesnt-exist/file-versions', [
-            'label' => 'New version',
-        ]);
+        $response = $this->post('/files/doesnt-exist/file-versions');
 
         $response->assertNotFound();
     }
@@ -210,11 +208,30 @@ class FileVersionTest extends TestCase {
             ->for($otherUser)
             ->create();
 
-        $response = $this->post("/files/{$file->uuid}/file-versions", [
-            'label' => 'New version',
-        ]);
+        $response = $this->post("/files/{$file->uuid}/file-versions");
 
         $response->assertForbidden();
+    }
+
+    public function testNewFileVersionCantBeCreatedIfMimeTypesMismatch(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->create(['mime_type' => 'text/plain']);
+
+        $response = $this->post("/files/{$file->uuid}/file-versions", [
+            'file' => UploadedFile::fake()->create(
+                'new-version.jpg',
+                'image/jpeg'
+            ),
+        ]);
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
+
+            return true;
+        });
     }
 
     public function testNewFileVersionCantBeCreatedWithoutAnUploadFileIfFileDoesntHaveAnyVersions(): void {

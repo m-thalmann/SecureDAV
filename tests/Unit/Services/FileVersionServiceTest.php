@@ -4,6 +4,7 @@ namespace Tests\Unit\Services;
 
 use App\Exceptions\FileAlreadyExistsException;
 use App\Exceptions\FileWriteException;
+use App\Exceptions\MimeTypeMismatchException;
 use App\Exceptions\NoVersionFoundException;
 use App\Models\File;
 use App\Models\FileVersion;
@@ -131,16 +132,16 @@ class FileVersionServiceTest extends TestCase {
     }
 
     public function testCreateNewVersionCreatesANewVersionFromTheGivenFile(): void {
-        $file = File::factory()
-            ->encrypted()
-            ->create();
-
         $content = fake()->text();
 
         $uploadedFile = UploadedFile::fake()->createWithContent(
             'test.txt',
             $content
         );
+
+        $file = File::factory()
+            ->encrypted()
+            ->create(['mime_type' => $uploadedFile->getClientMimeType()]);
 
         $expectedBytes = $uploadedFile->getSize();
 
@@ -174,6 +175,28 @@ class FileVersionServiceTest extends TestCase {
             ->once();
 
         $this->service->createNewVersion($file, $uploadedFile, $newLabel);
+    }
+
+    public function testCreateNewVersionFailsIfMimeTypesDontMatch(): void {
+        $this->expectException(MimeTypeMismatchException::class);
+
+        $file = File::factory()->create(['mime_type' => 'application/json']);
+
+        try {
+            $this->service->createNewVersion(
+                $file,
+                UploadedFile::fake()->create(
+                    'test.pdf',
+                    mimeType: 'application/pdf'
+                )
+            );
+        } catch (Exception $e) {
+            $this->assertDatabaseMissing('file_versions', [
+                'file_id' => $file->id,
+            ]);
+
+            throw $e;
+        }
     }
 
     public function testCreateVersionCreatesANewVersion(): void {
@@ -291,20 +314,20 @@ class FileVersionServiceTest extends TestCase {
     }
 
     public function testUpdateLatestVersionReplacesTheFileForTheLatestVersion(): void {
-        $file = File::factory()
-            ->encrypted()
-            ->create();
-
-        $version = FileVersion::factory()
-            ->for($file)
-            ->create();
-
         $content = fake()->text();
 
         $uploadedFile = UploadedFile::fake()->createWithContent(
             'test.txt',
             $content
         );
+
+        $file = File::factory()
+            ->encrypted()
+            ->create(['mime_type' => $uploadedFile->getClientMimeType()]);
+
+        $version = FileVersion::factory()
+            ->for($file)
+            ->create();
 
         $expectedBytes = $uploadedFile->getSize();
 
@@ -333,21 +356,17 @@ class FileVersionServiceTest extends TestCase {
     public function testUpdateLatestVersionFailsIfFileHasNoVersions(): void {
         $this->expectException(NoVersionFoundException::class);
 
-        $file = File::factory()->create();
-
         $uploadedFile = UploadedFile::fake()->create('test.txt');
+
+        $file = File::factory()->create([
+            'mime_type' => $uploadedFile->getClientMimeType(),
+        ]);
 
         $this->service->updateLatestVersion($file, $uploadedFile);
     }
 
     public function testUpdateLatestVersionFailsAndDoesntStoreTheUpdateIfStoreFileFails(): void {
         $this->expectException(FileWriteException::class);
-
-        $file = File::factory()->create();
-
-        $version = FileVersion::factory()
-            ->for($file)
-            ->create();
 
         $content = fake()->text();
 
@@ -356,6 +375,14 @@ class FileVersionServiceTest extends TestCase {
             $content
         );
 
+        $file = File::factory()->create([
+            'mime_type' => $uploadedFile->getClientMimeType(),
+        ]);
+
+        $version = FileVersion::factory()
+            ->for($file)
+            ->create();
+
         $this->service
             ->shouldReceive('storeFile')
             ->once()
@@ -363,6 +390,37 @@ class FileVersionServiceTest extends TestCase {
 
         try {
             $this->service->updateLatestVersion($file, $uploadedFile);
+        } catch (Exception $e) {
+            $this->assertDatabaseHas('file_versions', [
+                'id' => $version->id,
+                'file_id' => $file->id,
+                'version' => $version->version,
+                'storage_path' => $version->storage_path,
+                'etag' => $version->etag,
+                'bytes' => $version->bytes,
+            ]);
+
+            throw $e;
+        }
+    }
+
+    public function testUpdateLatestVersionFailsIfMimeTypesDontMatch(): void {
+        $this->expectException(MimeTypeMismatchException::class);
+
+        $file = File::factory()->create(['mime_type' => 'application/json']);
+
+        $version = FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        try {
+            $this->service->updateLatestVersion(
+                $file,
+                UploadedFile::fake()->create(
+                    'test.pdf',
+                    mimeType: 'application/pdf'
+                )
+            );
         } catch (Exception $e) {
             $this->assertDatabaseHas('file_versions', [
                 'id' => $version->id,
