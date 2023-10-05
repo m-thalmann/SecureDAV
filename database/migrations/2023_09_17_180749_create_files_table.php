@@ -18,7 +18,7 @@ return new class extends Migration {
                 ->foreignId('directory_id')
                 ->nullable()
                 ->constrained('directories')
-                ->cascadeOnDelete()
+                ->restrictOnDelete()
                 ->cascadeOnUpdate();
             $table->string('name');
             $table->string('description')->nullable();
@@ -28,8 +28,6 @@ return new class extends Migration {
             $table->integer('next_version');
             $table->timestamps();
             $table->softDeletes();
-
-            $table->unique(['directory_id', 'name']);
         });
     }
 

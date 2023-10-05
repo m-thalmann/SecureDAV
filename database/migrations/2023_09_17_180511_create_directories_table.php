@@ -18,7 +18,7 @@ return new class extends Migration {
                 ->foreignId('parent_directory_id')
                 ->nullable()
                 ->constrained('directories')
-                ->cascadeOnDelete()
+                ->restrictOnDelete()
                 ->cascadeOnUpdate();
             $table->string('name');
             $table->timestamps();

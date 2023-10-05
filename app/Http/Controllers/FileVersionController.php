@@ -66,7 +66,7 @@ class FileVersionController extends Controller {
                 'snackbar',
                 SessionMessage::error(
                     __(
-                        'The uploaded file has a different mime type than the current file.'
+                        'The uploaded file has a different type than the current file.'
                     )
                 )->forDuration()
             );

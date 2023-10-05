@@ -70,6 +70,7 @@ class FileVersionService {
      * @param \Illuminate\Http\UploadedFile $uploadedFile
      * @param string|null $label The optional label for the new version
      *
+     * @throws \App\Exceptions\MimeTypeMismatchException
      * @throws \App\Exceptions\FileAlreadyExistsException
      * @throws \App\Exceptions\FileWriteException
      * @throws \RuntimeException
@@ -175,6 +176,7 @@ class FileVersionService {
      * @param \App\Models\File $file
      * @param \Illuminate\Http\UploadedFile $uploadedFile
      *
+     * @throws \App\Exceptions\MimeTypeMismatchException
      * @throws \App\Exceptions\NoVersionFoundException
      * @throws \App\Exceptions\FileWriteException
      */

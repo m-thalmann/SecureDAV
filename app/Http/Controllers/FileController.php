@@ -58,7 +58,8 @@ class FileController extends Controller {
                 'max:128',
                 Rule::unique('files', 'name')
                     ->where('directory_id', $directory?->id)
-                    ->where('user_id', $request->user()->id),
+                    ->where('user_id', $request->user()->id)
+                    ->withoutTrashed(),
             ],
 
             'encrypt' => ['nullable'],
@@ -135,7 +136,8 @@ class FileController extends Controller {
                 Rule::unique('files', 'name')
                     ->where('directory_id', $file->directory_id)
                     ->where('user_id', $file->user_id)
-                    ->ignore($file),
+                    ->ignore($file)
+                    ->withoutTrashed(),
             ],
 
             'description' => ['nullable', 'string', 'max:512'],
