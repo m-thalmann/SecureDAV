@@ -12,7 +12,6 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class FileVersionTest extends TestCase {
@@ -225,13 +224,7 @@ class FileVersionTest extends TestCase {
             ),
         ]);
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-
-            return true;
-        });
+        $response->assertSessionHasErrors(['file']);
     }
 
     public function testNewFileVersionCantBeCreatedWithoutAnUploadFileIfFileDoesntHaveAnyVersions(): void {
@@ -243,10 +236,10 @@ class FileVersionTest extends TestCase {
             'label' => 'New version',
         ]);
 
-        $response->assertSessionHas('snackbar', function (
+        $response->assertSessionHas('session-message', function (
             SessionMessage $message
         ) {
-            $this->assertEquals(SessionMessage::TYPE_WARNING, $message->type);
+            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
 
             return true;
         });
@@ -256,6 +249,7 @@ class FileVersionTest extends TestCase {
         $this->mock(FileVersionService::class, function ($mock) {
             $mock
                 ->shouldReceive('createNewVersion')
+                ->once()
                 ->andThrow(new Exception('Test exception'));
         });
 
@@ -269,7 +263,7 @@ class FileVersionTest extends TestCase {
             'file' => $uploadedFile,
         ]);
 
-        $response->assertSessionHas('snackbar', function (
+        $response->assertSessionHas('session-message', function (
             SessionMessage $message
         ) {
             $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);

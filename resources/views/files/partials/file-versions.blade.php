@@ -8,10 +8,10 @@
                 {{ __('Create new version') }}
             </a>
 
-            <button class="btn btn-neutral btn-sm">
+            <a href="{{ route('files.file-versions.latest.edit', ['file' => $file]) }}" class="btn btn-neutral btn-sm">
                 <i class="fa-solid fa-upload mr-2"></i>
                 {{ __('Upload file') }}
-            </button>
+            </a>
         </div>
 
         @if ($file->versions->count() > 0)

@@ -92,6 +92,7 @@ class FileTest extends TestCase {
 
                     return true;
                 })
+                ->once()
         );
 
         $response = $this->post('/files', [
@@ -221,6 +222,7 @@ class FileTest extends TestCase {
             FileVersionService::class,
             fn(MockInterface $mock) => $mock
                 ->shouldReceive('createNewVersion')
+                ->once()
                 ->andThrow(new Exception('Test exception'))
         );
 
@@ -235,7 +237,7 @@ class FileTest extends TestCase {
 
         $response->assertRedirect('/files/create');
 
-        $response->assertSessionHas('snackbar', function (
+        $response->assertSessionHas('session-message', function (
             SessionMessage $message
         ) {
             $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);

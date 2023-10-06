@@ -30,6 +30,7 @@ class FileVersionController extends Controller {
         FileVersionService $fileVersionService,
         File $file
     ): RedirectResponse {
+        // TODO: confirm password
         $this->authorize('update', $file);
 
         $data = $request->validate([
@@ -54,31 +55,30 @@ class FileVersionController extends Controller {
             }
         } catch (NoVersionFoundException $e) {
             return back()->with(
-                'snackbar',
-                SessionMessage::warning(
+                'session-message',
+                SessionMessage::error(
                     __(
                         'This file doesn\'t have a version yet. Upload a file to create a new one.'
                     )
-                )->forDuration()
+                )
             );
         } catch (MimeTypeMismatchException $e) {
-            return back()->with(
-                'snackbar',
-                SessionMessage::error(
-                    __(
-                        'The uploaded file has a different type than the current file.'
-                    )
-                )->forDuration()
-            );
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'file' => __('The uploaded file has the wrong type.'),
+                ]);
         } catch (Exception $e) {
-            return back()->with(
-                'snackbar',
-                SessionMessage::error(
-                    __(
-                        'An error occurred while creating a new version of this file.'
+            return back()
+                ->withInput()
+                ->with(
+                    'session-message',
+                    SessionMessage::error(
+                        __(
+                            'An error occurred while creating a new version of this file.'
+                        )
                     )
-                )->forDuration()
-            );
+                );
         }
 
         return redirect()

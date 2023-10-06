@@ -8,6 +8,8 @@
                 {{ __('Create file') }}
             </h2>
 
+            <x-session-message :message="session('session-message')" class="my-3"></x-session-message>
+
             <form action="{{ route('files.store') }}" method="post" enctype="multipart/form-data">
                 @csrf
 

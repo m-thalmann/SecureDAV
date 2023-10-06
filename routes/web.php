@@ -4,6 +4,7 @@ use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\FileVersionController;
+use App\Http\Controllers\LatestFileVersionController;
 use App\Http\Controllers\Settings\LogoutBrowserSessionsController;
 use App\Http\Controllers\Settings\ProfileSettingsController;
 use App\Providers\RouteServiceProvider;
@@ -162,6 +163,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('files', FileController::class)
         ->scoped(['file' => 'uuid'])
         ->except('index');
+
+    Route::controller(LatestFileVersionController::class)
+        ->prefix('files/{file:uuid}/file-versions/latest')
+        ->as('files.file-versions.latest.')
+        ->group(function () {
+            Route::get('edit', 'edit')->name('edit');
+            Route::put('/', 'update')->name('update');
+        });
 
     Route::resource('files.file-versions', FileVersionController::class)
         ->shallow()

@@ -99,12 +99,12 @@ class FileController extends Controller {
                 $fileVersionService->createNewVersion($file, $requestFile);
             });
         } catch (Exception $e) {
-            return back()->with(
-                'snackbar',
-                SessionMessage::error(
-                    __('File could not be created')
-                )->forDuration()
-            );
+            return back()
+                ->withInput()
+                ->with(
+                    'session-message',
+                    SessionMessage::error(__('File could not be created'))
+                );
         }
 
         return redirect()
