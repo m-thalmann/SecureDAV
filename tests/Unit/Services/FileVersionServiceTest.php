@@ -17,9 +17,11 @@ use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Mockery;
 use Mockery\MockInterface;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Tests\TestCase;
 
 class FileVersionServiceTest extends TestCase {
@@ -620,6 +622,104 @@ class FileVersionServiceTest extends TestCase {
 
             throw $e;
         }
+    }
+
+    public function testCreateDownloadResponseDownloadsTheUnencryptedFileVersion(): void {
+        $content = fake()->text();
+
+        $file = File::factory()->create();
+
+        $version = FileVersion::factory()
+            ->for($file)
+            ->create(['bytes' => strlen($content)]);
+
+        $this->storageFake->put($version->storage_path, $content);
+
+        $response = $this->service->createDownloadResponse($file, $version);
+
+        $this->assertEquals(
+            $content,
+            $this->getStreamedResponseContent($response)
+        );
+
+        $this->assertEquals(
+            $version->bytes,
+            $response->headers->get('Content-Length')
+        );
+
+        $this->assertEquals(
+            "\"$version->etag\"",
+            $response->headers->get('ETag')
+        );
+    }
+
+    public function testCreateDownloadResponseDownloadsTheEncryptedFileVersion(): void {
+        $content = fake()->text();
+
+        $file = File::factory()
+            ->encrypted()
+            ->create();
+
+        $version = FileVersion::factory()
+            ->for($file)
+            ->create(['bytes' => strlen($content)]);
+
+        $this->storageFake->put(
+            $version->storage_path,
+            '==encrypted-content=='
+        );
+
+        $this->fileEncryptionServiceMock
+            ->shouldReceive('decrypt')
+            ->withArgs(function (
+                string $key,
+                mixed $inputResource,
+                mixed $outputResource
+            ) use ($file, $content) {
+                $this->assertEquals($file->encryption_key, $key);
+
+                fwrite($outputResource, $content);
+
+                return true;
+            })
+            ->once();
+
+        $response = $this->service->createDownloadResponse($file, $version);
+
+        $this->assertEquals(
+            $content,
+            $this->getStreamedResponseContent($response)
+        );
+
+        $this->assertEquals(
+            $version->bytes,
+            $response->headers->get('Content-Length')
+        );
+
+        $this->assertEquals(
+            "\"$version->etag\"",
+            $response->headers->get('ETag')
+        );
+    }
+
+    public function testCreateDownloadResponseFailsIfTheFileVersionDoesNotBelongToTheFile(): void {
+        $this->expectException(InvalidArgumentException::class);
+
+        $file = File::factory()->create();
+
+        $version = FileVersion::factory()->create();
+
+        $this->service->createDownloadResponse($file, $version);
+    }
+
+    protected function getStreamedResponseContent(
+        StreamedResponse $response
+    ): string|false {
+        ob_start();
+
+        $response->send();
+
+        return ob_get_clean();
     }
 }
 

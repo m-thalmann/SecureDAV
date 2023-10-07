@@ -14,7 +14,9 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FileVersionService {
     protected const TMP_SUFFIX = '.tmp';
@@ -282,6 +284,61 @@ class FileVersionService {
             if (!$this->storage->putFileAs('', $file, $path)) {
                 throw new FileWriteException();
             }
+        }
+    }
+
+    /**
+     * Creates a streamed response to download the given file.
+     *
+     * @param \App\Models\File $file
+     * @param \App\Models\FileVersion $version
+     *
+     * @throws \InvalidArgumentException If the version does not belong to the file
+     *
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    public function createDownloadResponse(
+        File $file,
+        FileVersion $version
+    ): StreamedResponse {
+        if ($version->file_id !== $file->id) {
+            throw new InvalidArgumentException(
+                'Version does not belong to file'
+            );
+        }
+
+        if ($file->isEncrypted) {
+            return response()
+                ->streamDownload(
+                    function () use ($file, $version) {
+                        $outputStream = fopen('php://output', 'w');
+
+                        $readStream = $this->storage->readStream(
+                            $version->storage_path
+                        );
+
+                        $this->fileEncryptionService->decrypt(
+                            $file->encryption_key,
+                            $readStream,
+                            $outputStream
+                        );
+
+                        fclose($readStream);
+                        fclose($outputStream);
+                    },
+                    $file->fileName,
+                    [
+                        'Content-Type' => $file->mime_type,
+                        'Content-Length' => $version->bytes,
+                    ]
+                )
+                ->setEtag($version->etag);
+        } else {
+            return $this->storage
+                ->download($version->storage_path, $file->fileName, [
+                    'Content-Type' => $file->mime_type,
+                ])
+                ->setEtag($version->etag);
         }
     }
 }

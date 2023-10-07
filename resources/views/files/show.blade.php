@@ -60,7 +60,7 @@
                     <tr>
                         <td class="pr-4 font-bold w-px whitespace-nowrap">{{ __('Encrypted') }}:</td>
                         <td>
-                            <input type="checkbox" class="checkbox checkbox-sm cursor-not-allowed align-middle" @checked($file->encrypted) disabled />
+                            <input type="checkbox" class="checkbox checkbox-sm cursor-not-allowed align-middle" @checked($file->isEncrypted) disabled />
                         </td>
                     </tr>
                     <tr>

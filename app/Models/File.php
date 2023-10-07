@@ -53,7 +53,7 @@ class File extends Model {
         return $this->hasOne(FileVersion::class)->latest();
     }
 
-    protected function encrypted(): Attribute {
+    protected function isEncrypted(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
                 return $attributes['encryption_key'] !== null;
