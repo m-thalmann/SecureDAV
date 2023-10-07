@@ -119,7 +119,9 @@
                             <span class="tooltip" data-tip="{{ $file->latestVersion?->updated_at ?? __('No versions yet') }}">{{ $file->latestVersion?->updated_at?->diffForHumans() ?? '-' }}</span>
                         </td>
                         <td>
-                            <a href="#" class="btn btn-sm btn-square"><i class="fas fa-download"></i></a>
+                            <a href="{{ route('files.file-versions.latest.show', ['file' => $file]) }}" class="btn btn-sm btn-square">
+                                <i class="fas fa-download"></i>
+                            </a>
                         </td>
                     </tr>
                 @endforeach

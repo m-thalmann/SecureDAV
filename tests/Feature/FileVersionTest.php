@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\File;
 use App\Models\FileVersion;
 use App\Models\User;
+use App\Services\FileEncryptionService;
 use App\Services\FileVersionService;
 use App\View\Helpers\SessionMessage;
 use Exception;
@@ -12,6 +13,8 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Mockery;
+use Mockery\MockInterface;
 use Tests\TestCase;
 
 class FileVersionTest extends TestCase {
@@ -246,7 +249,7 @@ class FileVersionTest extends TestCase {
     }
 
     public function testCreateFileVersionFailsIfCreateCallFails(): void {
-        $this->mock(FileVersionService::class, function ($mock) {
+        $this->mock(FileVersionService::class, function (MockInterface $mock) {
             $mock
                 ->shouldReceive('createNewVersion')
                 ->once()
@@ -270,6 +273,68 @@ class FileVersionTest extends TestCase {
 
             return true;
         });
+    }
+
+    public function testShowFileVersionDownloadsFile(): void {
+        /**
+         * @var FileVersionService|MockInterface
+         */
+        $fileVersionServiceSpy = $this->instance(
+            FileVersionService::class,
+            Mockery::spy(FileVersionService::class, [
+                Mockery::mock(FileEncryptionService::class),
+                $this->storage,
+            ])
+        )->makePartial();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $versions = FileVersion::factory(3)
+            ->for($file)
+            ->create();
+
+        $selectedVersion = $versions->get(1);
+
+        $response = $this->get("/file-versions/{$selectedVersion->id}");
+
+        $response->assertOk();
+
+        $response->assertDownload($file->fileName);
+
+        $this->assertEquals(
+            $this->storage->get($selectedVersion->storage_path),
+            $response->streamedContent()
+        );
+
+        $fileVersionServiceSpy
+            ->shouldHaveReceived('createDownloadResponse')
+            ->withArgs(function (File $file, FileVersion $fileVersion) use (
+                $selectedVersion
+            ) {
+                $this->assertEquals($selectedVersion->id, $fileVersion->id);
+
+                return true;
+            });
+    }
+
+    public function testShowFileVersionFailsIfFileVersionDoesNotExist(): void {
+        $response = $this->get('/file-versions/does-not-exist');
+
+        $response->assertNotFound();
+    }
+
+    public function testShowFileVersionFailsIfFileVersionDoesNotBelongToUser(): void {
+        $file = File::factory()->create();
+
+        $fileVersion = FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        $response = $this->get("/file-versions/{$fileVersion->id}");
+
+        $response->assertForbidden();
     }
 
     public function testEditFileVersionViewCanBeRendered(): void {

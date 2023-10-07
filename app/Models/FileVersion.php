@@ -15,7 +15,7 @@ class FileVersion extends Model {
 
     protected $fillable = ['file_id', 'label'];
 
-    public function scopeLatest(Builder $query): Builder {
+    public function scopeLatestVersion(Builder $query): Builder {
         return $query->orderBy('version', 'desc')->limit(1);
     }
 

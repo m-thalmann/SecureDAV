@@ -40,7 +40,9 @@
                                     <span class="tooltip" data-tip="{{ $version->updated_at }}">{{ $version->updated_at->diffForHumans() }}</span>
                                 </td>
                                 <td class="flex gap-2 items-center">
-                                    <a href="#" class="btn btn-sm btn-square"><i class="fas fa-download"></i></a>
+                                    <a href="{{ route('file-versions.show', ['file_version' => $version->id]) }}" class="btn btn-sm btn-square">
+                                        <i class="fas fa-download"></i>
+                                    </a>
 
                                     <div @class([
                                         'dropdown dropdown-end',

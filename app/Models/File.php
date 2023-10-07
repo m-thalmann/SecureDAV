@@ -50,7 +50,7 @@ class File extends Model {
     }
 
     public function latestVersion(): HasOne {
-        return $this->hasOne(FileVersion::class)->latest();
+        return $this->hasOne(FileVersion::class)->latestVersion();
     }
 
     protected function isEncrypted(): Attribute {

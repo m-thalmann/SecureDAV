@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\MimeTypeMismatchException;
-use App\Exceptions\NoVersionFoundException;
 use App\Models\File;
 use App\Services\FileVersionService;
 use App\View\Helpers\SessionMessage;
@@ -15,6 +14,19 @@ use Illuminate\Validation\Rules\File as FileRule;
 class LatestFileVersionController extends Controller {
     public function __construct() {
         $this->authorizeResource(File::class);
+    }
+
+    public function show(File $file, FileVersionService $fileVersionService) {
+        if ($file->latestVersion === null) {
+            return $this->redirectNoLatestVersion($file);
+        }
+
+        $this->authorize('view', $file->latestVersion);
+
+        return $fileVersionService->createDownloadResponse(
+            $file,
+            $file->latestVersion
+        );
     }
 
     public function edit(File $file) {

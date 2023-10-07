@@ -10,6 +10,10 @@ class FileVersionPolicy {
         return true;
     }
 
+    public function view(User $user, FileVersion $fileVersion): bool {
+        return $fileVersion->file->user_id === $user->id;
+    }
+
     public function update(User $user, FileVersion $fileVersion): bool {
         return $fileVersion->file->user_id === $user->id;
     }

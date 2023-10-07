@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\File;
 use App\Models\FileVersion;
 use App\Models\User;
+use App\Services\FileEncryptionService;
 use App\Services\FileVersionService;
 use App\View\Helpers\SessionMessage;
 use Exception;
@@ -12,6 +13,8 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Mockery;
+use Mockery\MockInterface;
 use Tests\TestCase;
 
 class LatestFileVersionTest extends TestCase {
@@ -28,6 +31,88 @@ class LatestFileVersionTest extends TestCase {
         $this->actingAs($this->user);
 
         $this->storage = Storage::fake('files');
+    }
+
+    public function testShowLatestFileVersionDownloadsFile(): void {
+        /**
+         * @var FileVersionService|MockInterface
+         */
+        $fileVersionServiceSpy = $this->instance(
+            FileVersionService::class,
+            Mockery::spy(FileVersionService::class, [
+                Mockery::mock(FileEncryptionService::class),
+                $this->storage,
+            ])
+        )->makePartial();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        FileVersion::factory(2)
+            ->for($file)
+            ->create();
+
+        $latestVersion = FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        $response = $this->get("/files/{$file->uuid}/file-versions/latest");
+
+        $response->assertOk();
+
+        $response->assertDownload($file->fileName);
+
+        $this->assertEquals(
+            $this->storage->get($latestVersion->storage_path),
+            $response->streamedContent()
+        );
+
+        $fileVersionServiceSpy
+            ->shouldHaveReceived('createDownloadResponse')
+            ->withArgs(function (File $file, FileVersion $fileVersion) use (
+                $latestVersion
+            ) {
+                $this->assertEquals($latestVersion->id, $fileVersion->id);
+
+                return true;
+            });
+    }
+
+    public function testShowLatestFileVersionFailsIfFileHasNoVersions(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get("/files/{$file->uuid}/file-versions/latest");
+
+        $response->assertRedirect("/files/{$file->uuid}#file-versions");
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
+
+            return true;
+        });
+    }
+
+    public function testShowLatestFileVersionFailsIfFileDoesNotBelongToUser(): void {
+        $file = File::factory()->create();
+
+        $fileVersion = FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        $response = $this->get("/files/{$file->uuid}/file-versions/latest");
+
+        $response->assertForbidden();
+    }
+
+    public function testShowLatestFileVersionViewFailsIfFileDoesNotExist(): void {
+        $response = $this->get('/files/does-not-exist/file-versions/latest');
+
+        $response->assertNotFound();
     }
 
     public function testEditLatestFileVersionViewCanBeRendered(): void {
@@ -176,7 +261,7 @@ class LatestFileVersionTest extends TestCase {
     }
 
     public function testLatestFileVersionCantBeUpdatedIfCreateCallFails(): void {
-        $this->mock(FileVersionService::class, function ($mock) {
+        $this->mock(FileVersionService::class, function (MockInterface $mock) {
             $mock
                 ->shouldReceive('updateLatestVersion')
                 ->once()

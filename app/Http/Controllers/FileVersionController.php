@@ -92,6 +92,16 @@ class FileVersionController extends Controller {
             );
     }
 
+    public function show(
+        FileVersion $fileVersion,
+        FileVersionService $fileVersionService
+    ) {
+        return $fileVersionService->createDownloadResponse(
+            $fileVersion->file,
+            $fileVersion
+        );
+    }
+
     public function edit(FileVersion $fileVersion): View {
         return view('file-versions.edit', ['fileVersion' => $fileVersion]);
     }

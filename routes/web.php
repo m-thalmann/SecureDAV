@@ -162,12 +162,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('files', FileController::class)
         ->scoped(['file' => 'uuid'])
-        ->except('index');
+        ->except(['index']);
 
     Route::controller(LatestFileVersionController::class)
         ->prefix('files/{file:uuid}/file-versions/latest')
         ->as('files.file-versions.latest.')
         ->group(function () {
+            Route::get('/', 'show')->name('show');
+
             Route::get('edit', 'edit')->name('edit');
             Route::put('/', 'update')->name('update');
         });
@@ -175,7 +177,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('files.file-versions', FileVersionController::class)
         ->shallow()
         ->scoped(['file' => 'uuid'])
-        ->except(['index', 'show']);
+        ->except(['index']);
 
     // TODO: replace with resource controllers
     Route::view('access', 'access.index')->name('access.index');
