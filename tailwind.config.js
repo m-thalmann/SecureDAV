@@ -9,7 +9,17 @@ export default {
     './resources/views/**/*.blade.php',
   ],
 
-  safelist: ['alert-success', 'alert-error', 'alert-warning', 'alert-info'],
+  safelist: [
+    // SessionMessage
+    'alert-success',
+    'alert-error',
+    'alert-warning',
+    'alert-info',
+    // FileIconForExtension
+    'text-blue-600',
+    'text-green-600',
+    'text-red-600',
+  ],
 
   theme: {
     extend: {

@@ -28,7 +28,7 @@
         @if ($file)
             <li>
                 <a href="{{ route('files.show', ['file' => $file->uuid]) }}" class="flex items-center gap-2">
-                    <i class="fas fa-file"></i> {{ $file->fileName }}
+                    <i class="{{ $file->fileIcon }}"></i> {{ $file->fileName }}
                 </a>
             </li>
         @endif

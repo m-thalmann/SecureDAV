@@ -81,7 +81,7 @@
             </div>
 
             <div class="card-actions">
-                <a href="{{ route('files.file-versions.latest.show', ['file' => $file->uuid]) }}" class="btn btn-neutral btn-sm">
+                <a href="{{ route('files.file-versions.latest.show', ['file' => $file->uuid]) }}" class="btn btn-neutral btn-sm" @disabled($file->latestVersion === null)>
                     <i class="fas fa-download"></i>
                     {{ __('Download latest version') }}
                 </a>

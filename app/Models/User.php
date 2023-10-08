@@ -39,19 +39,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     protected function initials(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
-                $names = explode(' ', $attributes['name']);
-                $initials = '';
-
-                if (count($names) >= 2) {
-                    $first = Arr::first($names)[0];
-                    $last = Arr::last($names)[0];
-
-                    $initials = $first . $last;
-                } else {
-                    $initials = Str::substr($attributes['name'], 0, 2);
-                }
-
-                return Str::upper($initials);
+                return generateInitials($attributes['name']);
             }
         );
     }

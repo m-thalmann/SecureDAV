@@ -8,7 +8,7 @@
                 {{ __('Create new version') }}
             </a>
 
-            <a href="{{ route('files.file-versions.latest.edit', ['file' => $file]) }}" class="btn btn-neutral btn-sm">
+            <a href="{{ route('files.file-versions.latest.edit', ['file' => $file]) }}" class="btn btn-neutral btn-sm" @disabled($file->latestVersion === null)>
                 <i class="fa-solid fa-upload mr-2"></i>
                 {{ __('Upload file') }}
             </a>

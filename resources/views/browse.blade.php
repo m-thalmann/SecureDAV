@@ -91,16 +91,15 @@
 
                 @foreach ($files as $file)
                     <tr class="hover">
-                        <!-- TODO: use better file icons for file extension -->
                         <td>
                             <a href="{{ route('files.show', ['file' => $file->uuid]) }}" class="flex items-center group">
-                                <i class="fas fa-file w-6"></i>
+                                <i class="{{ $file->fileIcon }} text-xl w-[1.25em] mr-1"></i>
                                 <span class="group-hover:underline">
                                     {{ $file->fileName }}
                                 </span>
                             </a>
                         </td>
-                        <td class="max-sm:hidden">
+                        <td class="max-sm:hidden text-right">
                             @if ($file->latestVersion)
                                 {{ formatBytes($file->latestVersion->bytes) }}
                             @else
@@ -119,9 +118,11 @@
                             <span class="tooltip" data-tip="{{ $file->latestVersion?->updated_at ?? __('No versions yet') }}">{{ $file->latestVersion?->updated_at?->diffForHumans() ?? '-' }}</span>
                         </td>
                         <td>
-                            <a href="{{ route('files.file-versions.latest.show', ['file' => $file]) }}" class="btn btn-sm btn-square">
-                                <i class="fas fa-download"></i>
-                            </a>
+                            @if ($file->latestVersion !== null)
+                                <a href="{{ route('files.file-versions.latest.show', ['file' => $file]) }}" class="btn btn-sm btn-square">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            @endif
                         </td>
                     </tr>
                 @endforeach

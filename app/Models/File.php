@@ -74,5 +74,13 @@ class File extends Model {
             }
         );
     }
+
+    protected function fileIcon(): Attribute {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                return getFileIconForExtension($attributes['extension']);
+            }
+        );
+    }
 }
 
