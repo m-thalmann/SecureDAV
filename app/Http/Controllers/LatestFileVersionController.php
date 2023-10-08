@@ -10,13 +10,18 @@ use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\File as FileRule;
+use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LatestFileVersionController extends Controller {
     public function __construct() {
         $this->authorizeResource(File::class);
     }
 
-    public function show(File $file, FileVersionService $fileVersionService) {
+    public function show(
+        File $file,
+        FileVersionService $fileVersionService
+    ): StreamedResponse|RedirectResponse {
         if ($file->latestVersion === null) {
             return $this->redirectNoLatestVersion($file);
         }
@@ -29,7 +34,7 @@ class LatestFileVersionController extends Controller {
         );
     }
 
-    public function edit(File $file) {
+    public function edit(File $file): View|RedirectResponse {
         if ($file->latestVersion === null) {
             return $this->redirectNoLatestVersion($file);
         }

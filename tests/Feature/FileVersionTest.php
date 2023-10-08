@@ -38,7 +38,7 @@ class FileVersionTest extends TestCase {
             ->for($this->user)
             ->create();
 
-        $response = $this->get("/files/{$file->uuid}/file-versions/create");
+        $response = $this->get("/files/{$file->uuid}/versions/create");
 
         $response->assertOk();
 
@@ -50,7 +50,7 @@ class FileVersionTest extends TestCase {
             ->for($this->user)
             ->create();
 
-        $response = $this->get("/files/{$file->uuid}/file-versions/create");
+        $response = $this->get("/files/{$file->uuid}/versions/create");
 
         $response->assertOk();
 
@@ -67,7 +67,7 @@ class FileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->get("/files/{$file->uuid}/file-versions/create");
+        $response = $this->get("/files/{$file->uuid}/versions/create");
 
         $response->assertOk();
 
@@ -76,7 +76,7 @@ class FileVersionTest extends TestCase {
     }
 
     public function testCreateFileVersionViewFailsIfFileDoesntExist(): void {
-        $response = $this->get('/files/nonexistent/file-versions/create');
+        $response = $this->get('/files/nonexistent/versions/create');
 
         $response->assertNotFound();
     }
@@ -88,7 +88,7 @@ class FileVersionTest extends TestCase {
             ->for($otherUser)
             ->create();
 
-        $response = $this->get("/files/{$file->uuid}/file-versions/create");
+        $response = $this->get("/files/{$file->uuid}/versions/create");
 
         $response->assertForbidden();
     }
@@ -102,7 +102,7 @@ class FileVersionTest extends TestCase {
 
         $label = 'New version';
 
-        $response = $this->post("/files/{$file->uuid}/file-versions", [
+        $response = $this->post("/files/{$file->uuid}/versions", [
             'label' => $label,
             'file' => $uploadedFile,
         ]);
@@ -143,7 +143,7 @@ class FileVersionTest extends TestCase {
             ->create();
         $fileVersionContent = $this->storage->get($fileVersion->storage_path);
 
-        $response = $this->post("/files/{$file->uuid}/file-versions", [
+        $response = $this->post("/files/{$file->uuid}/versions", [
             'label' => 'New version',
         ]);
 
@@ -187,7 +187,7 @@ class FileVersionTest extends TestCase {
             ->trashed()
             ->create(['version' => $fileVersion->version + 1]);
 
-        $response = $this->post("/files/{$file->uuid}/file-versions");
+        $response = $this->post("/files/{$file->uuid}/versions");
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
@@ -198,7 +198,7 @@ class FileVersionTest extends TestCase {
     }
 
     public function testNewFileVersionCantBeCreatedIfFileDoesntExist(): void {
-        $response = $this->post('/files/doesnt-exist/file-versions');
+        $response = $this->post('/files/doesnt-exist/versions');
 
         $response->assertNotFound();
     }
@@ -210,7 +210,7 @@ class FileVersionTest extends TestCase {
             ->for($otherUser)
             ->create();
 
-        $response = $this->post("/files/{$file->uuid}/file-versions");
+        $response = $this->post("/files/{$file->uuid}/versions");
 
         $response->assertForbidden();
     }
@@ -220,7 +220,7 @@ class FileVersionTest extends TestCase {
             ->for($this->user)
             ->create(['mime_type' => 'text/plain']);
 
-        $response = $this->post("/files/{$file->uuid}/file-versions", [
+        $response = $this->post("/files/{$file->uuid}/versions", [
             'file' => UploadedFile::fake()->create(
                 'new-version.jpg',
                 'image/jpeg'
@@ -235,7 +235,7 @@ class FileVersionTest extends TestCase {
             ->for($this->user)
             ->create();
 
-        $response = $this->post("/files/{$file->uuid}/file-versions", [
+        $response = $this->post("/files/{$file->uuid}/versions", [
             'label' => 'New version',
         ]);
 
@@ -262,7 +262,7 @@ class FileVersionTest extends TestCase {
 
         $uploadedFile = UploadedFile::fake()->create('new-version.txt');
 
-        $response = $this->post("/files/{$file->uuid}/file-versions", [
+        $response = $this->post("/files/{$file->uuid}/versions", [
             'file' => $uploadedFile,
         ]);
 
@@ -297,7 +297,9 @@ class FileVersionTest extends TestCase {
 
         $selectedVersion = $versions->get(1);
 
-        $response = $this->get("/file-versions/{$selectedVersion->id}");
+        $response = $this->get(
+            "/files/{$file->uuid}/versions/{$selectedVersion->version}"
+        );
 
         $response->assertOk();
 
@@ -320,7 +322,11 @@ class FileVersionTest extends TestCase {
     }
 
     public function testShowFileVersionFailsIfFileVersionDoesNotExist(): void {
-        $response = $this->get('/file-versions/does-not-exist');
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get("/files/{$file->uuid}/versions/1");
 
         $response->assertNotFound();
     }
@@ -332,7 +338,9 @@ class FileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->get("/file-versions/{$fileVersion->id}");
+        $response = $this->get(
+            "/files/{$file->uuid}/versions/{$fileVersion->version}"
+        );
 
         $response->assertForbidden();
     }
@@ -348,7 +356,9 @@ class FileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->get("/file-versions/{$fileVersion->id}/edit");
+        $response = $this->get(
+            "/files/{$file->uuid}/versions/{$fileVersion->version}/edit"
+        );
 
         $response->assertOk();
 
@@ -363,13 +373,19 @@ class FileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->get("/file-versions/{$fileVersion->id}/edit");
+        $response = $this->get(
+            "/files/{$file->uuid}/versions/{$fileVersion->version}/edit"
+        );
 
         $response->assertForbidden();
     }
 
     public function testEditFileVersionViewFailsIfFileDoesNotExist(): void {
-        $response = $this->get('/file-versions/does-not-exist/edit');
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get("/files/{$file->uuid}/versions/1/edit");
 
         $response->assertNotFound();
     }
@@ -385,9 +401,12 @@ class FileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->put("/file-versions/{$fileVersion->id}", [
-            'label' => $newLabel,
-        ]);
+        $response = $this->put(
+            "/files/{$file->uuid}/versions/{$fileVersion->version}",
+            [
+                'label' => $newLabel,
+            ]
+        );
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
@@ -411,9 +430,12 @@ class FileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->put("/file-versions/{$fileVersion->id}", [
-            'label' => 'New Label',
-        ]);
+        $response = $this->put(
+            "/files/{$file->uuid}/versions/{$fileVersion->version}",
+            [
+                'label' => 'New Label',
+            ]
+        );
 
         $response->assertForbidden();
     }
@@ -427,7 +449,9 @@ class FileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->delete("/file-versions/{$fileVersion->id}");
+        $response = $this->delete(
+            "/files/{$file->uuid}/versions/{$fileVersion->version}"
+        );
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
@@ -455,13 +479,19 @@ class FileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->delete("/file-versions/{$fileVersion->id}");
+        $response = $this->delete(
+            "/files/{$file->uuid}/versions/{$fileVersion->version}"
+        );
 
         $response->assertForbidden();
     }
 
     public function testFileVersionCannotBeMovedToTrashIfItDoesNotExist(): void {
-        $response = $this->delete('/file-versions/doesnt-exist');
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->delete("/files/{$file->uuid}/versions/1");
 
         $response->assertNotFound();
     }

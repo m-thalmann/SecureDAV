@@ -16,7 +16,7 @@
 
             <x-session-message :message="session('session-message')" class="my-3"></x-session-message>
 
-            <form action="{{ route('files.file-versions.store', ['file' => $file]) }}" method="post" enctype="multipart/form-data">
+            <form action="{{ route('files.versions.store', ['file' => $file]) }}" method="post" enctype="multipart/form-data">
                 @csrf
 
                 <x-form-field name="label" class="md:w-2/3">

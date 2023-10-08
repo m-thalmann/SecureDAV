@@ -36,6 +36,7 @@ use Laravel\Fortify\Http\Controllers\VerifyEmailController;
 */
 
 Route::permanentRedirect('/', RouteServiceProvider::HOME);
+Route::permanentRedirect('/files', RouteServiceProvider::HOME);
 
 Route::controller(AuthenticatedSessionController::class)->group(function () {
     Route::get('login', 'create')
@@ -165,8 +166,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->except(['index']);
 
     Route::controller(LatestFileVersionController::class)
-        ->prefix('files/{file:uuid}/file-versions/latest')
-        ->as('files.file-versions.latest.')
+        ->prefix('files/{file:uuid}/versions/latest')
+        ->as('files.versions.latest.')
         ->group(function () {
             Route::get('/', 'show')->name('show');
 
@@ -174,9 +175,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('/', 'update')->name('update');
         });
 
-    Route::resource('files.file-versions', FileVersionController::class)
-        ->shallow()
-        ->scoped(['file' => 'uuid'])
+    Route::resource('files.versions', FileVersionController::class)
+        ->scoped(['file' => 'uuid', 'version' => 'version'])
         ->except(['index']);
 
     // TODO: replace with resource controllers

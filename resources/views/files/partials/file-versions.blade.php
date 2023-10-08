@@ -3,12 +3,12 @@
         <h2 class="card-title mb-4">{{ __('Versions') }} ({{ $file->versions->count() }})</h2>
 
         <div class="actions flex gap-4 items-center mb-4">
-            <a href="{{ route('files.file-versions.create', ['file' => $file]) }}" class="btn btn-neutral btn-sm">
+            <a href="{{ route('files.versions.create', ['file' => $file]) }}" class="btn btn-neutral btn-sm">
                 <i class="fa-solid fa-clock-rotate-left mr-2"></i>
                 {{ __('Create new version') }}
             </a>
 
-            <a href="{{ route('files.file-versions.latest.edit', ['file' => $file]) }}" class="btn btn-neutral btn-sm" @disabled($file->latestVersion === null)>
+            <a href="{{ route('files.versions.latest.edit', ['file' => $file]) }}" class="btn btn-neutral btn-sm" @disabled($file->latestVersion === null)>
                 <i class="fa-solid fa-upload mr-2"></i>
                 {{ __('Upload file') }}
             </a>
@@ -40,7 +40,7 @@
                                     <span class="tooltip" data-tip="{{ $version->updated_at }}">{{ $version->updated_at->diffForHumans() }}</span>
                                 </td>
                                 <td class="flex gap-2 items-center">
-                                    <a href="{{ route('file-versions.show', ['file_version' => $version->id]) }}" class="btn btn-sm btn-square">
+                                    <a href="{{ route('files.versions.show', ['file' => $file->uuid, 'version' => $version->version]) }}" class="btn btn-sm btn-square">
                                         <i class="fas fa-download"></i>
                                     </a>
 
@@ -62,13 +62,13 @@
                                             ])
                                         >
                                             <li>
-                                                <a href="{{ route('file-versions.edit', ['file_version' => $version->id]) }}">
+                                                <a href="{{ route('files.versions.edit', ['file' => $file->uuid, 'version' => $version->version]) }}">
                                                     <i class="fas fa-edit mr-2"></i>
                                                     {{ __('Edit label') }}
                                                 </a>
                                             </li>
 
-                                            <form method="POST" action="{{ route('file-versions.destroy', ['file_version' => $version->id]) }}">
+                                            <form method="POST" action="{{ route('files.versions.destroy', ['file' => $file->uuid, 'version' => $version->version]) }}">
                                                 @method('DELETE')
                                                 @csrf
                                                 

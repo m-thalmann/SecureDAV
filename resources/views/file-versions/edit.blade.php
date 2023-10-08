@@ -13,7 +13,7 @@
                 {{ __('Edit version') }}
             </h2>
 
-            <form action="{{ route('file-versions.update', ['file_version' => $fileVersion->id]) }}" method="post">
+            <form action="{{ route('files.versions.update', ['file' => $fileVersion->file->uuid, 'version' => $fileVersion->version]) }}" method="post">
                 @method('PUT')
                 @csrf
 

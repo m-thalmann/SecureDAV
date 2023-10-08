@@ -57,7 +57,7 @@ class LatestFileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->get("/files/{$file->uuid}/file-versions/latest");
+        $response = $this->get("/files/{$file->uuid}/versions/latest");
 
         $response->assertOk();
 
@@ -84,7 +84,7 @@ class LatestFileVersionTest extends TestCase {
             ->for($this->user)
             ->create();
 
-        $response = $this->get("/files/{$file->uuid}/file-versions/latest");
+        $response = $this->get("/files/{$file->uuid}/versions/latest");
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
@@ -104,13 +104,13 @@ class LatestFileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->get("/files/{$file->uuid}/file-versions/latest");
+        $response = $this->get("/files/{$file->uuid}/versions/latest");
 
         $response->assertForbidden();
     }
 
     public function testShowLatestFileVersionViewFailsIfFileDoesNotExist(): void {
-        $response = $this->get('/files/does-not-exist/file-versions/latest');
+        $response = $this->get('/files/does-not-exist/versions/latest');
 
         $response->assertNotFound();
     }
@@ -124,9 +124,7 @@ class LatestFileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->get(
-            "/files/{$file->uuid}/file-versions/latest/edit"
-        );
+        $response = $this->get("/files/{$file->uuid}/versions/latest/edit");
 
         $response->assertOk();
 
@@ -138,9 +136,7 @@ class LatestFileVersionTest extends TestCase {
             ->for($this->user)
             ->create();
 
-        $response = $this->get(
-            "/files/{$file->uuid}/file-versions/latest/edit"
-        );
+        $response = $this->get("/files/{$file->uuid}/versions/latest/edit");
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
@@ -160,17 +156,13 @@ class LatestFileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->get(
-            "/files/{$file->uuid}/file-versions/latest/edit"
-        );
+        $response = $this->get("/files/{$file->uuid}/versions/latest/edit");
 
         $response->assertForbidden();
     }
 
     public function testEditLatestFileVersionViewFailsIfFileDoesNotExist(): void {
-        $response = $this->get(
-            '/files/does-not-exist/file-versions/latest/edit'
-        );
+        $response = $this->get('/files/does-not-exist/versions/latest/edit');
 
         $response->assertNotFound();
     }
@@ -191,7 +183,7 @@ class LatestFileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $response = $this->put("/files/{$file->uuid}/file-versions/latest", [
+        $response = $this->put("/files/{$file->uuid}/versions/latest", [
             'file' => $uploadedFile,
         ]);
 
@@ -225,17 +217,15 @@ class LatestFileVersionTest extends TestCase {
             ->create();
 
         $response = $this->from(
-            "/files/{$file->uuid}/file-versions/latest/edit"
-        )->put("/files/{$file->uuid}/file-versions/latest", [
+            "/files/{$file->uuid}/versions/latest/edit"
+        )->put("/files/{$file->uuid}/versions/latest", [
             'file' => UploadedFile::fake()->create(
                 'new-version.jpg',
                 'image/jpeg'
             ),
         ]);
 
-        $response->assertRedirect(
-            "/files/{$file->uuid}/file-versions/latest/edit"
-        );
+        $response->assertRedirect("/files/{$file->uuid}/versions/latest/edit");
 
         $response->assertSessionHasErrors(['file']);
     }
@@ -245,7 +235,7 @@ class LatestFileVersionTest extends TestCase {
             ->for($this->user)
             ->create();
 
-        $response = $this->put("/files/{$file->uuid}/file-versions/latest", [
+        $response = $this->put("/files/{$file->uuid}/versions/latest", [
             'file' => UploadedFile::fake()->create('new-version.txt'),
         ]);
 
@@ -279,14 +269,12 @@ class LatestFileVersionTest extends TestCase {
         $uploadedFile = UploadedFile::fake()->create('new-version.txt');
 
         $response = $this->from(
-            "/files/{$file->uuid}/file-versions/latest/edit"
-        )->put("/files/{$file->uuid}/file-versions/latest", [
+            "/files/{$file->uuid}/versions/latest/edit"
+        )->put("/files/{$file->uuid}/versions/latest", [
             'file' => $uploadedFile,
         ]);
 
-        $response->assertRedirect(
-            "/files/{$file->uuid}/file-versions/latest/edit"
-        );
+        $response->assertRedirect("/files/{$file->uuid}/versions/latest/edit");
 
         $response->assertSessionHas('session-message', function (
             SessionMessage $message

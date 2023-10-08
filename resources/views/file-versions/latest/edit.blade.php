@@ -20,7 +20,7 @@
 
             <x-session-message :message="session('session-message')" class="my-3"></x-session-message>
 
-            <form action="{{ route('files.file-versions.latest.update', ['file' => $file->uuid]) }}" method="post" enctype="multipart/form-data">
+            <form action="{{ route('files.versions.latest.update', ['file' => $file->uuid]) }}" method="post" enctype="multipart/form-data">
                 @method('PUT')
                 @csrf
 

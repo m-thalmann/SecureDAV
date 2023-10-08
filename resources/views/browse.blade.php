@@ -119,7 +119,7 @@
                         </td>
                         <td>
                             @if ($file->latestVersion !== null)
-                                <a href="{{ route('files.file-versions.latest.show', ['file' => $file]) }}" class="btn btn-sm btn-square">
+                                <a href="{{ route('files.versions.latest.show', ['file' => $file]) }}" class="btn btn-sm btn-square">
                                     <i class="fas fa-download"></i>
                                 </a>
                             @endif

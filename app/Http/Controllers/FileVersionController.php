@@ -13,10 +13,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\File as FileRule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FileVersionController extends Controller {
     public function __construct() {
-        $this->authorizeResource(FileVersion::class);
+        $this->authorizeResource(File::class, 'file');
+        $this->authorizeResource(FileVersion::class, 'version');
     }
 
     public function create(File $file): View {
@@ -93,31 +95,30 @@ class FileVersionController extends Controller {
     }
 
     public function show(
-        FileVersion $fileVersion,
-        FileVersionService $fileVersionService
-    ) {
-        return $fileVersionService->createDownloadResponse(
-            $fileVersion->file,
-            $fileVersion
-        );
+        FileVersionService $fileVersionService,
+        File $file,
+        FileVersion $version
+    ): StreamedResponse {
+        return $fileVersionService->createDownloadResponse($file, $version);
     }
 
-    public function edit(FileVersion $fileVersion): View {
-        return view('file-versions.edit', ['fileVersion' => $fileVersion]);
+    public function edit(File $file, FileVersion $version): View {
+        return view('file-versions.edit', ['fileVersion' => $version]);
     }
 
     public function update(
         Request $request,
-        FileVersion $fileVersion
+        File $file,
+        FileVersion $version
     ): RedirectResponse {
         $data = $request->validate([
             'label' => ['nullable', 'string', 'max:64'],
         ]);
 
-        $fileVersion->update($data);
+        $version->update($data);
 
         return redirect()
-            ->route('files.show', $fileVersion->file->uuid)
+            ->route('files.show', $file->uuid)
             ->withFragment('file-versions')
             ->with(
                 'snackbar',
@@ -127,10 +128,11 @@ class FileVersionController extends Controller {
             );
     }
 
-    public function destroy(FileVersion $fileVersion): RedirectResponse {
-        $file = $fileVersion->file;
-
-        $fileVersion->delete();
+    public function destroy(
+        File $file,
+        FileVersion $version
+    ): RedirectResponse {
+        $version->delete();
 
         return redirect()
             ->route('files.show', $file->uuid)
