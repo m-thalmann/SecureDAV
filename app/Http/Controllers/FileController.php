@@ -49,9 +49,15 @@ class FileController extends Controller {
             $this->authorize('update', $directory);
         }
 
-        $data = $request->validate([
+        $request->validate([
             'file' => ['required', FileRule::default()->max('1gb')],
+        ]);
 
+        $requestFile = $request->file('file');
+
+        $extension = $requestFile->getClientOriginalExtension();
+
+        $data = $request->validate([
             'name' => [
                 'required',
                 'string',
@@ -59,6 +65,7 @@ class FileController extends Controller {
                 Rule::unique('files', 'name')
                     ->where('directory_id', $directory?->id)
                     ->where('user_id', $request->user()->id)
+                    ->where('extension', $extension)
                     ->withoutTrashed(),
             ],
 
@@ -66,10 +73,6 @@ class FileController extends Controller {
 
             'description' => ['nullable', 'string', 'max:512'],
         ]);
-
-        $requestFile = $request->file('file');
-
-        $extension = $requestFile->getClientOriginalExtension();
 
         $encryptionKey = Arr::get($data, 'encrypt', false)
             ? Str::random(16)
@@ -136,6 +139,7 @@ class FileController extends Controller {
                 Rule::unique('files', 'name')
                     ->where('directory_id', $file->directory_id)
                     ->where('user_id', $file->user_id)
+                    ->where('extension', $file->extension)
                     ->ignore($file)
                     ->withoutTrashed(),
             ],
