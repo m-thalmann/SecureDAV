@@ -23,7 +23,7 @@ class FileVersionFactory extends Factory {
             'label' => null,
             'version' => 1,
             'storage_path' => null,
-            'etag' => $this->faker->md5(),
+            'checksum' => $this->faker->md5(),
             'bytes' => $this->faker->numberBetween(1, 1000000),
         ];
     }

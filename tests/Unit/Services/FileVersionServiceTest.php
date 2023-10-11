@@ -65,12 +65,12 @@ class FileVersionServiceTest extends TestCase {
             ->withArgs(function (
                 File $file,
                 Closure $storeFileAction,
-                string $etag,
+                string $checksum,
                 int $bytes,
                 string $label
             ) use ($latestVersion, $newLabel) {
                 $this->assertEquals($latestVersion->file_id, $file->id);
-                $this->assertEquals($latestVersion->etag, $etag);
+                $this->assertEquals($latestVersion->checksum, $checksum);
                 $this->assertEquals($latestVersion->bytes, $bytes);
                 $this->assertEquals($newLabel, $label);
 
@@ -111,7 +111,7 @@ class FileVersionServiceTest extends TestCase {
             ->withArgs(function (
                 File $file,
                 Closure $storeFileAction,
-                string $etag,
+                string $checksum,
                 int $bytes,
                 ?string $label
             ) use ($latestVersion) {
@@ -161,12 +161,12 @@ class FileVersionServiceTest extends TestCase {
             ->withArgs(function (
                 File $receivedFile,
                 Closure $storeFileAction,
-                string $etag,
+                string $checksum,
                 int $bytes,
                 string $label
             ) use ($file, $content, $expectedBytes, $newLabel, $newPath) {
                 $this->assertEquals($file->id, $receivedFile->id);
-                $this->assertEquals(md5($content), $etag);
+                $this->assertEquals(md5($content), $checksum);
                 $this->assertEquals($expectedBytes, $bytes);
                 $this->assertEquals($newLabel, $label);
 
@@ -207,7 +207,7 @@ class FileVersionServiceTest extends TestCase {
         $file = File::factory()->create(['next_version' => $nextVersion]);
 
         $expectedBytes = 100;
-        $expectedEtag = md5('test');
+        $expectedChecksum = md5('test');
 
         $newLabel = 'test-label';
 
@@ -228,7 +228,7 @@ class FileVersionServiceTest extends TestCase {
         $this->service->createVersion(
             $file,
             $storeFileAction,
-            $expectedEtag,
+            $expectedChecksum,
             $expectedBytes,
             $newLabel
         );
@@ -238,7 +238,7 @@ class FileVersionServiceTest extends TestCase {
             'label' => $newLabel,
             'version' => $nextVersion,
             'storage_path' => $foundNewPath,
-            'etag' => $expectedEtag,
+            'checksum' => $expectedChecksum,
             'bytes' => $expectedBytes,
         ]);
 
@@ -350,7 +350,7 @@ class FileVersionServiceTest extends TestCase {
             'file_id' => $file->id,
             'version' => $version->version,
             'storage_path' => $version->storage_path,
-            'etag' => md5($content),
+            'checksum' => md5($content),
             'bytes' => $expectedBytes,
         ]);
     }
@@ -398,7 +398,7 @@ class FileVersionServiceTest extends TestCase {
                 'file_id' => $file->id,
                 'version' => $version->version,
                 'storage_path' => $version->storage_path,
-                'etag' => $version->etag,
+                'checksum' => $version->checksum,
                 'bytes' => $version->bytes,
             ]);
 
@@ -429,7 +429,7 @@ class FileVersionServiceTest extends TestCase {
                 'file_id' => $file->id,
                 'version' => $version->version,
                 'storage_path' => $version->storage_path,
-                'etag' => $version->etag,
+                'checksum' => $version->checksum,
                 'bytes' => $version->bytes,
             ]);
 
@@ -648,7 +648,7 @@ class FileVersionServiceTest extends TestCase {
         );
 
         $this->assertEquals(
-            "\"$version->etag\"",
+            "\"$version->checksum\"",
             $response->headers->get('ETag')
         );
     }
@@ -697,7 +697,7 @@ class FileVersionServiceTest extends TestCase {
         );
 
         $this->assertEquals(
-            "\"$version->etag\"",
+            "\"$version->checksum\"",
             $response->headers->get('ETag')
         );
     }
@@ -727,11 +727,17 @@ class FileVersionServiceTestClass extends FileVersionService {
     public function createVersion(
         File $file,
         Closure $storeFileAction,
-        string $etag,
+        string $checksum,
         int $bytes,
         ?string $label = null
     ): void {
-        parent::createVersion($file, $storeFileAction, $etag, $bytes, $label);
+        parent::createVersion(
+            $file,
+            $storeFileAction,
+            $checksum,
+            $bytes,
+            $label
+        );
     }
 
     public function storeFile(

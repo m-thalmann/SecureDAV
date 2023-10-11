@@ -59,7 +59,7 @@ class FileVersionService {
         $this->createVersion(
             $file,
             $storeFileAction,
-            $version->etag,
+            $version->checksum,
             $version->bytes,
             $label
         );
@@ -92,7 +92,7 @@ class FileVersionService {
         }
 
         $fileSize = $uploadedFile->getSize();
-        $etag = md5_file($uploadedFile->path());
+        $checksum = md5_file($uploadedFile->path());
 
         $storeFileAction = function (string $newPath) use (
             $file,
@@ -106,7 +106,13 @@ class FileVersionService {
             );
         };
 
-        $this->createVersion($file, $storeFileAction, $etag, $fileSize, $label);
+        $this->createVersion(
+            $file,
+            $storeFileAction,
+            $checksum,
+            $fileSize,
+            $label
+        );
     }
 
     /**
@@ -116,7 +122,7 @@ class FileVersionService {
      *
      * @param \App\Models\File $file
      * @param \Closure $storeFileAction The action to store the file. It receives the new path (inside of the disk) as the first argument.
-     * @param string $etag The etag of the file
+     * @param string $checksum The checksum of the file
      * @param int $bytes The size of the file in bytes
      * @param string|null $label The optional label for the new version
      *
@@ -126,7 +132,7 @@ class FileVersionService {
     protected function createVersion(
         File $file,
         Closure $storeFileAction,
-        string $etag,
+        string $checksum,
         int $bytes,
         ?string $label = null
     ): void {
@@ -140,7 +146,7 @@ class FileVersionService {
             $file,
             $storeFileAction,
             $label,
-            $etag,
+            $checksum,
             $bytes,
             $newPath
         ) {
@@ -151,7 +157,7 @@ class FileVersionService {
                 'label' => $label,
                 'version' => $file->next_version,
                 'storage_path' => $newPath,
-                'etag' => $etag,
+                'checksum' => $checksum,
                 'bytes' => $bytes,
             ]);
 
@@ -196,7 +202,7 @@ class FileVersionService {
         }
 
         $fileSize = $uploadedFile->getSize();
-        $etag = md5_file($uploadedFile->path());
+        $checksum = md5_file($uploadedFile->path());
 
         $latestVersion = $file->latestVersion;
 
@@ -208,11 +214,11 @@ class FileVersionService {
             $file,
             $latestVersion,
             $fileSize,
-            $etag,
+            $checksum,
             $uploadedFile
         ) {
             $latestVersion->forceFill([
-                'etag' => $etag,
+                'checksum' => $checksum,
                 'bytes' => $fileSize,
             ]);
 
@@ -332,13 +338,13 @@ class FileVersionService {
                         'Content-Length' => $version->bytes,
                     ]
                 )
-                ->setEtag($version->etag);
+                ->setEtag($version->checksum);
         } else {
             return $this->storage
                 ->download($version->storage_path, $file->fileName, [
                     'Content-Type' => $file->mime_type,
                 ])
-                ->setEtag($version->etag);
+                ->setEtag($version->checksum);
         }
     }
 }

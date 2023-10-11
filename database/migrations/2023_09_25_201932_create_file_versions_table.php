@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('label')->nullable();
             $table->integer('version');
             $table->string('storage_path');
-            $table->string('etag', 32);
+            $table->string('checksum', 32);
             $table->unsignedBigInteger('bytes');
             $table->timestamps();
             $table->softDeletes();
