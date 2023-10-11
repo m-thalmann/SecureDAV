@@ -12,27 +12,35 @@ class BrowseController extends Controller {
             $this->authorize('view', $directory);
         }
 
-        $directories = [];
-        $files = [];
+        $directoriesQuery = null;
+        $filesQuery = null;
+
         $breadcrumbs = [];
 
         if ($directory) {
-            $directories = $directory->directories->all();
-            $files = $directory->files->all();
+            $directoriesQuery = $directory->directories();
+            $filesQuery = $directory->files();
 
             $breadcrumbs = $directory->breadcrumbs;
         } else {
-            $directories = Directory::query()
+            $directoriesQuery = Directory::query()
                 ->whereNull('parent_directory_id')
-                ->forUser(auth()->user())
-                ->get()
-                ->all();
-            $files = File::query()
+                ->forUser(auth()->user());
+            $filesQuery = File::query()
                 ->whereNull('directory_id')
-                ->forUser(auth()->user())
-                ->get()
-                ->all();
+                ->forUser(auth()->user());
         }
+
+        $directories = $directoriesQuery
+            ->orderBy('name', 'asc')
+            ->get()
+            ->all();
+
+        $files = $filesQuery
+            ->orderBy('name', 'asc')
+            ->orderBy('extension', 'asc')
+            ->get()
+            ->all();
 
         return view('browse', [
             'currentDirectory' => $directory ?? null,

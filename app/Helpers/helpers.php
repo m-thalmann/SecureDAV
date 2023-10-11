@@ -105,3 +105,36 @@ if (!function_exists('getFileIconForExtension')) {
         return $defaultIcon;
     }
 }
+
+if (!function_exists('getTableLoopDropdownPositionAligned')) {
+    /**
+     * Returns the position of the dropdown for the given loop index.
+     *
+     * @param int $index The current loop index
+     * @param int $totalItems The total number of items in the loop
+     * @param int $dropdownHeightRows The height of the dropdown in rows (rounded up)
+     *
+     * @return string The position and align of the dropdown (<bottom|left>-<start|end>)
+     */
+    function getTableLoopDropdownPositionAligned(
+        int $index,
+        int $totalItems,
+        int $dropdownHeightRows
+    ): string {
+        $rowsBefore = $index + 1; // plus the header row
+        $rowsAfter = max($totalItems - $index - 1, 0);
+
+        if ($rowsAfter >= $dropdownHeightRows) {
+            return 'bottom-end';
+        }
+
+        if (
+            $rowsAfter < $dropdownHeightRows - 1 &&
+            $rowsBefore >= $dropdownHeightRows - 1
+        ) {
+            return 'left-end';
+        }
+
+        return 'left-start';
+    }
+}

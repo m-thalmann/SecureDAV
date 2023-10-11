@@ -72,6 +72,28 @@ class HelpersTest extends TestCase {
         );
     }
 
+    /**
+     * @dataProvider tableLoopDropdownPositionAlignedProvider
+     */
+    public function testGetTableLoopDropdownPositionAlignedReturnsExpectedPosition(
+        int $index,
+        int $totalItems,
+        int $dropdownHeightRows,
+        string $expectedPosition,
+        string $expectedAlign
+    ): void {
+        $positionAligned = getTableLoopDropdownPositionAligned(
+            $index,
+            $totalItems,
+            $dropdownHeightRows
+        );
+
+        [$position, $align] = explode('-', $positionAligned, 2);
+
+        $this->assertEquals($expectedPosition, $position);
+        $this->assertEquals($expectedAlign, $align);
+    }
+
     public static function formatBytesProvider(): array {
         return [
             [1, '1 B'],
@@ -123,6 +145,16 @@ class HelpersTest extends TestCase {
             ['bz2', 'fa-file-zipper'],
 
             ['kdbx', 'fa-file-shield'],
+        ];
+    }
+
+    public static function tableLoopDropdownPositionAlignedProvider(): array {
+        return [
+            [0, 1, 3, 'left', 'start'],
+            [0, 1, 2, 'left', 'end'],
+            [0, 2, 2, 'left', 'start'],
+            [1, 2, 2, 'left', 'end'],
+            [0, 3, 2, 'bottom', 'end'],
         ];
     }
 }

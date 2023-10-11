@@ -4,57 +4,46 @@
             <li></li>
         </x-breadcrumbs>
 
-        <div @class([
-            'dropdown',
-            'dropdown-end' => count($breadcrumbs) > 2,
-        ])>
-            <label tabindex="0" class="btn btn-sm btn-circle">
-                <i class="fas fa-add"></i>
-            </label>
-            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 mt-1 shadow bg-base-300 rounded-box w-44">
-                <li>
-                    <a href="{{ route('directories.create') . ($currentDirectory ? "?directory={$currentDirectory->uuid}" : '') }}">
-                        <i class="fa-solid fa-folder-plus w-6"></i>
-                        {{ __('New directory') }}
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('files.create') . ($currentDirectory ? "?directory={$currentDirectory->uuid}" : '') }}">
-                        <i class="fa-solid fa-file-circle-plus w-6"></i>
-                        {{ __('New file') }}
-                    </a>
-                </li>
-            </ul>
-        </div>
+        <x-dropdown :align="count($breadcrumbs) > 2 ? 'end' : 'start'">
+            <x-slot:icon><i class="fas fa-add"></i></x-slot:icon>
+
+            <li>
+                <a href="{{ route('directories.create') . ($currentDirectory ? "?directory={$currentDirectory->uuid}" : '') }}">
+                    <i class="fa-solid fa-folder-plus w-6"></i>
+                    {{ __('New directory') }}
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('files.create') . ($currentDirectory ? "?directory={$currentDirectory->uuid}" : '') }}">
+                    <i class="fa-solid fa-file-circle-plus w-6"></i>
+                    {{ __('New file') }}
+                </a>
+            </li>
+        </x-dropdown>
 
         @if ($currentDirectory)
             <span class="flex-1"></span>
 
-            <div class="dropdown dropdown-end">
-                <label tabindex="0" class="btn btn-sm btn-circle">
-                    <i class="fa-solid fa-ellipsis"></i>
-                </label>
-                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 mt-1 shadow bg-base-300 rounded-box w-48">
-                    <li>
-                        <a href="{{ route('directories.edit', ['directory' => $currentDirectory->uuid]) }}">
-                            <i class="fas fa-edit mr-2"></i>
-                            {{ __('Edit directory') }}
-                        </a>
-                    </li>
+            <x-dropdown align="end">
+                <li>
+                    <a href="{{ route('directories.edit', ['directory' => $currentDirectory->uuid]) }}">
+                        <i class="fas fa-edit mr-2"></i>
+                        {{ __('Edit directory') }}
+                    </a>
+                </li>
 
-                    <form method="POST" action="{{ route('directories.destroy', ['directory' => $currentDirectory->uuid]) }}">
-                        @method('DELETE')
-                        @csrf
-                        
-                        <li>
-                            <button class="hover:bg-error hover:text-error-content">
-                                <i class="fas fa-trash mr-2"></i>
-                                {{ __('Delete directory') }}
-                            </button>
-                        </li>
-                    </form>
-                </ul>
-            </div>
+                <form method="POST" action="{{ route('directories.destroy', ['directory' => $currentDirectory->uuid]) }}">
+                    @method('DELETE')
+                    @csrf
+                    
+                    <li>
+                        <button class="hover:bg-error hover:text-error-content">
+                            <i class="fas fa-trash mr-2"></i>
+                            {{ __('Delete directory') }}
+                        </button>
+                    </li>
+                </form>
+            </x-dropdown>
         @endif
     </div>
 
@@ -80,12 +69,33 @@
                                 </span>
                             </a>
                         </td>
-                        <td class="max-sm:hidden">-</td>
+                        <td class="max-sm:hidden text-right">-</td>
                         <td>-</td>
                         <td>
                             <span class="tooltip" data-tip="{{ $directory->updated_at }}">{{ $directory->updated_at->diffForHumans() }}</span>
                         </td>
-                        <td></td>
+                        <td class="flex justify-end">
+                            <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, count($files) + $loop->count, 2)">
+                                <li>
+                                    <a href="{{ route('directories.edit', ['directory' => $directory->uuid]) }}">
+                                        <i class="fas fa-edit mr-2"></i>
+                                        {{ __('Edit directory') }}
+                                    </a>
+                                </li>
+
+                                <form method="POST" action="{{ route('directories.destroy', ['directory' => $directory->uuid]) }}">
+                                    @method('DELETE')
+                                    @csrf
+                                    
+                                    <li>
+                                        <button class="hover:bg-error hover:text-error-content">
+                                            <i class="fas fa-trash mr-2"></i>
+                                            {{ __('Delete directory') }}
+                                        </button>
+                                    </li>
+                                </form>
+                            </x-dropdown>
+                        </td>
                     </tr>
                 @endforeach
 
@@ -117,12 +127,33 @@
                         <td>
                             <span class="tooltip" data-tip="{{ $file->latestVersion?->updated_at ?? __('No versions yet') }}">{{ $file->latestVersion?->updated_at?->diffForHumans() ?? '-' }}</span>
                         </td>
-                        <td>
+                        <td class="flex justify-end gap-2 items-center">
                             @if ($file->latestVersion !== null)
                                 <a href="{{ route('files.versions.latest.show', ['file' => $file]) }}" class="btn btn-sm btn-square">
                                     <i class="fas fa-download"></i>
                                 </a>
                             @endif
+
+                            <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned(count($directories) + $loop->index, count($directories) + $loop->count, 2)">
+                                <li>
+                                    <a href="{{ route('files.edit', ['file' => $file->uuid]) }}">
+                                        <i class="fas fa-edit mr-2"></i>
+                                        {{ __('Edit file') }}
+                                    </a>
+                                </li>
+
+                                <form method="POST" action="{{ route('files.destroy', ['file' => $file->uuid]) }}" onsubmit="return confirm('{{ __('Are you sure you want to move this file to trash?') }}')">
+                                    @method('DELETE')
+                                    @csrf
+                                    
+                                    <li>
+                                        <button class="hover:bg-error hover:text-error-content">
+                                            <i class="fas fa-trash mr-2"></i>
+                                            {{ __('Move file to trash') }}
+                                        </button>
+                                    </li>
+                                </form>
+                            </x-dropdown>
                         </td>
                     </tr>
                 @endforeach

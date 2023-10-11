@@ -1,12 +1,12 @@
 @extends('layouts._base', ['title' => $title])
 
 @section('htmlBody')
-    <div class="drawer">
+    <div class="drawer h-full">
         <input id="navigation-drawer" type="checkbox" class="drawer-toggle" /> 
-        <div class="drawer-content flex flex-col overflow-hidden">
+        <div class="drawer-content flex flex-col overflow-hidden h-full">
             @include('layouts.partials.app-header')
             
-            <main {{ $attributes->merge(['class' => 'py-12 w-full max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6']) }}>
+            <main {{ $attributes->merge(['class' => 'py-12 w-full h-full max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6']) }}>
                 {{ $slot }}
             </main>
         </div> 

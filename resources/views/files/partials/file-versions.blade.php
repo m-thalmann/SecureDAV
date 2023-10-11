@@ -44,43 +44,29 @@
                                         <i class="fas fa-download"></i>
                                     </a>
 
-                                    <div @class([
-                                        'dropdown dropdown-end',
-                                        'dropdown-left' => $loop->first && $loop->count < 3,
-                                        'dropdown-top' => !$loop->first && $loop->remaining < 2,
-                                    ])>
-                                        <label tabindex="0" class="btn btn-sm btn-circle">
-                                            <i class="fa-solid fa-ellipsis"></i>
-                                        </label>
-                                        <ul
-                                            tabindex="0"
-                                            @class([
-                                                'dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-box w-56',
-                                                'mt-1' => $loop->count >= 3 || $loop->remaining >= 2,
-                                                'mr-1' => $loop->first && $loop->count < 3,
-                                                'mb-1' => !$loop->first && $loop->remaining < 2,
-                                            ])
-                                        >
-                                            <li>
-                                                <a href="{{ route('files.versions.edit', ['file' => $file->uuid, 'version' => $version->version]) }}">
-                                                    <i class="fas fa-edit mr-2"></i>
-                                                    {{ __('Edit label') }}
-                                                </a>
-                                            </li>
+                                    <x-dropdown
+                                        :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)"
+                                        width="w-56"
+                                    >
+                                        <li>
+                                            <a href="{{ route('files.versions.edit', ['file' => $file->uuid, 'version' => $version->version]) }}">
+                                                <i class="fas fa-edit mr-2"></i>
+                                                {{ __('Edit label') }}
+                                            </a>
+                                        </li>
 
-                                            <form method="POST" action="{{ route('files.versions.destroy', ['file' => $file->uuid, 'version' => $version->version]) }}">
-                                                @method('DELETE')
-                                                @csrf
-                                                
-                                                <li>
-                                                    <button class="hover:bg-error hover:text-error-content">
-                                                        <i class="fas fa-trash mr-2"></i>
-                                                        {{ __('Move to trash') }}
-                                                    </button>
-                                                </li>
-                                            </form>
-                                        </ul>
-                                    </div>
+                                        <form method="POST" action="{{ route('files.versions.destroy', ['file' => $file->uuid, 'version' => $version->version]) }}">
+                                            @method('DELETE')
+                                            @csrf
+                                            
+                                            <li>
+                                                <button class="hover:bg-error hover:text-error-content">
+                                                    <i class="fas fa-trash mr-2"></i>
+                                                    {{ __('Move to trash') }}
+                                                </button>
+                                            </li>
+                                        </form>
+                                    </x-dropdown>
                                 </td>
                             </tr>
                         @endforeach

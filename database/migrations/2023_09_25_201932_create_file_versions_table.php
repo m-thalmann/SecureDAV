@@ -27,7 +27,7 @@ return new class extends Migration {
 
     public function down(): void {
         Schema::dropIfExists('file_versions');
-        // TODO: delete files from storage
+        // files in storage are intentionally not deleted to prevent data loss
     }
 };
 
