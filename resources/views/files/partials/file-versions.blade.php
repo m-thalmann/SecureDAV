@@ -24,6 +24,7 @@
                             <th>{{ __('Size') }}</th>
                             <th>{{ __('Created') }}</th>
                             <th>{{ __('Last updated') }}</th>
+                            <th class="w-0">{{ __('Checksum (MD5)') }}</th>
                             <th class="w-0"></th>
                         </tr>
                     </thead>
@@ -39,6 +40,7 @@
                                 <td>
                                     <span class="tooltip" data-tip="{{ $version->updated_at }}">{{ $version->updated_at->diffForHumans() }}</span>
                                 </td>
+                                <td class="font-mono">{{ $version->checksum }}</td>
                                 <td class="flex gap-2 items-center">
                                     <a href="{{ route('files.versions.show', ['file' => $file->uuid, 'version' => $version->version]) }}" class="btn btn-sm btn-square">
                                         <i class="fas fa-download"></i>

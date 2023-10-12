@@ -51,7 +51,8 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>{{ __('Name') }}</th>
+                    <th class="w-0 pr-2"></th>
+                    <th class="pl-0">{{ __('Name') }}</th>
                     <th class="max-sm:hidden">{{ __('Size') }}</th>
                     <th>{{ __('Current version') }}</th>
                     <th>{{ __('Last updated') }}</th>
@@ -61,12 +62,15 @@
             <tbody>
                 @foreach ($directories as $directory)
                     <tr class="hover">
-                        <td>
-                            <a href="{{ route('browse.index', ['directory' => $directory->uuid]) }}" class="flex items-center group">
-                                <i class="fas fa-folder text-secondary w-6"></i>
-                                <span class="group-hover:underline max-w-[48ch] overflow-hidden text-ellipsis">
-                                    {{ $directory->name }}
-                                </span>
+                        <td class="pr-2">
+                            <i class="fas fa-folder text-secondary"></i>
+                        </td>
+                        <td class="pl-0">
+                            <a
+                                href="{{ route('browse.index', ['directory' => $directory->uuid]) }}"
+                                class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis"
+                            >
+                                {{ $directory->name }}
                             </a>
                         </td>
                         <td class="max-sm:hidden text-right">-</td>
@@ -101,12 +105,15 @@
 
                 @foreach ($files as $file)
                     <tr class="hover">
-                        <td>
-                            <a href="{{ route('files.show', ['file' => $file->uuid]) }}" class="flex items-center group">
-                                <i class="{{ $file->fileIcon }} text-xl w-[1.25em] mr-1"></i>
-                                <span class="group-hover:underline">
-                                    {{ $file->fileName }}
-                                </span>
+                        <td class="pr-2">
+                            <i class="{{ $file->fileIcon }} text-xl"></i>
+                        </td>
+                        <td class="pl-0">
+                            <a
+                                href="{{ route('files.show', ['file' => $file->uuid]) }}"
+                                class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis"
+                            >
+                                {{ $file->fileName }}
                             </a>
                         </td>
                         <td class="max-sm:hidden text-right">
@@ -160,7 +167,15 @@
 
                 @if (count($directories) === 0 && count($files) === 0)
                     <tr>
-                        <td colspan="5" class="text-center italic text-base-content/70">{{ __('This directory is empty') }}</td>
+                        <td colspan="6" class="text-center italic text-base-content/70">{{ __('This directory is empty') }}</td>
+                    </tr>
+                @else
+                    <tr>
+                        <td></td>
+                        <td colspan="5" class="text-sm text-base-content/50 pl-0">
+                            {{ trans_choice('{1} 1 directory|[2,*] :count directories', count($directories)) }},
+                            {{ trans_choice('{1} 1 file|[2,*] :count files', count($files)) }}
+                        </td>
                     </tr>
                 @endif
             </tbody>
