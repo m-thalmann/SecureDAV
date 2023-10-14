@@ -57,7 +57,11 @@
                                             </a>
                                         </li>
 
-                                        <form method="POST" action="{{ route('files.versions.destroy', ['file' => $file->uuid, 'version' => $version->version]) }}">
+                                        <form
+                                            method="POST"
+                                            action="{{ route('files.versions.destroy', ['file' => $file->uuid, 'version' => $version->version]) }}"
+                                            onsubmit="return confirm('{{ __('Are you sure you want to move this version to trash?') }}')"
+                                        >
                                             @method('DELETE')
                                             @csrf
                                             

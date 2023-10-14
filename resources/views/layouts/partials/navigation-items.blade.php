@@ -6,7 +6,7 @@
             "icon" => "fa-solid fa-folder"
         ],
         [
-            "route" => "access.index",
+            "route" => "access-users.index",
             "name" => __("Access"),
             "icon" => "fa-solid fa-shield-alt"
         ],

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccessUserController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\FileController;
@@ -179,8 +180,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->scoped(['file' => 'uuid', 'version' => 'version'])
         ->except(['index']);
 
+    Route::resource('access-users', AccessUserController::class)->scoped([
+        'access_user' => 'username',
+    ]);
+
     // TODO: replace with resource controllers
-    Route::view('access', 'access.index')->name('access.index');
     Route::view('backups', 'backups.index')->name('backups.index');
 });
 
