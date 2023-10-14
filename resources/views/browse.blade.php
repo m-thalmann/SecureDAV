@@ -112,9 +112,13 @@
                             <a
                                 href="{{ route('files.show', ['file' => $file->uuid]) }}"
                                 class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis"
-                            >
-                                {{ $file->fileName }}
-                            </a>
+                            >{{ $file->fileName }}</a>
+
+                            @if ($file->isEncrypted)
+                                <span class="tooltip ml-2" data-tip="{{ __('Encrypted') }}">
+                                    <i class="fa-solid fa-lock text-primary text-xs"></i>
+                                </span>
+                            @endif
                         </td>
                         <td class="max-sm:hidden text-right">
                             @if ($file->latestVersion)
