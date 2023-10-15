@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccessUser;
+use App\View\Helpers\SessionMessage;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class AccessUserController extends Controller {
@@ -17,6 +19,19 @@ class AccessUserController extends Controller {
                 ->forUser(auth()->user())
                 ->get(),
         ]);
+    }
+
+    public function destroy(AccessUser $accessUser): RedirectResponse {
+        $accessUser->delete();
+
+        return redirect()
+            ->route('access-users.index')
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('Access user successfully deleted.')
+                )->forDuration()
+            );
     }
 }
 
