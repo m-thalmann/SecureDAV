@@ -10,7 +10,7 @@
             @csrf
 
             <x-form-field name="email" class="w-full">
-                <x-slot:label>{{ __('Email') }}</x-slot:label>
+                <x-slot name="label">{{ __('Email') }}</x-slot>
 
                 <x-input name="email" type="email" :value="old('email')" required autofocus />
             </x-form-field>

@@ -2,17 +2,17 @@
     <x-breadcrumbs :file="$file" class="px-4" />
 
     <x-card dialog>
-        <x-slot:title>
+        <x-slot name="title">
             <i class="fas fa-edit mr-2"></i>
             {{ __('Edit file') }}
-        </x-slot:title>
+        </x-slot>
 
         <form action="{{ route('files.update', ['file' => $file->uuid]) }}" method="post" id="edit-form">
             @method('PUT')
             @csrf
 
             <x-form-field name="name" class="md:w-2/3">
-                <x-slot:label>{{ __('Name') }}</x-slot:label>
+                <x-slot name="label">{{ __('Name') }}</x-slot>
 
                 <div class="relative">
                     <x-input name="name" class="{{ $file->extension ? 'pr-16' : '' }}" :value="$file->name" autofocus required />
@@ -22,11 +22,11 @@
                     @endif
                 </div>
 
-                <x-slot:hint>{{ __('Info') }}: {{ __('Without file extension') }}</x-slot:hint>
+                <x-slot name="hint">{{ __('Info') }}: {{ __('Without file extension') }}</x-slot>
             </x-form-field>
 
             <x-form-field name="description" class="md:w-2/3">
-                <x-slot:label optional>{{ __('Description') }}</x-slot:label>
+                <x-slot name="label" optional>{{ __('Description') }}</x-slot>
 
                 <textarea
                     id="description"
@@ -36,9 +36,9 @@
             </x-form-field>
         </form>
 
-        <x-slot:actions>
+        <x-slot name="actions">
             <a href="{{ route('files.show', ['file' => $file->uuid]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Save') }}" form="edit-form" class="btn btn-primary">
-        </x-slot:actions>
+        </x-slot>
     </x-card>
 </x-app-layout>

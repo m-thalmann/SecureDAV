@@ -2,10 +2,10 @@
     <x-breadcrumbs :directories="$parentDirectory?->breadcrumbs" class="px-4" />
 
     <x-card dialog>
-        <x-slot:title>
+        <x-slot name="title">
             <i class="fas fa-folder-plus mr-2"></i>
             {{ __('Create directory') }}
-        </x-slot:title>
+        </x-slot>
 
         <form action="{{ route('directories.store') }}" method="post" id="create-form">
             @csrf
@@ -15,15 +15,15 @@
             @endif
 
             <x-form-field name="name" class="md:w-2/3">
-                <x-slot:label>{{ __('Name') }}</x-slot:label>
+                <x-slot name="label">{{ __('Name') }}</x-slot>
 
                 <x-input name="name" :value="old('name')" autofocus required />
             </x-form-field>
         </form>
 
-        <x-slot:actions>
+        <x-slot name="actions">
             <a href="{{ route('browse.index', ['directory' => $parentDirectory?->uuid]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Create') }}" form="create-form" class="btn btn-primary">
-        </x-slot:actions>
+        </x-slot>
     </x-card>
 </x-app-layout>

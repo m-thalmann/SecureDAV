@@ -6,13 +6,13 @@
             @csrf
 
             <x-form-field name="email" class="w-full">
-                <x-slot:label>{{ __('Email') }}</x-slot:label>
+                <x-slot name="label">{{ __('Email') }}</x-slot>
 
                 <x-input name="email" type="email" :value="old('email')" required autofocus autocomplete="username" />
             </x-form-field>
 
             <x-form-field name="password" class="w-full">
-                <x-slot:label>{{ __('Password') }}</x-slot:label>
+                <x-slot name="label">{{ __('Password') }}</x-slot>
 
                 <x-input name="password" type="password" required autocomplete="current-password" />
             </x-form-field>

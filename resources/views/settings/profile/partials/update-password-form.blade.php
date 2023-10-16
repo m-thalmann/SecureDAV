@@ -14,19 +14,19 @@
         @csrf
 
         <x-form-field name="current_password" errorBag="updatePassword" class="col-span-6 md:col-span-4">
-            <x-slot:label>{{ __('Current Password') }}</x-slot:label>
+            <x-slot name="label">{{ __('Current Password') }}</x-slot>
 
             <x-input name="current_password" type="password" errorBag="updatePassword" required autocomplete="current-password" />
         </x-form-field>
 
         <x-form-field name="password" errorBag="updatePassword" class="col-span-6 md:col-span-4">
-            <x-slot:label>{{ __('New Password') }}</x-slot:label>
+            <x-slot name="label">{{ __('New Password') }}</x-slot>
 
             <x-input name="password" type="password" errorBag="updatePassword" required autocomplete="new-password" />
         </x-form-field>
 
         <x-form-field name="password_confirmation" errorBag="updatePassword" class="col-span-6 md:col-span-4">
-            <x-slot:label>{{ __('Confirm Password') }}</x-slot:label>
+            <x-slot name="label">{{ __('Confirm Password') }}</x-slot>
 
             <x-input name="password_confirmation" type="password" errorBag="updatePassword" required autocomplete="new-password" />
         </x-form-field>

@@ -8,7 +8,7 @@
             @csrf
 
             <x-form-field name="password" class="w-full">
-                <x-slot:label>{{ __('Password') }}</x-slot:label>
+                <x-slot name="label">{{ __('Password') }}</x-slot>
 
                 <x-input name="password" type="password" required autocomplete="current-password" autofocus />
             </x-form-field>

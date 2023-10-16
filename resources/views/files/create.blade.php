@@ -2,10 +2,10 @@
     <x-breadcrumbs :directories="$directory?->breadcrumbs" class="px-4"/>
 
     <x-card dialog>
-        <x-slot:title>
+        <x-slot name="title">
             <i class="fa-solid fa-file-circle-plus mr-2"></i>
             {{ __('Create file') }}
-        </x-slot:title>
+        </x-slot>
 
         <x-session-message :message="session('session-message')" class="my-3"></x-session-message>
 
@@ -17,19 +17,19 @@
             @endif
 
             <x-form-field name="file" class="md:w-2/3">
-                <x-slot:label>{{ __('File') }}</x-slot:label>
+                <x-slot name="label">{{ __('File') }}</x-slot>
 
                 <x-input name="file" type="file" inputClass="file-input" required onchange="onSelectedFileChange(this.files[0])" />
             </x-form-field>
 
             <x-form-field name="name"  class="md:w-2/3">
-                <x-slot:label>{{ __('Name') }}</x-slot:label>
+                <x-slot name="label">{{ __('Name') }}</x-slot>
 
                 <div class="relative" id="name-input-container">
                     <x-input name="name" :value="old('name')" required />
                 </div>
 
-                <x-slot:hint>{{ __('Info') }}: {{ __('Without file extension') }}</x-slot:hint>
+                <x-slot name="hint">{{ __('Info') }}: {{ __('Without file extension') }}</x-slot>
             </x-form-field>
 
             <div class="form-control w-fit">
@@ -40,7 +40,7 @@
             </div>
 
             <x-form-field name="description" class="md:w-2/3">
-                <x-slot:label optional>{{ __('Description') }}</x-slot:label>
+                <x-slot name="label" optional>{{ __('Description') }}</x-slot>
 
                 <textarea
                     id="description"
@@ -50,10 +50,10 @@
             </x-form-field>
         </form>
 
-        <x-slot:actions>
+        <x-slot name="actions">
             <a href="{{ route('browse.index', ['directory' => $directory?->uuid]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Create') }}" form="create-form" class="btn btn-primary">
-        </x-slot:actions>
+        </x-slot>
     </x-card>
 
     @push('scripts')

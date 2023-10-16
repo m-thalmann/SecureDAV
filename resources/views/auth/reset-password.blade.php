@@ -8,19 +8,19 @@
             <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
             <x-form-field name="email" class="w-full">
-                <x-slot:label>{{ __('Email') }}</x-slot:label>
+                <x-slot name="label">{{ __('Email') }}</x-slot>
 
                 <x-input name="email" type="email" :value="old('email', $request->email)" required autocomplete="username" />
             </x-form-field>
 
             <x-form-field name="password" class="w-full">
-                <x-slot:label>{{ __('Password') }}</x-slot:label>
+                <x-slot name="label">{{ __('Password') }}</x-slot>
 
                 <x-input name="password" type="password" required autofocus autocomplete="new-password" />
             </x-form-field>
 
             <x-form-field name="password_confirmation" class="w-full">
-                <x-slot:label>{{ __('Confirm Password') }}</x-slot:label>
+                <x-slot name="label">{{ __('Confirm Password') }}</x-slot>
 
                 <x-input name="password_confirmation" type="password" required autocomplete="new-password" />
             </x-form-field>

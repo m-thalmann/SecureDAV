@@ -7,10 +7,10 @@
     </x-breadcrumbs>
 
     <x-card dialog>
-        <x-slot:title>
+        <x-slot name="title">
             <i class="fas fa-edit mr-2"></i>
             {{ __('Edit version') }}
-        </x-slot:title>
+        </x-slot>
 
         <form
             action="{{ route('files.versions.update', ['file' => $fileVersion->file->uuid, 'version' => $fileVersion->version]) }}"
@@ -21,15 +21,15 @@
             @csrf
 
             <x-form-field name="label" class="md:w-2/3">
-                <x-slot:label optional>{{ __('Label') }}</x-slot:label>
+                <x-slot name="label" optional>{{ __('Label') }}</x-slot>
 
                 <x-input name="label" :value="$fileVersion->label" autofocus />
             </x-form-field>
         </form>
 
-        <x-slot:actions>
+        <x-slot name="actions">
             <a href="{{ route('files.show', ['file' => $fileVersion->file]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Save') }}" form="edit-form" class="btn btn-primary">
-        </x-slot:actions>
+        </x-slot>
     </x-card>
 </x-app-layout>

@@ -8,13 +8,13 @@
             @csrf
 
             <x-form-field name="code" class="w-full" x-show="!recovery">
-                <x-slot:label>{{ __('Code') }}</x-slot:label>
+                <x-slot name="label">{{ __('Code') }}</x-slot>
 
                 <x-input name="code" inputmode="numeric" autofocus autocomplete="one-time-code" x-ref="code" />
             </x-form-field>
 
             <x-form-field name="recovery_code" class="w-full" x-show="recovery" x-cloak>
-                <x-slot:label>{{ __('Recovery Code') }}</x-slot:label>
+                <x-slot name="label">{{ __('Recovery Code') }}</x-slot>
 
                 <x-input name="recovery_code" autocomplete="one-time-code" x-ref="recovery_code" />
             </x-form-field>

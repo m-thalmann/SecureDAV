@@ -28,9 +28,9 @@
 
     @if ($file->description)
         <x-card>
-            <x-slot:title class="mb-4">
+            <x-slot name="title" class="mb-4">
                 {{ __('Description') }}
-            </x-slot:title>
+            </x-slot>
 
             <p>{{ $file->description }}</p>
         </x-card>
@@ -68,7 +68,7 @@
 
     <div class="flex gap-4 justify-between items-center px-4 sm:px-0">
         <x-form-field name="web-dav-url" class="w-full md:w-2/3 lg:w-1/2">
-            <x-slot:label>{{ __('WebDAV URL') }}</x-slot:label>
+            <x-slot name="label">{{ __('WebDAV URL') }}</x-slot>
 
             <div class="flex gap-2 items-center">
                 <x-input name="web-dav-url" class="input-sm bg-base-200" value="<TODO: webdav url>" readonly />

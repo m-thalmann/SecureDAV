@@ -1,10 +1,10 @@
 <x-app-layout :title="__('Access')">
     <x-card>
-        <x-slot:title>
+        <x-slot name="title">
             <i class="fa-solid fa-shield-alt mr-2"></i>
             {{ __('Access users') }}
             <small class="font-normal">({{ count($accessUsers) }})</small>
-        </x-slot:title>
+        </x-slot>
 
         <div class="actions my-4">
             <a href="{{ route('access-users.create') }}" class="btn btn-neutral btn-sm">

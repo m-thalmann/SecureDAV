@@ -14,13 +14,13 @@
         @csrf
 
         <x-form-field name="name" errorBag="updateProfileInformation" class="col-span-6 md:col-span-4">
-            <x-slot:label>{{ __('Name') }}</x-slot:label>
+            <x-slot name="label">{{ __('Name') }}</x-slot>
 
             <x-input name="name" errorBag="updateProfileInformation" required :value="$user->name" />
         </x-form-field>
 
         <x-form-field name="email" errorBag="updateProfileInformation" class="col-span-6 md:col-span-4">
-            <x-slot:label>
+            <x-slot name="label">
                 <div class="flex gap-4">
                     {{ __('Email') }}
 
@@ -38,7 +38,7 @@
                         @endif
                     @endif
                 </div>
-            </x-slot:label>
+            </x-slot>
 
             <x-input name="email" type="email" errorBag="updateProfileInformation" required :value="$user->email" />
         </x-form-field>

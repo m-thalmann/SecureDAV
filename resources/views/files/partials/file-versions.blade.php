@@ -1,8 +1,8 @@
 <x-card id="file-versions">
-    <x-slot:title class="mb-4">
+    <x-slot name="title" class="mb-4">
         {{ __('Versions') }}
         <small class="font-normal">({{ $file->versions->count() }})</small>
-    </x-slot:title>
+    </x-slot>
 
     <div class="actions flex gap-4 items-center mb-4">
         <a href="{{ route('files.versions.create', ['file' => $file]) }}" class="btn btn-neutral btn-sm">

@@ -8,10 +8,10 @@
     <x-breadcrumbs :file="$file" class="px-4" />
 
     <x-card dialog x-data="{ uploadFile: {{ $showFormInput ? 'true' : 'false' }} }">
-        <x-slot:title>
+        <x-slot name="title">
             <i class="fa-solid fa-clock-rotate-left mr-2"></i>
             {{ __('Create new version') }}
-        </x-slot:title>
+        </x-slot>
 
         <x-session-message :message="session('session-message')" class="my-3"></x-session-message>
 
@@ -19,7 +19,7 @@
             @csrf
 
             <x-form-field name="label" class="md:w-2/3">
-                <x-slot:label optional>{{ __('Label') }}</x-slot:label>
+                <x-slot name="label" optional>{{ __('Label') }}</x-slot>
 
                 <x-input name="label" :value="old('label')" autofocus />
             </x-form-field>
@@ -35,16 +35,16 @@
 
             <template x-if="uploadFile" data-file-input-is-shown="{{ $showFormInput ? 'true' : 'false'  }}">
                 <x-form-field name="file" class="md:w-2/3">
-                    <x-slot:label>{{ __('File') }}</x-slot:label>
+                    <x-slot name="label">{{ __('File') }}</x-slot>
 
                     <x-input name="file" type="file" inputClass="file-input" required data-test-id="file-input" />
                 </x-form-field>
             </template>
         </form>
 
-        <x-slot:actions>
+        <x-slot name="actions">
             <a href="{{ route('files.show', ['file' => $file->uuid]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Save') }}" form="create-form" class="btn btn-primary">
-        </x-slot:actions>
+        </x-slot>
     </x-card>
 </x-app-layout>

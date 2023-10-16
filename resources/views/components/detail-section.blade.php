@@ -13,9 +13,9 @@
         {{ $slot }}
 
         @isset($actions)
-            <x-slot:actions :class="$actions->attributes->get('class')">
+            <x-slot name="actions" :class="$actions->attributes->get('class')">
                 {{ $actions }}
-            </x-slot:actions>
+            </x-slot>
         @endisset
     </x-card>
 </div>

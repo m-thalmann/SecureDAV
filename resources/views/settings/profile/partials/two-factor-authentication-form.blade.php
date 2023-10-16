@@ -41,7 +41,7 @@
                 @csrf
 
                 <x-form-field name="code" errorBag="confirmTwoFactorAuthentication" class="mt-4 sm:w-1/2">
-                    <x-slot:label>{{ __('Code') }}</x-slot:label>
+                    <x-slot name="label">{{ __('Code') }}</x-slot>
 
                     <x-input name="code" inputmode="numeric" errorBag="confirmTwoFactorAuthentication" required autocomplete="one-time-code" />
                 </x-form-field>

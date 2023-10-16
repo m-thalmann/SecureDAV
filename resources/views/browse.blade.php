@@ -5,7 +5,7 @@
         </x-breadcrumbs>
 
         <x-dropdown :align="count($breadcrumbs) > 2 ? 'end' : 'start'">
-            <x-slot:icon><i class="fas fa-add"></i></x-slot:icon>
+            <x-slot name="icon"><i class="fas fa-add"></i></x-slot>
 
             <li>
                 <a href="{{ route('directories.create') . ($currentDirectory ? "?directory={$currentDirectory->uuid}" : '') }}">
@@ -51,7 +51,7 @@
         <x-files-table.table :directoriesCount="count($directories)" :filesCount="count($files)">
             @foreach ($directories as $directory)
                 <x-files-table.directory-row :directory="$directory">
-                    <x-slot:actions>
+                    <x-slot name="actions">
                         <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, count($files) + $loop->count, 2)">
                             <li>
                                 <a href="{{ route('directories.edit', ['directory' => $directory->uuid]) }}">
@@ -72,13 +72,13 @@
                                 </li>
                             </form>
                         </x-dropdown>
-                    </x-slot:actions>
+                    </x-slot>
                 </x-files-table.directory-row>
             @endforeach
 
             @foreach ($files as $file)
                 <x-files-table.file-row :file="$file">
-                    <x-slot:actions>
+                    <x-slot name="actions">
                         @if ($file->latestVersion !== null)
                             <a href="{{ route('files.versions.latest.show', ['file' => $file]) }}" class="btn btn-sm btn-square">
                                 <i class="fas fa-download"></i>
@@ -105,13 +105,13 @@
                                 </li>
                             </form>
                         </x-dropdown>
-                    </x-slot:actions>
+                    </x-slot>
                 </x-files-table.file-row>
             @endforeach
 
-            <x-slot:noItemsContent>
+            <x-slot name="noItemsContent">
                 {{ __('This directory is empty') }}
-            </x-slot:noItemsContent>
+            </x-slot>
         </x-files-table.table>
     </div>
 </x-app-layout>

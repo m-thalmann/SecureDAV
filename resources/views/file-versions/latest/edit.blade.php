@@ -7,10 +7,10 @@
     </x-breadcrumbs>
 
     <x-card dialog>
-        <x-slot:title>
+        <x-slot name="title">
             <i class="fas fa-edit mr-2"></i>
             {{ __('Update file') }}
-        </x-slot:title>
+        </x-slot>
 
         <div class="alert bg-base-300 my-3">
             <i class="fa-solid fa-triangle-exclamation text-warning"></i>
@@ -29,15 +29,15 @@
             @csrf
 
             <x-form-field name="file" class="md:w-2/3">
-                <x-slot:label>{{ __('File') }}</x-slot:label>
+                <x-slot name="label">{{ __('File') }}</x-slot>
 
                 <x-input name="file" type="file" inputClass="file-input" required />
             </x-form-field>
         </form>
 
-        <x-slot:actions>
+        <x-slot name="actions">
             <a href="{{ route('files.show', ['file' => $file]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Save') }}" form="edit-form" class="btn btn-primary">
-        </x-slot:actions>
+        </x-slot>
     </x-card>
 </x-app-layout>
