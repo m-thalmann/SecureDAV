@@ -27,15 +27,13 @@
     </div>
 
     @if ($file->description)
-        <div class="card bg-base-200 shadow-lg max-sm:rounded-none">
-            <div class="card-body">
-                <h2 class="card-title mb-4">{{ __('Description') }}</h2>
+        <x-card>
+            <x-slot:title class="mb-4">
+                {{ __('Description') }}
+            </x-slot:title>
 
-                <p>
-                    {{ $file->description }}
-                </p>
-            </div>
-        </div>
+            <p>{{ $file->description }}</p>
+        </x-card>
     @endif
 
     <div class="flex gap-4 items-center px-4 sm:px-0">

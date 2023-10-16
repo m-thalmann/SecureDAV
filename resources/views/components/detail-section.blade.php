@@ -9,9 +9,13 @@
         </div>
     </div>
 
-    <div class="card bg-base-200 shadow-lg md:col-span-2 max-sm:rounded-none">
-        <div class="card-body">
-            {{ $form }}
-        </div>
-    </div>
+    <x-card class="md:col-span-2">
+        {{ $slot }}
+
+        @isset($actions)
+            <x-slot:actions :class="$actions->attributes->get('class')">
+                {{ $actions }}
+            </x-slot:actions>
+        @endisset
+    </x-card>
 </div>
