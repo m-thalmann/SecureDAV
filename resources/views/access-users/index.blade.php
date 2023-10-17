@@ -22,7 +22,7 @@
                         <th class="text-right">{{ __('Accessible files') }}</th>
                         <th class="text-center">{{ __('Readonly') }}</th>
                         <th class="text-center">{{ __('Active') }}</th>
-                        <th>{{ __('Last access') }}</th>
+                        <th>{{ __('Created') }}</th>
                         <th class="w-0"></th>
                     </tr>
                 </thead>
@@ -41,7 +41,7 @@
                                 <input type="checkbox" @checked($accessUser->active) class="checkbox checkbox-primary cursor-not-allowed" onclick="return false;" />
                             </td>
                             <td>
-                                <span class="tooltip" data-tip="{{ $accessUser->last_access ?? '-' }}">{{ $accessUser->last_access?->diffForHumans() ?? '-' }}</span>
+                                <span class="tooltip" data-tip="{{ $accessUser->created_at }}">{{ $accessUser->created_at->diffForHumans() }}</span>
                             </td>
                             <td>
                                 <x-dropdown

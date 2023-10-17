@@ -17,7 +17,6 @@ class AccessUser extends Model {
 
     protected $casts = [
         'password' => 'hashed',
-        'last_access' => 'datetime',
     ];
 
     public function scopeForUser(Builder $query, User $user): Builder {

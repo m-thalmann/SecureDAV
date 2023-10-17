@@ -58,6 +58,39 @@ class AccessUserTest extends TestCase {
         $response->assertDontSee($otherAccessUser->username);
     }
 
+    public function testShowAccessUserViewCanBeRendered(): void {
+        $accessUser = AccessUser::factory()
+            ->for($this->user)
+            ->has(File::factory(3)->for($this->user))
+            ->create();
+
+        $response = $this->get("/access-users/{$accessUser->username}");
+
+        $response->assertOk();
+
+        $response->assertSee($accessUser->username);
+        $response->assertSee($accessUser->label);
+        $response->assertSee("({$accessUser->files->count()})");
+    }
+
+    public function testShowAccessUserViewFailsIfAccessUserDoesNotBelongToUser(): void {
+        $otherUser = $this->createUser();
+
+        $accessUser = AccessUser::factory()
+            ->for($otherUser)
+            ->create();
+
+        $response = $this->get("/access-users/{$accessUser->username}");
+
+        $response->assertForbidden();
+    }
+
+    public function testShowAccessUserViewFailsIfAccessUserDoesNotExist(): void {
+        $response = $this->get('/access-users/does-not-exist');
+
+        $response->assertNotFound();
+    }
+
     public function testAccessUserCanBeDeleted(): void {
         $accessUser = AccessUser::factory()
             ->for($this->user)

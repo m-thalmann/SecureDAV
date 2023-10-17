@@ -21,6 +21,12 @@ class AccessUserController extends Controller {
         ]);
     }
 
+    public function show(AccessUser $accessUser): View {
+        return view('access-users.show', [
+            'accessUser' => $accessUser->load('files'),
+        ]);
+    }
+
     public function destroy(AccessUser $accessUser): RedirectResponse {
         $accessUser->delete();
 

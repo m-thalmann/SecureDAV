@@ -26,45 +26,31 @@
         </x-dropdown>
     </div>
 
-    @if ($file->description)
-        <x-card>
-            <x-slot name="title" class="mb-4">
-                {{ __('Description') }}
-            </x-slot>
+    <x-header-title :iconClass="$file->fileIcon">
+        <x:slot name="title">
+            {{ $file->fileName }}
 
-            <p>{{ $file->description }}</p>
-        </x-card>
-    @endif
+            @if ($file->isEncrypted)
+                <span class="tooltip" data-tip="{{ __('Encrypted') }}">
+                    <i class="fa-solid fa-lock text-primary text-sm"></i>
+                </span>
+            @else
+                <span class="tooltip" data-tip="{{ __('Not encrypted') }}">
+                    <i class="fa-solid fa-lock-open text-warning text-sm"></i>
+                </span>
+            @endif
+        </x:slot>
 
-    <div class="flex gap-4 items-center px-4 sm:px-0">
-        <i class="{{ $file->fileIcon }} text-3xl"></i>
+        <x-slot name="subtitle">
+            @if ($file->mime_type)
+                <span class="tooltip" data-tip="{{ __('MIME-Type') }}">{{ $file->mime_type }}</span>
+                
+                <span class="mx-1">&CenterDot;</span>
+            @endif
 
-        <div>
-            <h2 class="mb-0 text-lg leading-none flex gap-2 items-center">
-                {{ $file->fileName }}
-
-                @if ($file->isEncrypted)
-                    <span class="tooltip" data-tip="{{ __('Encrypted') }}">
-                        <i class="fa-solid fa-lock text-primary text-sm"></i>
-                    </span>
-                @else
-                    <span class="tooltip" data-tip="{{ __('Not encrypted') }}">
-                        <i class="fa-solid fa-lock-open text-warning text-sm"></i>
-                    </span>
-                @endif
-            </h2>
-
-            <span class="text-sm text-base-content/60">
-                @if ($file->mime_type)
-                    <span class="tooltip" data-tip="{{ __('MIME-Type') }}">{{ $file->mime_type }}</span>
-                    
-                    <span class="mx-1">&CenterDot;</span>
-                @endif
-
-                <span class="tooltip" data-tip="{{ __('Created') }}">{{ $file->created_at }}</span>
-            </span>
-        </div>
-    </div>
+            <span class="tooltip" data-tip="{{ __('Created') }}">{{ $file->created_at }}</span>
+        </x-slot>
+    </x-header-title>
 
     <div class="flex gap-4 justify-between items-center px-4 sm:px-0">
         <x-form-field name="web-dav-url" class="w-full md:w-2/3 lg:w-1/2">
@@ -88,6 +74,16 @@
             <i class="fas fa-download"></i>
         </a>
     </div>
+
+    @if ($file->description)
+        <x-card>
+            <x-slot name="title" class="mb-4">
+                {{ __('Description') }}
+            </x-slot>
+
+            <p>{{ $file->description }}</p>
+        </x-card>
+    @endif
 
     @include('files.partials.file-versions')
 </x-app-layout>

@@ -24,7 +24,6 @@ class AccessUserFactory extends Factory {
             'active' => true,
             'readonly' => $this->faker->boolean(),
             'user_id' => User::factory(),
-            'last_access' => null,
         ];
     }
 }

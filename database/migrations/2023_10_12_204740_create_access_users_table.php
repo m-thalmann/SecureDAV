@@ -18,7 +18,6 @@ return new class extends Migration {
                 ->constrained('users')
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
-            $table->timestamp('last_access')->nullable();
             $table->timestamps();
         });
     }
