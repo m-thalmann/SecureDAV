@@ -42,7 +42,7 @@ export default {
           'base-100': '#374151',
           'base-200': '#1f2937',
           'base-300': '#111827',
-          info: '#a5f3fc',
+          info: '#65d3f7',
           success: '#a3e635',
           warning: '#fde047',
           error: '#ef4444',

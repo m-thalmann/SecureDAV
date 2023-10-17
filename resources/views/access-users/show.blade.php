@@ -62,6 +62,34 @@
         </x-slot>
     </x-header-title>
 
+    @if (session('generated-password'))
+        <div class="alert max-sm:rounded-none md:w-fit">
+            <i class="fa-solid fa-key text-success"></i>
+            <span>
+                {{ __('Generated password') }}: <span class="font-mono ml-2 inline-block blur" id="generated-password">{{ session('generated-password') }}</span>
+            </span>
+
+            <div>
+                <button
+                    class="btn btn-circle btn-sm"
+                    onclick="document.getElementById('generated-password').classList.toggle('blur')"
+                >
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+
+                <button
+                    class="btn btn-circle btn-sm"
+                    onclick="
+                        navigator.clipboard.writeText('{{ str_replace('\'', '\\\'', session('generated-password')) }}');
+                        changeClass(this.getElementsByTagName('i')[0], 'fa-solid fa-check text-success', 1000)
+                    "
+                >
+                    <i class="fa-solid fa-copy"></i>
+                </button>
+            </div>
+        </div>
+    @endif
+
     <x-card id="files">
         <x-slot name="title" class="mb-4">
             {{ __('Accessible files') }}

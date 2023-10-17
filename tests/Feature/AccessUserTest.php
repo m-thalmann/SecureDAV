@@ -7,6 +7,7 @@ use App\Models\File;
 use App\Models\User;
 use App\View\Helpers\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AccessUserTest extends TestCase {
@@ -56,6 +57,59 @@ class AccessUserTest extends TestCase {
 
         $response->assertSee($accessUser->username);
         $response->assertDontSee($otherAccessUser->username);
+    }
+
+    public function testCreateAccessUserViewCanBeRendered(): void {
+        $response = $this->get('/access-users/create');
+
+        $response->assertOk();
+    }
+
+    public function testNewAccessUserCanBeCreated(): void {
+        $label = 'Test Access User';
+        $readonly = true;
+
+        $response = $this->post('/access-users', [
+            'label' => $label,
+            'readonly' => $readonly,
+        ]);
+
+        $createdAccessUser = AccessUser::query()
+            ->where('label', $label)
+            ->first();
+
+        $response->assertRedirect(
+            "/access-users/{$createdAccessUser->username}"
+        );
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $generatedPassword = null;
+
+        $response->assertSessionHas('generated-password', function (
+            string $password
+        ) use (&$generatedPassword) {
+            $generatedPassword = $password;
+            return true;
+        });
+
+        $this->assertDatabaseHas('access_users', [
+            'id' => $createdAccessUser->id,
+            'label' => $label,
+            'readonly' => $readonly,
+            'active' => true,
+            'user_id' => $this->user->id,
+        ]);
+
+        $this->assertTrue(
+            Hash::check($generatedPassword, $createdAccessUser->password)
+        );
     }
 
     public function testShowAccessUserViewCanBeRendered(): void {

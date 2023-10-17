@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class AccessUser extends Model {
     use HasFactory;
 
-    protected $fillable = ['label', 'password', 'active', 'readonly'];
+    protected $fillable = ['label', 'active', 'readonly'];
 
     protected $hidden = ['password'];
 
