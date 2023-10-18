@@ -71,6 +71,38 @@ class AccessUserController extends Controller {
         ]);
     }
 
+    public function edit(AccessUser $accessUser): View {
+        return view('access-users.edit', [
+            'accessUser' => $accessUser,
+        ]);
+    }
+
+    public function update(
+        Request $request,
+        AccessUser $accessUser
+    ): RedirectResponse {
+        $data = $request->validate([
+            'label' => ['nullable', 'string', 'max:128'],
+            'readonly' => ['nullable'],
+            'active' => ['nullable'],
+        ]);
+
+        $accessUser->update([
+            'label' => $data['label'],
+            'readonly' => !!Arr::get($data, 'readonly', false),
+            'active' => !!Arr::get($data, 'active', false),
+        ]);
+
+        return redirect()
+            ->route('access-users.show', $accessUser->username)
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('Access user updated successfully')
+                )->forDuration()
+            );
+    }
+
     public function destroy(AccessUser $accessUser): RedirectResponse {
         $accessUser->delete();
 

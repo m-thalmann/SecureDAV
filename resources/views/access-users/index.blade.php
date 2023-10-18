@@ -20,7 +20,7 @@
                         <th>{{ __('Username') }}</th>
                         <th>{{ __('Label') }}</th>
                         <th class="text-right">{{ __('Accessible files') }}</th>
-                        <th class="text-center">{{ __('Readonly') }}</th>
+                        <th class="text-center">{{ __('Read-Only') }}</th>
                         <th class="text-center">{{ __('Active') }}</th>
                         <th>{{ __('Created') }}</th>
                         <th class="w-0"></th>

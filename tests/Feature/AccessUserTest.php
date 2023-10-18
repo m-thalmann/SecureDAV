@@ -90,12 +90,13 @@ class AccessUserTest extends TestCase {
             return true;
         });
 
-        $generatedPassword = null;
-
         $response->assertSessionHas('generated-password', function (
             string $password
-        ) use (&$generatedPassword) {
-            $generatedPassword = $password;
+        ) use ($createdAccessUser) {
+            $this->assertTrue(
+                Hash::check($password, $createdAccessUser->password)
+            );
+
             return true;
         });
 
@@ -106,10 +107,6 @@ class AccessUserTest extends TestCase {
             'active' => true,
             'user_id' => $this->user->id,
         ]);
-
-        $this->assertTrue(
-            Hash::check($generatedPassword, $createdAccessUser->password)
-        );
     }
 
     public function testShowAccessUserViewCanBeRendered(): void {
@@ -143,6 +140,99 @@ class AccessUserTest extends TestCase {
         $response = $this->get('/access-users/does-not-exist');
 
         $response->assertNotFound();
+    }
+
+    public function testEditAccessUserViewCanBeRendered(): void {
+        $accessUser = AccessUser::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get("/access-users/{$accessUser->username}/edit");
+
+        $response->assertOk();
+
+        $response->assertSee($accessUser->username);
+        $response->assertSee($accessUser->label);
+    }
+
+    public function testEditAccessUserViewFailsIfAccessUserDoesNotBelongToUser(): void {
+        $otherUser = $this->createUser();
+
+        $accessUser = AccessUser::factory()
+            ->for($otherUser)
+            ->create();
+
+        $response = $this->get("/access-users/{$accessUser->username}/edit");
+
+        $response->assertForbidden();
+    }
+
+    public function testEditAccessUserViewFailsIfAccessUserDoesNotExist(): void {
+        $response = $this->get('/access-users/does-not-exist/edit');
+
+        $response->assertNotFound();
+    }
+
+    public function testAccessUserCanBeUpdated(): void {
+        $accessUser = AccessUser::factory()
+            ->for($this->user)
+            ->create();
+
+        $label = 'Test Access User';
+        $readonly = !$accessUser->readonly;
+        $active = !$accessUser->active;
+
+        $response = $this->put("/access-users/{$accessUser->username}", [
+            'label' => $label,
+            'readonly' => $readonly,
+            'active' => $active,
+        ]);
+
+        $response->assertRedirect("/access-users/{$accessUser->username}");
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $this->assertDatabaseHas('access_users', [
+            'id' => $accessUser->id,
+            'label' => $label,
+            'readonly' => $readonly,
+            'active' => $active,
+            'user_id' => $this->user->id,
+        ]);
+    }
+
+    public function testAccessUserCantBeUpdatedForOtherUser(): void {
+        $otherUser = $this->createUser();
+
+        $accessUser = AccessUser::factory()
+            ->for($otherUser)
+            ->create();
+
+        $label = 'Test Access User';
+        $readonly = !$accessUser->readonly;
+        $active = !$accessUser->active;
+
+        $response = $this->put("/access-users/{$accessUser->username}", [
+            'label' => $label,
+            'readonly' => $readonly,
+            'active' => $active,
+        ]);
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseHas('access_users', [
+            'id' => $accessUser->id,
+            'label' => $accessUser->label,
+            'readonly' => $accessUser->readonly,
+            'active' => $accessUser->active,
+            'user_id' => $otherUser->id,
+        ]);
     }
 
     public function testAccessUserCanBeDeleted(): void {

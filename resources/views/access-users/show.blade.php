@@ -24,7 +24,7 @@
             @endif
 
             @if ($accessUser->readonly)
-                <span class="tooltip" data-tip="{{ __('Readonly') }}">
+                <span class="tooltip" data-tip="{{ __('Read-Only') }}">
                     <i class="fa-solid fa-book-open text-secondary text-xl"></i>
                 </span>
             @else

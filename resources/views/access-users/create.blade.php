@@ -21,7 +21,7 @@
 
             <div class="form-control w-fit">
                 <label class="label cursor-pointer gap-4">
-                    <span class="label-text">{{ __('Readonly') }}</span> 
+                    <span class="label-text">{{ __('Read-Only') }}</span>
                     <input type="checkbox" @checked(old('readonly', true)) class="checkbox checkbox-secondary" name="readonly" />
                 </label>
             </div>
