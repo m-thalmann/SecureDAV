@@ -1,22 +1,17 @@
-<x-app-layout :title="__('Create access user')">
+<x-app-layout :title="__('Create access group')">
     <x-card dialog>
         <x-slot name="title">
-            <i class="fas fa-user-plus mr-2"></i>
-            {{ __('Create access user') }}
+            <i class="fa-solid fa-user-group mr-2"></i>
+            {{ __('Create access group') }}
         </x-slot>
 
-        <div class="alert bg-base-300 my-3">
-            <i class="fa-solid fa-circle-info text-info"></i>
-            <span>{{ __('The username and password will be generated automatically') }}</span>
-        </div>
-
-        <form action="{{ route('access-users.store') }}" method="post" id="create-form">
+        <form action="{{ route('access-groups.store') }}" method="post" id="create-form">
             @csrf
 
             <x-form-field name="label" class="md:w-2/3">
-                <x-slot name="label" optional>{{ __('Label') }}</x-slot>
+                <x-slot name="label">{{ __('Label') }}</x-slot>
 
-                <x-input name="label" :value="old('label')" autofocus />
+                <x-input name="label" :value="old('label')" autofocus required />
             </x-form-field>
 
             <div class="form-control w-fit">
@@ -28,7 +23,7 @@
         </form>
 
         <x-slot name="actions">
-            <a href="{{ route('access-users.index') }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ route('access-groups.index') }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Create') }}" form="create-form" class="btn btn-primary">
         </x-slot>
     </x-card>

@@ -10,11 +10,11 @@
             ],
         ],
         [
-            "route" => "access-users.index",
+            "route" => "access-groups.index",
             "name" => __("Access"),
             "icon" => "fa-solid fa-shield-alt",
             "activeRoutes" => [
-                "access-users.*",
+                "access-groups.*",
             ],
         ],
         [

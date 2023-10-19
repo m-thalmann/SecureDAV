@@ -3,21 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class AccessUser extends Model {
-    use HasFactory;
+class AccessGroup extends Model {
+    use HasFactory, HasUuids;
 
     protected $fillable = ['label', 'active', 'readonly'];
 
-    protected $hidden = ['password'];
-
-    protected $casts = [
-        'password' => 'hashed',
-    ];
+    public function uniqueIds(): array {
+        return ['uuid'];
+    }
 
     public function scopeForUser(Builder $query, User $user): Builder {
         return $query->where('user_id', $user->id);
@@ -28,7 +28,7 @@ class AccessUser extends Model {
     }
 
     public function files(): BelongsToMany {
-        return $this->belongsToMany(File::class, 'access_user_files');
+        return $this->belongsToMany(File::class, 'access_group_files');
     }
 }
 

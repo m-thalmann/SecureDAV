@@ -6,11 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('access_users', function (Blueprint $table) {
+        Schema::create('access_groups', function (Blueprint $table) {
             $table->id();
-            $table->string('username')->unique();
-            $table->string('label')->nullable();
-            $table->string('password');
+            $table->uuid()->unique();
+            $table->string('label');
             $table->boolean('active');
             $table->boolean('readonly');
             $table
@@ -23,7 +22,7 @@ return new class extends Migration {
     }
 
     public function down(): void {
-        Schema::dropIfExists('access_users');
+        Schema::dropIfExists('access_groups');
     }
 };
 

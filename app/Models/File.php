@@ -42,8 +42,8 @@ class File extends Model {
         return $this->belongsTo(User::class);
     }
 
-    public function accessUsers(): BelongsToMany {
-        return $this->belongsToMany(AccessUser::class, 'access_user_files');
+    public function accessGroups(): BelongsToMany {
+        return $this->belongsToMany(AccessGroup::class, 'access_group_files');
     }
 
     public function directory(): BelongsTo {

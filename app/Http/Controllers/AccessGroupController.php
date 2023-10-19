@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AccessUser;
+use App\Models\AccessGroup;
 use App\View\Helpers\SessionMessage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-class AccessUserController extends Controller {
+class AccessGroupController extends Controller {
     public function __construct() {
-        $this->authorizeResource(AccessUser::class);
+        $this->authorizeResource(AccessGroup::class);
     }
 
     public function index(): View {
-        return view('access-users.index', [
-            'accessUsers' => AccessUser::query()
+        return view('access-groups.index', [
+            'accessGroups' => AccessGroup::query()
                 ->withCount('files')
                 ->forUser(auth()->user())
                 ->get(),
@@ -25,93 +24,79 @@ class AccessUserController extends Controller {
     }
 
     public function create(): View {
-        return view('access-users.create');
+        return view('access-groups.create');
     }
 
     public function store(Request $request): RedirectResponse {
         $data = $request->validate([
-            'label' => ['nullable', 'string', 'max:128'],
+            'label' => ['string', 'max:128'],
             'readonly' => ['nullable'],
         ]);
 
-        $username = Str::random();
-        $password = Str::password(32);
-
-        /**
-         * @var AccessUser
-         */
-        $accessUser = AccessUser::make([
+        $accessGroup = AccessGroup::forceCreate([
             'label' => $data['label'],
             'readonly' => !!Arr::get($data, 'readonly', false),
             'active' => true,
-        ]);
-
-        $accessUser->forceFill([
             'user_id' => $request->user()->id,
-            'username' => $username,
-            'password' => $password,
         ]);
-
-        $accessUser->save();
 
         return redirect()
-            ->route('access-users.show', $accessUser->username)
+            ->route('access-groups.show', $accessGroup->uuid)
             ->with(
                 'snackbar',
                 SessionMessage::success(
-                    __('Access user created successfully')
+                    __('Access group created successfully')
                 )->forDuration()
-            )
-            ->with('generated-password', $password);
+            );
     }
 
-    public function show(AccessUser $accessUser): View {
-        return view('access-users.show', [
-            'accessUser' => $accessUser->load('files'),
+    public function show(AccessGroup $accessGroup): View {
+        return view('access-groups.show', [
+            'accessGroup' => $accessGroup->load('files'),
         ]);
     }
 
-    public function edit(AccessUser $accessUser): View {
-        return view('access-users.edit', [
-            'accessUser' => $accessUser,
+    public function edit(AccessGroup $accessGroup): View {
+        return view('access-groups.edit', [
+            'accessGroup' => $accessGroup,
         ]);
     }
 
     public function update(
         Request $request,
-        AccessUser $accessUser
+        AccessGroup $accessGroup
     ): RedirectResponse {
         $data = $request->validate([
-            'label' => ['nullable', 'string', 'max:128'],
+            'label' => ['string', 'max:128'],
             'readonly' => ['nullable'],
             'active' => ['nullable'],
         ]);
 
-        $accessUser->update([
+        $accessGroup->update([
             'label' => $data['label'],
             'readonly' => !!Arr::get($data, 'readonly', false),
             'active' => !!Arr::get($data, 'active', false),
         ]);
 
         return redirect()
-            ->route('access-users.show', $accessUser->username)
+            ->route('access-groups.show', $accessGroup->uuid)
             ->with(
                 'snackbar',
                 SessionMessage::success(
-                    __('Access user updated successfully')
+                    __('Access group updated successfully')
                 )->forDuration()
             );
     }
 
-    public function destroy(AccessUser $accessUser): RedirectResponse {
-        $accessUser->delete();
+    public function destroy(AccessGroup $accessGroup): RedirectResponse {
+        $accessGroup->delete();
 
         return redirect()
-            ->route('access-users.index')
+            ->route('access-groups.index')
             ->with(
                 'snackbar',
                 SessionMessage::success(
-                    __('Access user successfully deleted.')
+                    __('Access group successfully deleted.')
                 )->forDuration()
             );
     }

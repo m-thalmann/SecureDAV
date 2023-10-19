@@ -2,14 +2,14 @@
     <x-card>
         <x-slot name="title">
             <i class="fa-solid fa-shield-alt mr-2"></i>
-            {{ __('Access users') }}
-            <small class="font-normal">({{ count($accessUsers) }})</small>
+            {{ __('Access groups') }}
+            <small class="font-normal">({{ count($accessGroups) }})</small>
         </x-slot>
 
         <div class="actions my-4">
-            <a href="{{ route('access-users.create') }}" class="btn btn-neutral btn-sm">
-                <i class="fa-solid fa-user-plus mr-2"></i>
-                {{ __('Create access user') }}
+            <a href="{{ route('access-groups.create') }}" class="btn btn-neutral btn-sm">
+                <i class="fa-solid fa-plus mr-2"></i>
+                {{ __('Create access group') }}
             </a>
         </div>
 
@@ -17,8 +17,8 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>{{ __('Username') }}</th>
                         <th>{{ __('Label') }}</th>
+                        <th class="text-right">{{ __('Users') }}</th>
                         <th class="text-right">{{ __('Accessible files') }}</th>
                         <th class="text-center">{{ __('Read-Only') }}</th>
                         <th class="text-center">{{ __('Active') }}</th>
@@ -27,21 +27,25 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($accessUsers as $accessUser)
+                    @foreach ($accessGroups as $accessGroup)
                         <tr>
                             <td>
-                                <a href="{{ route('access-users.show', ['access_user' => $accessUser->username]) }}" class="link">{{ $accessUser->username }}</a>
+                                <a href="{{ route('access-groups.show', ['access_group' => $accessGroup->uuid]) }}" class="link">{{ $accessGroup->label }}</a>
                             </td>
-                            <td>{{ $accessUser->label ?? '-' }}</td>
-                            <td class="text-right">{{ $accessUser->files_count }}</td>
+                            <td class="text-right">{{ $accessGroup->files_count }}</td>
+                            <td class="text-right">{{ $accessGroup->users_count }}</td>
                             <td class="text-center">
-                                <input type="checkbox" @checked($accessUser->readonly) class="checkbox checkbox-primary cursor-not-allowed" onclick="return false;" />
+                                <input type="checkbox" @checked($accessGroup->readonly) class="checkbox checkbox-primary cursor-not-allowed align-middle" onclick="return false;" />
                             </td>
                             <td class="text-center">
-                                <input type="checkbox" @checked($accessUser->active) class="checkbox checkbox-primary cursor-not-allowed" onclick="return false;" />
+                                @if ($accessGroup->active)
+                                    <i class="fa-solid fa-circle-check text-success text-xl"></i>
+                                @else
+                                    <i class="fa-solid fa-circle-xmark text-error text-xl"></i>
+                                @endif
                             </td>
                             <td>
-                                <span class="tooltip" data-tip="{{ $accessUser->created_at }}">{{ $accessUser->created_at->diffForHumans() }}</span>
+                                <span class="tooltip" data-tip="{{ $accessGroup->created_at }}">{{ $accessGroup->created_at->diffForHumans() }}</span>
                             </td>
                             <td>
                                 <x-dropdown
@@ -49,16 +53,16 @@
                                     width="w-56"
                                 >
                                     <li>
-                                        <a href="{{ route('access-users.edit', ['access_user' => $accessUser->username]) }}">
+                                        <a href="{{ route('access-groups.edit', ['access_group' => $accessGroup->uuid]) }}">
                                             <i class="fas fa-edit mr-2"></i>
-                                            {{ __('Edit access user') }}
+                                            {{ __('Edit access group') }}
                                         </a>
                                     </li>
 
                                     <form
                                         method="POST"
-                                        action="{{ route('access-users.destroy', ['access_user' => $accessUser->username]) }}"
-                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this access user?') }}')"
+                                        action="{{ route('access-groups.destroy', ['access_group' => $accessGroup->uuid]) }}"
+                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this access group and all of it\'s users?') }}')"
                                     >
                                         @method('DELETE')
                                         @csrf
@@ -66,7 +70,7 @@
                                         <li>
                                             <button class="hover:bg-error hover:text-error-content">
                                                 <i class="fas fa-trash mr-2"></i>
-                                                {{ __('Delete access user') }}
+                                                {{ __('Delete access group') }}
                                             </button>
                                         </li>
                                     </form>
@@ -75,9 +79,9 @@
                         </tr>
                     @endforeach
 
-                    @if (count($accessUsers) === 0)
+                    @if (count($accessGroups) === 0)
                         <tr>
-                            <td colspan="7" class="text-center italic text-base-content/70">{{ __('No access users') }}</td>
+                            <td colspan="7" class="text-center italic text-base-content/70">{{ __('No access groups') }}</td>
                         </tr>
                     @endif
                 </tbody>

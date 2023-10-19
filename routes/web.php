@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\AccessUserController;
+use App\Http\Controllers\AccessGroupController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\FileController;
@@ -180,8 +180,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->scoped(['file' => 'uuid', 'version' => 'version'])
         ->except(['index']);
 
-    Route::resource('access-users', AccessUserController::class)->scoped([
-        'access_user' => 'username',
+    Route::resource('access-groups', AccessGroupController::class)->scoped([
+        'access_group' => 'uuid',
     ]);
 
     // TODO: replace with resource controllers

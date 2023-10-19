@@ -34,8 +34,8 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasMany(Directory::class);
     }
 
-    public function accessUsers(): HasMany {
-        return $this->hasMany(AccessUser::class);
+    public function accessGroups(): HasMany {
+        return $this->hasMany(AccessGroup::class);
     }
 
     protected function initials(): Attribute {
