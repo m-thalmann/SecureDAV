@@ -1,5 +1,5 @@
 <x-app-layout :title="$accessGroup->label . ' - ' . __('Access group')">
-    <x-header-title iconClass="fa-solid fa-shield-alt">
+    <x-header-title iconClass="fa-solid fa-user-group">
         <x:slot name="title">
             {{ $accessGroup->label }}
         </x:slot>
@@ -57,6 +57,79 @@
             </x-dropdown>
         </x-slot>
     </x-header-title>
+
+    <x-card id="users">
+        <x-slot name="title">
+            {{ __('Group users') }}
+            <small class="font-normal">({{ $accessGroup->users->count() }})</small>
+        </x-slot>
+
+        <div class="actions my-4">
+            <a href="#" class="btn btn-neutral btn-sm">
+                <i class="fa-solid fa-user-plus mr-2"></i>
+                {{ __('Create group user') }}
+            </a>
+        </div>
+
+        <div class="overflow-auto w-full bg-base-100 rounded-md max-h-[25em]">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{{ __('Label') }}</th>
+                        <th>{{ __('Username') }}</th>
+                        <th>{{ __('Last access') }}</th>
+                        <th class="w-0"></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach ($accessGroup->users as $accessGroupUser)
+                        <tr>
+                            <td>{{ $accessGroupUser->label }}</td>
+                            <td class="font-mono">
+                                <span class="select-all">{{ $accessGroupUser->username }}</span>
+
+                                <x-copy-button :data="$accessGroupUser->username" />
+                            </td>
+                            <td>
+                                <span class="tooltip" data-tip="{{ $accessGroupUser->last_access ?? '-' }}">{{ $accessGroupUser->last_access?->diffForHumans() ?? '-' }}</span>
+                            </td>
+                            <td>
+                                <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 3)">
+                                    <li>
+                                        <a href="#">
+                                            <i class="fas fa-edit mr-2"></i>
+                                            {{ __('Edit group user') }}
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa-solid fa-rotate-left mr-2"></i>
+                                            {{ __('Reset password') }}
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a href="#" class="hover:bg-error hover:text-error-content">
+                                            <i class="fas fa-trash mr-2"></i>
+                                            {{ __('Delete group user') }}
+                                        </a>
+                                    </li>
+                                </x-dropdown>
+                            </td>
+                        </tr>
+                    @endforeach
+
+                    @if ($accessGroup->users->count() === 0)
+                        <tr>
+                            <td colspan="4" class="text-center italic text-base-content/70">{{ __('No users for this access group') }}</td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
+        </div>
+    </x-card>
 
     <x-card id="files">
         <x-slot name="title" class="mb-4">

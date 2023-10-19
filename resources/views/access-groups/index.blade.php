@@ -1,7 +1,7 @@
 <x-app-layout :title="__('Access')">
     <x-card>
         <x-slot name="title">
-            <i class="fa-solid fa-shield-alt mr-2"></i>
+            <i class="fa-solid fa-user-group mr-2"></i>
             {{ __('Access groups') }}
             <small class="font-normal">({{ count($accessGroups) }})</small>
         </x-slot>
@@ -32,10 +32,10 @@
                             <td>
                                 <a href="{{ route('access-groups.show', ['access_group' => $accessGroup->uuid]) }}" class="link">{{ $accessGroup->label }}</a>
                             </td>
-                            <td class="text-right">{{ $accessGroup->files_count }}</td>
                             <td class="text-right">{{ $accessGroup->users_count }}</td>
+                            <td class="text-right">{{ $accessGroup->files_count }}</td>
                             <td class="text-center">
-                                <input type="checkbox" @checked($accessGroup->readonly) class="checkbox checkbox-primary cursor-not-allowed align-middle" onclick="return false;" />
+                                <input type="checkbox" @checked($accessGroup->readonly) class="checkbox checkbox-primary cursor-not-allowed align-middle" tabindex="-1" onclick="return false;" />
                             </td>
                             <td class="text-center">
                                 @if ($accessGroup->active)

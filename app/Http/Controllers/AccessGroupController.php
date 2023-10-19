@@ -18,6 +18,7 @@ class AccessGroupController extends Controller {
         return view('access-groups.index', [
             'accessGroups' => AccessGroup::query()
                 ->withCount('files')
+                ->withCount('users')
                 ->forUser(auth()->user())
                 ->get(),
         ]);

@@ -30,5 +30,9 @@ class AccessGroup extends Model {
     public function files(): BelongsToMany {
         return $this->belongsToMany(File::class, 'access_group_files');
     }
+
+    public function users(): HasMany {
+        return $this->hasMany(AccessGroupUser::class);
+    }
 }
 

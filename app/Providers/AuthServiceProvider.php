@@ -17,6 +17,8 @@ class AuthServiceProvider extends ServiceProvider {
             \App\Policies\FileVersionPolicy::class,
         \App\Models\AccessGroup::class =>
             \App\Policies\AccessGroupPolicy::class,
+        \App\Models\AccessGroupUser::class =>
+            \App\Policies\AccessGroupUserPolicy::class,
     ];
 
     /**
