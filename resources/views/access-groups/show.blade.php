@@ -125,7 +125,7 @@
                             <td>
                                 <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 3)">
                                     <li>
-                                        <a href="#">
+                                        <a href="{{ route('access-group-users.edit', ['access_group_user' => $accessGroupUser->username]) }}">
                                             <i class="fas fa-edit mr-2"></i>
                                             {{ __('Edit group user') }}
                                         </a>

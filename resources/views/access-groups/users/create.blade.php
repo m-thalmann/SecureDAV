@@ -5,7 +5,10 @@
 
             <div>
                 <span>{{ __('Create group user') }}</span>
-                <small class="block text-sm font-normal text-base-content/60">{{ $accessGroup->label }}</small>
+                <small class="block text-sm font-normal text-base-content/60">
+                    <i class="fa-solid fa-user-group mr-1"></i>
+                    {{ $accessGroup->label }}
+                </small>
             </div>
         </x-slot>
 

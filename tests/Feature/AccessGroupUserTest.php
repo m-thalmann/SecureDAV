@@ -120,4 +120,80 @@ class AccessGroupUserTest extends TestCase {
 
         $response->assertForbidden();
     }
+
+    public function testEditAccessGroupUserViewCanBeRendered(): void {
+        $accessGroupUser = AccessGroupUser::factory()
+            ->for(AccessGroup::factory()->for($this->user))
+            ->create();
+
+        $response = $this->get(
+            "/access-group-users/{$accessGroupUser->username}/edit"
+        );
+
+        $response->assertOk();
+
+        $response->assertSee($accessGroupUser->label);
+        $response->assertSee($accessGroupUser->accessGroup->label);
+    }
+
+    public function testEditAccessGroupUserViewFailsIfAccessGroupUserDoesntExist(): void {
+        $response = $this->get('/access-group-users/nonexistent/edit');
+
+        $response->assertNotFound();
+    }
+
+    public function testEditAccessGroupUserViewFailsIfUserCantUpdateAccessGroupUser(): void {
+        $otherUser = $this->createUser();
+
+        $accessGroupUser = AccessGroupUser::factory()
+            ->for(AccessGroup::factory()->for($otherUser))
+            ->create();
+
+        $response = $this->get(
+            "/access-group-users/{$accessGroupUser->username}/edit"
+        );
+
+        $response->assertForbidden();
+    }
+
+    public function testAccessGroupUserCanBeUpdated(): void {
+        $accessGroupUser = AccessGroupUser::factory()
+            ->for(AccessGroup::factory()->for($this->user))
+            ->create();
+
+        $label = 'Test Access Group User';
+
+        $response = $this->put(
+            "/access-group-users/{$accessGroupUser->username}",
+            [
+                'label' => $label,
+            ]
+        );
+
+        $response->assertRedirect(
+            "/access-groups/{$accessGroupUser->accessGroup->uuid}#users"
+        );
+
+        $this->assertDatabaseHas('access_group_users', [
+            'id' => $accessGroupUser->id,
+            'label' => $label,
+        ]);
+    }
+
+    public function testAccessGroupUserCantBeUpdatedIfUserCantUpdateAccessGroupUser(): void {
+        $otherUser = $this->createUser();
+
+        $accessGroupUser = AccessGroupUser::factory()
+            ->for(AccessGroup::factory()->for($otherUser))
+            ->create();
+
+        $response = $this->put(
+            "/access-group-users/{$accessGroupUser->username}",
+            [
+                'label' => 'Test Access Group User',
+            ]
+        );
+
+        $response->assertForbidden();
+    }
 }

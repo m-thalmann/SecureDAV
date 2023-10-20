@@ -52,5 +52,32 @@ class AccessGroupUserController extends Controller {
             )
             ->with('generated-password', $password);
     }
+
+    public function edit(AccessGroupUser $accessGroupUser): View {
+        return view('access-groups.users.edit', [
+            'accessGroupUser' => $accessGroupUser,
+        ]);
+    }
+
+    public function update(
+        Request $request,
+        AccessGroupUser $accessGroupUser
+    ): RedirectResponse {
+        $data = $request->validate([
+            'label' => ['string', 'max:128'],
+        ]);
+
+        $accessGroupUser->update($data);
+
+        return redirect()
+            ->route('access-groups.show', $accessGroupUser->accessGroup->uuid)
+            ->withFragment('users')
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('Group user updated successfully')
+                )->forDuration()
+            );
+    }
 }
 
