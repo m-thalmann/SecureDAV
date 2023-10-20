@@ -131,12 +131,19 @@
                                         </a>
                                     </li>
 
-                                    <li>
-                                        <a href="#">
-                                            <i class="fa-solid fa-rotate-left mr-2"></i>
-                                            {{ __('Reset password') }}
-                                        </a>
-                                    </li>
+                                    <form
+                                        method="POST"
+                                        action="{{ route('access-group-users.reset-password', ['access_group_user' => $accessGroupUser->username]) }}"
+                                    >
+                                        @csrf
+                                        
+                                        <li>
+                                            <button>
+                                                <i class="fa-solid fa-rotate-left mr-2"></i>
+                                                {{ __('Reset password') }}
+                                            </button>
+                                        </li>
+                                    </form>
 
                                     <form
                                         method="POST"

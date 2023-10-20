@@ -228,4 +228,52 @@ class AccessGroupUserTest extends TestCase {
 
         $response->assertForbidden();
     }
+
+    public function testAccessGroupUserPasswordCanBeReset(): void {
+        $accessGroupUser = AccessGroupUser::factory()
+            ->for(AccessGroup::factory()->for($this->user))
+            ->create();
+
+        $response = $this->post(
+            "/access-group-users/{$accessGroupUser->username}/reset-password"
+        );
+
+        $response->assertRedirect(
+            "/access-groups/{$accessGroupUser->accessGroup->uuid}#users"
+        );
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $accessGroupUser->refresh();
+
+        $response->assertSessionHas('generated-password', function (
+            string $password
+        ) use ($accessGroupUser) {
+            $this->assertTrue(
+                Hash::check($password, $accessGroupUser->password)
+            );
+
+            return true;
+        });
+    }
+
+    public function testAccessGroupUserPasswordCantBeResetForOtherUser(): void {
+        $otherUser = $this->createUser();
+
+        $accessGroupUser = AccessGroupUser::factory()
+            ->for(AccessGroup::factory()->for($otherUser))
+            ->create();
+
+        $response = $this->post(
+            "/access-group-users/{$accessGroupUser->username}/reset-password"
+        );
+
+        $response->assertForbidden();
+    }
 }

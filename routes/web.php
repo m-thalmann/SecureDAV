@@ -185,6 +185,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'access_group' => 'uuid',
     ]);
 
+    Route::post(
+        'access-group-users/{access_group_user:username}/reset-password',
+        [AccessGroupUserController::class, 'resetPassword']
+    )->name('access-group-users.reset-password');
+
     Route::resource(
         'access-groups.access-group-users',
         AccessGroupUserController::class

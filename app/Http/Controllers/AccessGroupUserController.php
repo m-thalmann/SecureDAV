@@ -95,5 +95,30 @@ class AccessGroupUserController extends Controller {
                 )->forDuration()
             );
     }
+
+    public function resetPassword(
+        AccessGroupUser $accessGroupUser
+    ): RedirectResponse {
+        $this->authorize('update', $accessGroupUser);
+
+        $password = Str::password();
+
+        $accessGroupUser
+            ->forceFill([
+                'password' => $password,
+            ])
+            ->save();
+
+        return redirect()
+            ->route('access-groups.show', $accessGroupUser->accessGroup->uuid)
+            ->withFragment('users')
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('Password reset successfully')
+                )->forDuration()
+            )
+            ->with('generated-password', $password);
+    }
 }
 
