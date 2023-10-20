@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccessGroupController;
+use App\Http\Controllers\AccessGroupUserController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\FileController;
@@ -183,6 +184,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('access-groups', AccessGroupController::class)->scoped([
         'access_group' => 'uuid',
     ]);
+
+    Route::resource(
+        'access-groups.access-group-users',
+        AccessGroupUserController::class
+    )
+        ->scoped(['access_group' => 'uuid', 'access_group_user' => 'username'])
+        ->except(['index', 'show'])
+        ->shallow();
 
     // TODO: replace with resource controllers
     Route::view('backups', 'backups.index')->name('backups.index');

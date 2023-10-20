@@ -17,7 +17,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FileVersionController extends Controller {
     public function __construct() {
-        $this->authorizeResource(File::class, 'file');
         $this->authorizeResource(FileVersion::class, 'version');
     }
 

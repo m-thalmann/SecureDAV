@@ -18,7 +18,7 @@ export default {
     // FileIconForExtension
     'text-blue-600',
     'text-green-600',
-    'text-red-600',
+    'text-red-500',
   ],
 
   theme: {

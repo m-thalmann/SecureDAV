@@ -91,7 +91,7 @@ if (!function_exists('getFileIconForExtension')) {
         }
 
         if (in_array($extension, ['pdf'])) {
-            return 'fa-solid fa-file-pdf text-red-600';
+            return 'fa-solid fa-file-pdf text-red-500';
         }
 
         if (in_array($extension, ['zip', 'rar', '7z', 'tar', 'gz', 'bz2'])) {

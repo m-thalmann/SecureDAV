@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\AccessGroup;
+use App\Models\AccessGroupUser;
 use App\Models\File;
 use App\Models\User;
 use App\View\Helpers\SessionMessage;
@@ -24,10 +25,12 @@ class AccessGroupTest extends TestCase {
 
     public function testIndexAccessGroupsViewCanBeRendered(): void {
         $fileCount = 13;
+        $userCount = 11;
 
         $accessGroup = AccessGroup::factory()
             ->for($this->user)
             ->has(File::factory($fileCount)->for($this->user))
+            ->has(AccessGroupUser::factory($userCount), 'users')
             ->create();
 
         $response = $this->get('/access-groups');
@@ -36,6 +39,7 @@ class AccessGroupTest extends TestCase {
 
         $response->assertSee($accessGroup->label);
         $response->assertSee($fileCount);
+        $response->assertSee($userCount);
     }
 
     public function testIndexAccessGroupsViewDoesOnlyShowItemsOfTheAuthenticatedUser(): void {
@@ -96,9 +100,13 @@ class AccessGroupTest extends TestCase {
     }
 
     public function testShowAccessGroupViewCanBeRendered(): void {
+        $fileCount = 10;
+        $userCount = 15;
+
         $accessGroup = AccessGroup::factory()
             ->for($this->user)
-            ->has(File::factory(3)->for($this->user))
+            ->has(File::factory($fileCount)->for($this->user))
+            ->has(AccessGroupUser::factory($userCount), 'users')
             ->create();
 
         $response = $this->get("/access-groups/{$accessGroup->uuid}");
@@ -106,7 +114,8 @@ class AccessGroupTest extends TestCase {
         $response->assertOk();
 
         $response->assertSee($accessGroup->label);
-        $response->assertSee("({$accessGroup->files->count()})");
+        $response->assertSee("({$fileCount})");
+        $response->assertSee("({$userCount})");
     }
 
     public function testShowAccessGroupViewFailsIfAccessGroupDoesNotBelongToUser(): void {
