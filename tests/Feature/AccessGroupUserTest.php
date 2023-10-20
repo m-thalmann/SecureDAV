@@ -180,7 +180,7 @@ class AccessGroupUserTest extends TestCase {
         ]);
     }
 
-    public function testAccessGroupUserCantBeUpdatedIfUserCantUpdateAccessGroupUser(): void {
+    public function testAccessGroupUserCantBeUpdatedForOtherUser(): void {
         $otherUser = $this->createUser();
 
         $accessGroupUser = AccessGroupUser::factory()
@@ -192,6 +192,38 @@ class AccessGroupUserTest extends TestCase {
             [
                 'label' => 'Test Access Group User',
             ]
+        );
+
+        $response->assertForbidden();
+    }
+
+    public function testAccessGroupUserCanBeDeleted(): void {
+        $accessGroupUser = AccessGroupUser::factory()
+            ->for(AccessGroup::factory()->for($this->user))
+            ->create();
+
+        $response = $this->delete(
+            "/access-group-users/{$accessGroupUser->username}"
+        );
+
+        $response->assertRedirect(
+            "/access-groups/{$accessGroupUser->accessGroup->uuid}#users"
+        );
+
+        $this->assertDatabaseMissing('access_group_users', [
+            'id' => $accessGroupUser->id,
+        ]);
+    }
+
+    public function testAccessGroupUserCantBeDeletedForOtherUser(): void {
+        $otherUser = $this->createUser();
+
+        $accessGroupUser = AccessGroupUser::factory()
+            ->for(AccessGroup::factory()->for($otherUser))
+            ->create();
+
+        $response = $this->delete(
+            "/access-group-users/{$accessGroupUser->username}"
         );
 
         $response->assertForbidden();

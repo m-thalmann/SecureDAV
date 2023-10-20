@@ -79,5 +79,21 @@ class AccessGroupUserController extends Controller {
                 )->forDuration()
             );
     }
+
+    public function destroy(
+        AccessGroupUser $accessGroupUser
+    ): RedirectResponse {
+        $accessGroupUser->delete();
+
+        return redirect()
+            ->route('access-groups.show', $accessGroupUser->accessGroup->uuid)
+            ->withFragment('users')
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('Group user deleted successfully')
+                )->forDuration()
+            );
+    }
 }
 

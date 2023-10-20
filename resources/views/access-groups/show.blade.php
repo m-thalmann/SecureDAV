@@ -123,7 +123,7 @@
                                 <span class="tooltip" data-tip="{{ $accessGroupUser->last_access ?? '-' }}">{{ $accessGroupUser->last_access?->diffForHumans() ?? '-' }}</span>
                             </td>
                             <td>
-                                <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 3)">
+                                <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 3)" width="w-52">
                                     <li>
                                         <a href="{{ route('access-group-users.edit', ['access_group_user' => $accessGroupUser->username]) }}">
                                             <i class="fas fa-edit mr-2"></i>
@@ -138,12 +138,21 @@
                                         </a>
                                     </li>
 
-                                    <li>
-                                        <a href="#" class="hover:bg-error hover:text-error-content">
-                                            <i class="fas fa-trash mr-2"></i>
-                                            {{ __('Delete group user') }}
-                                        </a>
-                                    </li>
+                                    <form
+                                        method="POST"
+                                        action="{{ route('access-group-users.destroy', ['access_group_user' => $accessGroupUser->username]) }}"
+                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this group user?') }}')"
+                                    >
+                                        @method('DELETE')
+                                        @csrf
+                                        
+                                        <li>
+                                            <button class="hover:bg-error hover:text-error-content">
+                                                <i class="fas fa-trash mr-2"></i>
+                                                {{ __('Delete group user') }}
+                                            </button>
+                                        </li>
+                                    </form>
                                 </x-dropdown>
                             </td>
                         </tr>
