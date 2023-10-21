@@ -2,10 +2,13 @@
 
 namespace Tests\Unit;
 
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class HelpersTest extends TestCase {
+    use LazilyRefreshDatabase;
+
     /**
      * @dataProvider formatBytesProvider
      */
@@ -92,6 +95,18 @@ class HelpersTest extends TestCase {
 
         $this->assertEquals($expectedPosition, $position);
         $this->assertEquals($expectedAlign, $align);
+    }
+
+    public function testAuthUserReturnsTheAuthenticatedUser(): void {
+        $user = $this->createUser();
+
+        auth()->login($user);
+
+        $this->assertEquals($user->id, authUser()->id);
+    }
+
+    public function testAuthUserReturnsNullIfNoUserIsAuthenticated(): void {
+        $this->assertNull(authUser());
     }
 
     public static function formatBytesProvider(): array {

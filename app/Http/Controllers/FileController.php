@@ -64,7 +64,7 @@ class FileController extends Controller {
                 'max:128',
                 Rule::unique('files', 'name')
                     ->where('directory_id', $directory?->id)
-                    ->where('user_id', $request->user()->id)
+                    ->where('user_id', authUser()->id)
                     ->where('extension', $extension)
                     ->withoutTrashed(),
             ],
@@ -78,18 +78,17 @@ class FileController extends Controller {
             ? Str::random(16)
             : null;
 
-        $file = File::make([
-            'directory_id' => $directory?->id,
-            'name' => $data['name'],
-            'description' => $data['description'] ?? null,
-            'mime_type' => $requestFile->getClientMimeType(),
-            'extension' => strlen($extension) > 0 ? $extension : null,
-        ]);
-
-        $file->forceFill([
-            'user_id' => $request->user()->id,
-            'encryption_key' => $encryptionKey,
-        ]);
+        $file = authUser()
+            ->files()
+            ->make()
+            ->forceFill([
+                'directory_id' => $directory?->id,
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+                'mime_type' => $requestFile->getClientMimeType(),
+                'extension' => strlen($extension) > 0 ? $extension : null,
+                'encryption_key' => $encryptionKey,
+            ]);
 
         try {
             DB::transaction(function () use (

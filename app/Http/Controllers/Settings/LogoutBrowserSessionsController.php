@@ -21,7 +21,7 @@ class LogoutBrowserSessionsController extends Controller {
 
         DB::connection(config('session.connection'))
             ->table(config('session.table', 'sessions'))
-            ->where('user_id', $request->user()->getAuthIdentifier())
+            ->where('user_id', authUser()->getAuthIdentifier())
             ->delete();
 
         auth()->logout();

@@ -34,12 +34,13 @@ class AccessGroupController extends Controller {
             'readonly' => ['nullable'],
         ]);
 
-        $accessGroup = AccessGroup::forceCreate([
-            'label' => $data['label'],
-            'readonly' => !!Arr::get($data, 'readonly', false),
-            'active' => true,
-            'user_id' => $request->user()->id,
-        ]);
+        $accessGroup = authUser()
+            ->accessGroups()
+            ->forceCreate([
+                'label' => $data['label'],
+                'readonly' => !!Arr::get($data, 'readonly', false),
+                'active' => true,
+            ]);
 
         return redirect()
             ->route('access-groups.show', $accessGroup->uuid)

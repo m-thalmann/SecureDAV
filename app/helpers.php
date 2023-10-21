@@ -139,3 +139,16 @@ if (!function_exists('getTableLoopDropdownPositionAligned')) {
         return 'left-start';
     }
 }
+
+if (!function_exists('authUser')) {
+    /**
+     * Returns the currently authenticated user.
+     *
+     * @param string|null $guard The guard to use
+     *
+     * @return User|null
+     */
+    function authUser(?string $guard = null): ?User {
+        return auth($guard)->user();
+    }
+}

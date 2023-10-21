@@ -46,23 +46,16 @@ class DirectoryController extends Controller {
                 'max:128',
                 Rule::unique('directories', 'name')
                     ->where('parent_directory_id', $parentDirectory?->id)
-                    ->where('user_id', $request->user()->id),
+                    ->where('user_id', authUser()->id),
             ],
         ]);
 
-        /**
-         * @var Directory
-         */
-        $directory = Directory::make([
-            'parent_directory_id' => $parentDirectory?->id,
-            'name' => $data['name'],
-        ]);
-
-        $directory->forceFill([
-            'user_id' => $request->user()->id,
-        ]);
-
-        $directory->save();
+        $directory = authUser()
+            ->directories()
+            ->create([
+                'parent_directory_id' => $parentDirectory?->id,
+                'name' => $data['name'],
+            ]);
 
         return redirect()
             ->route('browse.index', $directory->uuid)

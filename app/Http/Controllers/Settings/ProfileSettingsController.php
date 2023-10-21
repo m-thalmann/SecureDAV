@@ -15,21 +15,20 @@ use Jenssegers\Agent\Agent;
 
 class ProfileSettingsController extends Controller {
     public function show(Request $request): View {
-        $twoFactorEnabled = $request->user()->two_factor_secret !== null;
+        $twoFactorEnabled = authUser()->two_factor_secret !== null;
         $twoFactorConfirmed =
-            $twoFactorEnabled &&
-            $request->user()->two_factor_confirmed_at !== null;
+            $twoFactorEnabled && authUser()->two_factor_confirmed_at !== null;
 
         return view('settings.profile.show', [
-            'user' => $request->user(),
+            'user' => authUser(),
             'twoFactorEnabled' => $twoFactorEnabled,
             'twoFactorConfirmed' => $twoFactorConfirmed,
             'sessions' => $this->getSessions($request)?->all(),
         ]);
     }
 
-    public function destroy(Request $request): RedirectResponse {
-        if (!$request->user()->delete()) {
+    public function destroy(): RedirectResponse {
+        if (!authUser()->delete()) {
             return back()
                 ->withFragment('delete-account')
                 ->with(
@@ -70,7 +69,7 @@ class ProfileSettingsController extends Controller {
 
         return DB::connection(config('session.connection'))
             ->table(config('session.table', 'sessions'))
-            ->where('user_id', $request->user()->getAuthIdentifier())
+            ->where('user_id', authUser()->getAuthIdentifier())
             ->orderBy('last_activity', 'desc')
             ->get()
             ->map(function (mixed $session) use ($request) {

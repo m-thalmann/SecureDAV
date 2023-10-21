@@ -73,15 +73,7 @@
                     <i class="fa-solid fa-eye"></i>
                 </button>
 
-                <button
-                    class="btn btn-circle btn-sm"
-                    onclick="
-                        navigator.clipboard.writeText('{{ str_replace('\'', '\\\'', session('generated-password')) }}');
-                        changeClass(this.getElementsByTagName('i')[0], 'fa-solid fa-check text-success', 1000)
-                    "
-                >
-                    <i class="fa-solid fa-copy"></i>
-                </button>
+                <x-copy-button :data="session('generated-password')" />
             </div>
         </div>
     @endif

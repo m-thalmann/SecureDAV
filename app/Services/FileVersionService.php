@@ -150,18 +150,17 @@ class FileVersionService {
             $bytes,
             $newPath
         ) {
-            $newVersion = new FileVersion();
-
-            $newVersion->forceFill([
-                'file_id' => $file->id,
-                'label' => $label,
-                'version' => $file->next_version,
-                'storage_path' => $newPath,
-                'checksum' => $checksum,
-                'bytes' => $bytes,
-            ]);
-
-            $newVersion->save();
+            $newVersion = $file
+                ->versions()
+                ->make()
+                ->forceFill([
+                    'label' => $label,
+                    'version' => $file->next_version,
+                    'storage_path' => $newPath,
+                    'checksum' => $checksum,
+                    'bytes' => $bytes,
+                ])
+                ->save();
 
             $nextVersionSetSuccessfully = $file
                 ->forceFill([
@@ -348,3 +347,4 @@ class FileVersionService {
         }
     }
 }
+
