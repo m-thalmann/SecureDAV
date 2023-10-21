@@ -3,7 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use App\Providers\RouteServiceProvider;
-use App\View\Helpers\SessionMessage;
+use App\Support\SessionMessage;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -106,3 +106,4 @@ class EmailVerificationTest extends TestCase {
         });
     }
 }
+

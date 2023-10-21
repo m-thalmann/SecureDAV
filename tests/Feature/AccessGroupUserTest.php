@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Models\AccessGroup;
 use App\Models\AccessGroupUser;
 use App\Models\User;
-use App\View\Helpers\SessionMessage;
+use App\Support\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;

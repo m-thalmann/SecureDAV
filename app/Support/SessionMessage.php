@@ -1,6 +1,6 @@
 <?php
 
-namespace App\View\Helpers;
+namespace App\Support;
 
 class SessionMessage {
     const TYPE_SUCCESS = 'success';

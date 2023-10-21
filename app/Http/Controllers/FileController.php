@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Directory;
 use App\Models\File;
 use App\Services\FileVersionService;
-use App\View\Helpers\SessionMessage;
+use App\Support\SessionMessage;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccessGroup;
-use App\View\Helpers\SessionMessage;
+use App\Support\SessionMessage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;

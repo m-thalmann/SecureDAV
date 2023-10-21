@@ -2,7 +2,7 @@
 
 namespace App\Auth\Fortify\Responses;
 
-use App\View\Helpers\SessionMessage;
+use App\Support\SessionMessage;
 use Laravel\Fortify\Http\Responses\PasswordResetResponse as BasePasswordResetResponse;
 
 class PasswordResetResponse extends BasePasswordResetResponse {

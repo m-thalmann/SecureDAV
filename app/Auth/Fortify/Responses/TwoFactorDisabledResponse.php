@@ -2,7 +2,7 @@
 
 namespace App\Auth\Fortify\Responses;
 
-use App\View\Helpers\SessionMessage;
+use App\Support\SessionMessage;
 use Laravel\Fortify\Http\Responses\TwoFactorDisabledResponse as BaseTwoFactorDisabledResponse;
 
 class TwoFactorDisabledResponse extends BaseTwoFactorDisabledResponse {

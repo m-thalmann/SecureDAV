@@ -4,7 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
-use App\View\Helpers\SessionMessage;
+use App\Support\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use PragmaRX\Google2FA\Google2FA;
 use Tests\TestCase;

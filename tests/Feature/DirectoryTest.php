@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Models\Directory;
 use App\Models\File;
 use App\Models\User;
-use App\View\Helpers\SessionMessage;
+use App\Support\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 

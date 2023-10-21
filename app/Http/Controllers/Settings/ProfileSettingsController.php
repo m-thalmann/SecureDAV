@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
-use App\View\Helpers\SessionMessage;
+use App\Support\SessionMessage;
 use Carbon\Carbon;
 use Illuminate\Auth\SessionGuard;
 use Illuminate\Http\RedirectResponse;

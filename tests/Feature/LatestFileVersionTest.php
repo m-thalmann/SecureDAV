@@ -7,7 +7,7 @@ use App\Models\FileVersion;
 use App\Models\User;
 use App\Services\FileEncryptionService;
 use App\Services\FileVersionService;
-use App\View\Helpers\SessionMessage;
+use App\Support\SessionMessage;
 use Exception;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;

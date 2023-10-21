@@ -4,9 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Directory;
 use App\Models\File;
+use App\Models\FileVersion;
 use App\Models\User;
 use App\Services\FileVersionService;
-use App\View\Helpers\SessionMessage;
+use App\Support\SessionMessage;
 use Exception;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -277,8 +278,11 @@ class FileTest extends TestCase {
     }
 
     public function testShowFileViewCanBeRendered(): void {
+        $versionCount = 4;
+
         $file = File::factory()
             ->for($this->user)
+            ->has(FileVersion::factory($versionCount), 'versions')
             ->create();
 
         $response = $this->get("/files/{$file->uuid}");
@@ -286,6 +290,7 @@ class FileTest extends TestCase {
         $response->assertOk();
 
         $response->assertSee($file->fileName);
+        $response->assertSee("($versionCount)");
     }
 
     public function testShowFileViewFailsIfFileDoesNotBelongToUser(): void {
@@ -460,3 +465,4 @@ class FileTest extends TestCase {
         $response->assertNotFound();
     }
 }
+

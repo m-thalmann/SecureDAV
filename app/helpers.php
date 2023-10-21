@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 

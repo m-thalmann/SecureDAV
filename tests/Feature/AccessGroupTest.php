@@ -6,7 +6,7 @@ use App\Models\AccessGroup;
 use App\Models\AccessGroupUser;
 use App\Models\File;
 use App\Models\User;
-use App\View\Helpers\SessionMessage;
+use App\Support\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
