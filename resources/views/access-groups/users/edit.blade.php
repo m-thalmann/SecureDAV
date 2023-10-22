@@ -1,15 +1,11 @@
 <x-app-layout :title="__('Edit group user')">
     <x-card dialog>
-        <x-slot name="title">
-            <i class="fa-solid fa-user-pen mr-2"></i>
-
-            <div>
-                {{ __('Edit group user') }}
-                <small class="block text-sm font-normal text-base-content/60">
-                    <i class="fa-solid fa-user-group mr-1"></i>
-                    {{ $accessGroupUser->accessGroup->label }}
-                </small>
-            </div>
+        <x-slot name="title" icon="fa-solid fa-user-pen">
+            {{ __('Edit group user') }}
+        </x-slot>
+            
+        <x-slot name="subtitle" icon="fa-solid fa-user-group">
+            {{ $accessGroupUser->accessGroup->label }}
         </x-slot>
 
         <form action="{{ route('access-group-users.update', ['access_group_user' => $accessGroupUser->username]) }}" method="post" id="edit-form">

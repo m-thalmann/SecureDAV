@@ -7,8 +7,7 @@
     </x-breadcrumbs>
 
     <x-card dialog>
-        <x-slot name="title">
-            <i class="fas fa-edit mr-2"></i>
+        <x-slot name="title" icon="fas fa-edit">
             {{ __('Edit version') }}
         </x-slot>
 

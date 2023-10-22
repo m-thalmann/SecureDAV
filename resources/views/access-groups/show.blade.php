@@ -79,9 +79,8 @@
     @endif
 
     <x-card id="users">
-        <x-slot name="title">
+        <x-slot name="title" :amount="$accessGroup->users->count()">
             {{ __('Group users') }}
-            <small class="font-normal">({{ $accessGroup->users->count() }})</small>
         </x-slot>
 
         <div class="actions my-4">
@@ -168,9 +167,8 @@
     </x-card>
 
     <x-card id="files">
-        <x-slot name="title">
+        <x-slot name="title" :amount="$accessGroup->files->count()">
             {{ __('Accessible files') }}
-            <small class="font-normal">({{ $accessGroup->files->count() }})</small>
         </x-slot>
 
         <div class="actions my-4">

@@ -1,9 +1,7 @@
 <x-app-layout :title="__('Access')">
     <x-card>
-        <x-slot name="title">
-            <i class="fa-solid fa-user-group mr-2"></i>
+        <x-slot name="title" icon="fa-solid fa-user-group" :amount="count($accessGroups)">
             {{ __('Access groups') }}
-            <small class="font-normal">({{ count($accessGroups) }})</small>
         </x-slot>
 
         <div class="actions my-4">

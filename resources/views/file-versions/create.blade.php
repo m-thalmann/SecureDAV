@@ -8,8 +8,7 @@
     <x-breadcrumbs :file="$file" class="px-4" />
 
     <x-card dialog x-data="{ uploadFile: {{ $showFormInput ? 'true' : 'false' }} }">
-        <x-slot name="title">
-            <i class="fa-solid fa-clock-rotate-left mr-2"></i>
+        <x-slot name="title" icon="fa-solid fa-clock-rotate-left">
             {{ __('Create new version') }}
         </x-slot>
 

@@ -1,15 +1,11 @@
 <x-app-layout :title="__('Add access to file')">
     <x-card dialog>
-        <x-slot name="title">
-            <i class="fa-solid fa-file-circle-plus mr-2"></i>
-
-            <div>
-                <span>{{ __('Add access to file') }}</span>
-                <small class="block text-sm font-normal text-base-content/60">
-                    <i class="fa-solid fa-user-group mr-1"></i>
-                    {{ $accessGroup->label }}
-                </small>
-            </div>
+        <x-slot name="title" icon="fa-solid fa-file-circle-plus">
+            {{ __('Add access to file') }}
+        </x-slot>
+            
+        <x-slot name="subtitle" icon="fa-solid fa-user-group">
+            {{ $accessGroup->label }}
         </x-slot>
 
         <x-file-browser.list :breadcrumbs="$breadcrumbs">

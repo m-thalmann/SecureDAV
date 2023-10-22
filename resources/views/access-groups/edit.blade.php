@@ -1,7 +1,6 @@
 <x-app-layout :title="__('Edit access group')">
     <x-card dialog>
-        <x-slot name="title">
-            <i class="fa-solid fa-user-group mr-2"></i>
+        <x-slot name="title" icon="fa-solid fa-user-group">
             {{ __('Edit access group') }}
         </x-slot>
 

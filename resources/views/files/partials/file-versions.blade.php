@@ -1,7 +1,6 @@
 <x-card id="file-versions">
-    <x-slot name="title" class="mb-4">
+    <x-slot name="title" :amount="$file->versions->count()" class="mb-4">
         {{ __('Versions') }}
-        <small class="font-normal">({{ $file->versions->count() }})</small>
     </x-slot>
 
     <div class="actions flex gap-4 items-center mb-4">

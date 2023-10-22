@@ -2,8 +2,7 @@
     <x-breadcrumbs :directories="$parentDirectory?->breadcrumbs" class="px-4" />
 
     <x-card dialog>
-        <x-slot name="title">
-            <i class="fas fa-folder-plus mr-2"></i>
+        <x-slot name="title" icon="fas fa-folder-plus">
             {{ __('Create directory') }}
         </x-slot>
 

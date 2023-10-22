@@ -1,15 +1,11 @@
 <x-app-layout :title="__('Create group user')">
     <x-card dialog>
-        <x-slot name="title">
-            <i class="fa-solid fa-user-plus mr-2"></i>
-
-            <div>
-                <span>{{ __('Create group user') }}</span>
-                <small class="block text-sm font-normal text-base-content/60">
-                    <i class="fa-solid fa-user-group mr-1"></i>
-                    {{ $accessGroup->label }}
-                </small>
-            </div>
+        <x-slot name="title" icon="fa-solid fa-user-plus">
+            {{ __('Create group user') }}
+        </x-slot>
+            
+        <x-slot name="subtitle" icon="fa-solid fa-user-group">
+            {{ $accessGroup->label }}
         </x-slot>
 
         <div class="alert bg-base-300 my-3">

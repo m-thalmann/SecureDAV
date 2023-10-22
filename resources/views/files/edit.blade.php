@@ -2,8 +2,7 @@
     <x-breadcrumbs :file="$file" class="px-4" />
 
     <x-card dialog>
-        <x-slot name="title">
-            <i class="fas fa-edit mr-2"></i>
+        <x-slot name="title" icon="fas fa-edit">
             {{ __('Edit file') }}
         </x-slot>
 

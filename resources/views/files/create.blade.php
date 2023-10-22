@@ -2,8 +2,7 @@
     <x-breadcrumbs :directories="$directory?->breadcrumbs" class="px-4"/>
 
     <x-card dialog>
-        <x-slot name="title">
-            <i class="fa-solid fa-file-circle-plus mr-2"></i>
+        <x-slot name="title" icon="fa-solid fa-file-circle-plus">
             {{ __('Create file') }}
         </x-slot>
 
