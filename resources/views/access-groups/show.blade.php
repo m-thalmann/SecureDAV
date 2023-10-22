@@ -168,10 +168,17 @@
     </x-card>
 
     <x-card id="files">
-        <x-slot name="title" class="mb-4">
+        <x-slot name="title">
             {{ __('Accessible files') }}
             <small class="font-normal">({{ $accessGroup->files->count() }})</small>
         </x-slot>
+
+        <div class="actions my-4">
+            <a href="{{ route('access-groups.files.create', ['access_group' => $accessGroup->uuid]) }}" class="btn btn-neutral btn-sm">
+                <i class="fa-solid fa-file-circle-plus mr-2"></i>
+                {{ __('Add access to file') }}
+            </a>
+        </div>
 
         <div class="overflow-auto w-full bg-base-100 rounded-md">
             <x-files-table.table :filesCount="count($accessGroup->files)" :showCountSummary="false">
