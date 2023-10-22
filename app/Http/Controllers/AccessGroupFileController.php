@@ -110,5 +110,26 @@ class AccessGroupFileController extends Controller {
                 )->forDuration()
             );
     }
+
+    public function destroy(
+        AccessGroup $accessGroup,
+        File $file
+    ): RedirectResponse {
+        $this->authorize('update', $accessGroup);
+
+        $accessGroup->files()->detach($file);
+
+        return redirect()
+            ->route('access-groups.show', [
+                'access_group' => $accessGroup,
+            ])
+            ->withFragment('files')
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('File access removed successfully')
+                )->forDuration()
+            );
+    }
 }
 

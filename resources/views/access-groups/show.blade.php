@@ -186,12 +186,17 @@
                     <x-files-table.file-row :file="$file">
                         <x-slot name="actions">
                             <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)">
-                                <li>
-                                    <a href="#" class="hover:bg-error hover:text-error-content">
-                                        <i class="fa-solid fa-user-slash mr-2"></i>
-                                        {{ __('Revoke access') }}
-                                    </a>
-                                </li>
+                                <form method="POST" action="{{ route('access-groups.files.destroy', ['access_group' => $accessGroup->uuid, 'file' => $file->uuid]) }}" onsubmit="return confirm('{{ __('Are you sure you want to revoke access to this file?') }}')">
+                                    @method('DELETE')
+                                    @csrf
+                                    
+                                    <li>
+                                        <button class="hover:bg-error hover:text-error-content">
+                                            <i class="fa-solid fa-user-slash mr-2"></i>
+                                            {{ __('Revoke access') }}
+                                        </button>
+                                    </li>
+                                </form>
                             </x-dropdown>
                         </x-slot>
                     </x-files-table.file-row>

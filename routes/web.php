@@ -202,7 +202,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('access-groups.files', AccessGroupFileController::class)
         ->scoped([
             'access_group' => 'uuid',
-            'access_group_file' => 'uuid',
+            'file' => 'uuid',
         ])
         ->only(['create', 'store', 'destroy']);
 

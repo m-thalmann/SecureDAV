@@ -299,4 +299,70 @@ class AccessGroupFileTest extends TestCase {
             'file_id' => $file->id,
         ]);
     }
+
+    public function testAccessGroupFileCanBeDeleted(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $accessGroup = AccessGroup::factory()
+            ->for($this->user)
+            ->hasAttached($file)
+            ->create();
+
+        $response = $this->delete(
+            "/access-groups/{$accessGroup->uuid}/files/{$file->uuid}"
+        );
+
+        $response->assertRedirect("/access-groups/{$accessGroup->uuid}#files");
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $this->assertDatabaseMissing('access_group_files', [
+            'access_group_id' => $accessGroup->id,
+            'file_id' => $file->id,
+        ]);
+    }
+
+    public function testAccessGroupFileCantBeDeletedIfUserCantUpdateAccessGroup(): void {
+        $otherUser = $this->createUser();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $accessGroup = AccessGroup::factory()
+            ->for($otherUser)
+            ->hasAttached($file)
+            ->create();
+
+        $response = $this->delete(
+            "/access-groups/{$accessGroup->uuid}/files/{$file->uuid}"
+        );
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseHas('access_group_files', [
+            'access_group_id' => $accessGroup->id,
+            'file_id' => $file->id,
+        ]);
+    }
+
+    public function testAccessGroupFileCantBeDeletedIfItDoesNotExist(): void {
+        $accessGroup = AccessGroup::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->delete(
+            "/access-groups/{$accessGroup->uuid}/files/non-existent"
+        );
+
+        $response->assertNotFound();
+    }
 }
