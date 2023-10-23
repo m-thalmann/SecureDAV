@@ -8,15 +8,15 @@
             <x-slot name="icon"><i class="fas fa-add"></i></x-slot>
 
             <li>
-                <a href="{{ route('directories.create') . ($currentDirectory ? "?directory={$currentDirectory->uuid}" : '') }}">
-                    <i class="fa-solid fa-folder-plus w-6"></i>
-                    {{ __('New directory') }}
-                </a>
-            </li>
-            <li>
                 <a href="{{ route('files.create') . ($currentDirectory ? "?directory={$currentDirectory->uuid}" : '') }}">
                     <i class="fa-solid fa-file-circle-plus w-6"></i>
                     {{ __('New file') }}
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('directories.create') . ($currentDirectory ? "?directory={$currentDirectory->uuid}" : '') }}">
+                    <i class="fa-solid fa-folder-plus w-6"></i>
+                    {{ __('New directory') }}
                 </a>
             </li>
         </x-dropdown>

@@ -23,6 +23,26 @@ class Directory extends Model {
         return $query->where('user_id', $user->id);
     }
 
+    public function scopeInDirectory(
+        Builder $query,
+        ?Directory $directory
+    ): Builder {
+        if ($directory === null) {
+            return $query
+                ->whereNull('parent_directory_id')
+                ->forUser(authUser());
+        }
+
+        return $query->where('parent_directory_id', $directory->id);
+    }
+
+    public function scopeOrdered(
+        Builder $query,
+        string $direction = 'asc'
+    ): Builder {
+        return $query->orderBy('name', $direction);
+    }
+
     public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
@@ -32,11 +52,14 @@ class Directory extends Model {
     }
 
     public function directories(): HasMany {
-        return $this->hasMany(Directory::class, 'parent_directory_id');
+        return $this->hasMany(
+            Directory::class,
+            'parent_directory_id'
+        )->ordered();
     }
 
     public function files(): HasMany {
-        return $this->hasMany(File::class);
+        return $this->hasMany(File::class)->ordered();
     }
 
     protected function breadcrumbs(): Attribute {

@@ -38,6 +38,26 @@ class File extends Model {
         return $query->where('user_id', $user->id);
     }
 
+    public function scopeInDirectory(
+        Builder $query,
+        ?Directory $directory
+    ): Builder {
+        if ($directory === null) {
+            return $query->whereNull('directory_id')->forUser(authUser());
+        }
+
+        return $query->where('directory_id', $directory->id);
+    }
+
+    public function scopeOrdered(
+        Builder $query,
+        string $direction = 'asc'
+    ): Builder {
+        return $query
+            ->orderBy('name', $direction)
+            ->orderBy('extension', $direction);
+    }
+
     public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }

@@ -2,7 +2,7 @@
     'file' => null
 ])
 
-<tr>
+<tr class="hover">
     <td class="text-center pr-0">
         <i class="{{ $file->fileIcon }} text-xl align-middle"></i>
     </td>
