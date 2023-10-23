@@ -55,7 +55,7 @@ class AccessGroupUserController extends Controller {
 
     public function edit(AccessGroupUser $accessGroupUser): View {
         return view('access-groups.users.edit', [
-            'accessGroupUser' => $accessGroupUser,
+            'accessGroupUser' => $accessGroupUser->load('accessGroup'),
         ]);
     }
 

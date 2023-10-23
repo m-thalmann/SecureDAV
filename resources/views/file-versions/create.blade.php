@@ -1,6 +1,4 @@
 @php
-    $hasVersion = $file->versions()->exists();
-
     $showFormInput = !$hasVersion || old('new_file');
 @endphp
 

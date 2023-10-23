@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Support\SessionMessage;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class LogoutBrowserSessionsController extends Controller {
-    public function __invoke(Request $request): RedirectResponse {
+    public function __invoke(): RedirectResponse {
         if (config('session.driver') !== 'database') {
             return back()
                 ->withFragment('browser-sessions')

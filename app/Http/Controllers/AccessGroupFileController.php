@@ -37,10 +37,10 @@ class AccessGroupFileController extends Controller {
         } else {
             $directoriesQuery = Directory::query()
                 ->whereNull('parent_directory_id')
-                ->forUser(auth()->user());
+                ->forUser(authUser());
             $filesQuery = File::query()
                 ->whereNull('directory_id')
-                ->forUser(auth()->user());
+                ->forUser(authUser());
         }
 
         $directories = $directoriesQuery

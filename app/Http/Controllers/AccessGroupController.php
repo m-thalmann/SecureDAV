@@ -19,7 +19,7 @@ class AccessGroupController extends Controller {
             'accessGroups' => AccessGroup::query()
                 ->withCount('files')
                 ->withCount('users')
-                ->forUser(auth()->user())
+                ->forUser(authUser())
                 ->get(),
         ]);
     }
@@ -54,7 +54,9 @@ class AccessGroupController extends Controller {
 
     public function show(AccessGroup $accessGroup): View {
         return view('access-groups.show', [
-            'accessGroup' => $accessGroup->load('files'),
+            'accessGroup' => $accessGroup
+                ->load('users')
+                ->load('files.latestVersion'),
         ]);
     }
 

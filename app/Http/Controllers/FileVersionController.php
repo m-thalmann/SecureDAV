@@ -23,7 +23,10 @@ class FileVersionController extends Controller {
     public function create(File $file): View {
         $this->authorize('update', $file);
 
-        return view('file-versions.create', ['file' => $file]);
+        return view('file-versions.create', [
+            'file' => $file,
+            'hasVersion' => $file->versions()->exists(),
+        ]);
     }
 
     public function store(
@@ -102,7 +105,10 @@ class FileVersionController extends Controller {
     }
 
     public function edit(File $file, FileVersion $version): View {
-        return view('file-versions.edit', ['fileVersion' => $version]);
+        return view('file-versions.edit', [
+            'file' => $file,
+            'fileVersion' => $version,
+        ]);
     }
 
     public function update(

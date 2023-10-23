@@ -1,5 +1,5 @@
 <x-app-layout :title="__('Edit version')">
-    <x-breadcrumbs :file="$fileVersion->file" class="px-4">
+    <x-breadcrumbs :file="$file" class="px-4">
         <li>
             <i class="fa-solid fa-clock-rotate-left mr-1"></i>
             {{ $fileVersion->version }}
@@ -12,7 +12,7 @@
         </x-slot>
 
         <form
-            action="{{ route('files.versions.update', ['file' => $fileVersion->file->uuid, 'version' => $fileVersion->version]) }}"
+            action="{{ route('files.versions.update', ['file' => $file->uuid, 'version' => $fileVersion->version]) }}"
             method="post"
             id="edit-form"
         >
@@ -27,7 +27,7 @@
         </form>
 
         <x-slot name="actions">
-            <a href="{{ route('files.show', ['file' => $fileVersion->file]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ route('files.show', ['file' => $file]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Save') }}" form="edit-form" class="btn btn-primary">
         </x-slot>
     </x-card>

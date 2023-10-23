@@ -120,7 +120,15 @@ class FileController extends Controller {
     }
 
     public function show(File $file): View {
-        return view('files.show', ['file' => $file]);
+        $file
+            ->load('latestVersion')
+            ->load('versions')
+            ->load('accessGroups');
+        $file->accessGroups->loadCount('users');
+
+        return view('files.show', [
+            'file' => $file,
+        ]);
     }
 
     public function edit(File $file): View {
