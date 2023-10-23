@@ -86,4 +86,6 @@
     @endif
 
     @include('files.partials.file-versions')
+
+    @include('files.partials.file-access-groups')
 </x-app-layout>

@@ -310,11 +310,11 @@ class AccessGroupFileTest extends TestCase {
             ->hasAttached($file)
             ->create();
 
-        $response = $this->delete(
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->delete(
             "/access-groups/{$accessGroup->uuid}/files/{$file->uuid}"
         );
 
-        $response->assertRedirect("/access-groups/{$accessGroup->uuid}#files");
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
         $response->assertSessionHas('snackbar', function (
             SessionMessage $message

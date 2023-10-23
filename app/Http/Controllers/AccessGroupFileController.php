@@ -119,17 +119,12 @@ class AccessGroupFileController extends Controller {
 
         $accessGroup->files()->detach($file);
 
-        return redirect()
-            ->route('access-groups.show', [
-                'access_group' => $accessGroup,
-            ])
-            ->withFragment('files')
-            ->with(
-                'snackbar',
-                SessionMessage::success(
-                    __('File access removed successfully')
-                )->forDuration()
-            );
+        return back()->with(
+            'snackbar',
+            SessionMessage::success(
+                __('File access removed successfully')
+            )->forDuration()
+        );
     }
 }
 

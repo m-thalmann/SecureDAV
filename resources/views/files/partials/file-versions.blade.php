@@ -16,7 +16,7 @@
     </div>
 
     @if ($file->versions->count() > 0)
-        <div class="overflow-auto w-full max-h-[25em]">
+        <div class="overflow-auto w-full bg-base-100 rounded-md max-h-[25em]">
             <table class="table">
                 <thead>
                     <tr>
@@ -31,7 +31,7 @@
                 </thead>
                 <tbody>
                     @foreach ($file->versions as $version)
-                        <tr class="hover:bg-base-100">
+                        <tr>
                             <td class="text-center">{{ $version->version }}</td>
                             <td>{{ $version->label ?? '-' }}</td>
                             <td>{{ formatBytes($version->bytes) }}</td>
