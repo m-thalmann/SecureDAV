@@ -16,7 +16,7 @@
             @foreach ($files as $file)
                 <x-file-browser.file-entry :file="$file">
                     <x-slot name="action">
-                        <button class="btn btn-sm btn-circle btn-secondary" onclick="onSelectFile('{{ $file->uuid }}')">
+                        <button class="btn btn-sm btn-circle btn-secondary" onclick="onSelectFile(`{{ $file->uuid }}`)">
                             <i class="fa-solid fa-file-circle-plus"></i>
                         </button>
                     </x-slot>

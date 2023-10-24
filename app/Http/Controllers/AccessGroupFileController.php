@@ -6,6 +6,7 @@ use App\Models\AccessGroup;
 use App\Models\Directory;
 use App\Models\File;
 use App\Support\SessionMessage;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -31,6 +32,11 @@ class AccessGroupFileController extends Controller {
             ->all();
         $files = File::query()
             ->inDirectory($directory)
+            ->whereNot->whereHas('accessGroups', function (Builder $query) use (
+                $accessGroup
+            ) {
+                $query->where('access_group_id', $accessGroup->id);
+            })
             ->ordered()
             ->get()
             ->all();

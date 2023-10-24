@@ -45,7 +45,11 @@
                             </td>
                             <td>
                                 <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)">
-                                    <form method="POST" action="{{ route('access-groups.files.destroy', ['access_group' => $accessGroup->uuid, 'file' => $file->uuid]) }}" onsubmit="return confirm('{{ __('Are you sure you want to revoke access to this file?') }}')">
+                                    <form
+                                        method="POST"
+                                        action="{{ route('access-groups.files.destroy', ['access_group' => $accessGroup->uuid, 'file' => $file->uuid]) }}"
+                                        onsubmit="return confirm(`{{ __('Are you sure you want to revoke access to this file?') }}`)"
+                                    >
                                         @method('DELETE')
                                         @csrf
                                         

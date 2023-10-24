@@ -59,7 +59,7 @@
                                 <form
                                     method="POST"
                                     action="{{ route('access-group-users.destroy', ['access_group_user' => $accessGroupUser->username]) }}"
-                                    onsubmit="return confirm('{{ __('Are you sure you want to delete this group user?') }}')"
+                                    onsubmit="return confirm(`{{ __('Are you sure you want to delete this group user?') }}`)"
                                 >
                                     @method('DELETE')
                                     @csrf

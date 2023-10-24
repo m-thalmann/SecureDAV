@@ -105,6 +105,30 @@ class AccessGroupFileTest extends TestCase {
         }
     }
 
+    public function testCreateAccessGroupFileViewOnlyShowsFilesNotYetInTheAccessGroup(): void {
+        $nonGroupFile = File::factory()
+            ->for($this->user)
+            ->create(['directory_id' => null]);
+
+        $groupFile = File::factory()
+            ->for($this->user)
+            ->create(['directory_id' => null]);
+
+        $accessGroup = AccessGroup::factory()
+            ->for($this->user)
+            ->hasAttached($groupFile)
+            ->create();
+
+        $response = $this->get(
+            "/access-groups/{$accessGroup->uuid}/files/create"
+        );
+
+        $response->assertOk();
+
+        $response->assertSee($nonGroupFile->name);
+        $response->assertDontSee($groupFile->name);
+    }
+
     public function testCreateAccessGroupFileViewDoesNotShowDirectoriesAndFilesOfOtherUser(): void {
         $otherUser = $this->createUser();
 

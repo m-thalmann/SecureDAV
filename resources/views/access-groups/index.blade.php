@@ -60,7 +60,7 @@
                                     <form
                                         method="POST"
                                         action="{{ route('access-groups.destroy', ['access_group' => $accessGroup->uuid]) }}"
-                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this access group and all of it\'s users?') }}')"
+                                        onsubmit="return confirm(`{{ __('Are you sure you want to delete this access group and all of it\'s users?') }}`)"
                                     >
                                         @method('DELETE')
                                         @csrf

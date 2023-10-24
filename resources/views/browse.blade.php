@@ -93,7 +93,11 @@
                                 </a>
                             </li>
 
-                            <form method="POST" action="{{ route('files.destroy', ['file' => $file->uuid]) }}" onsubmit="return confirm('{{ __('Are you sure you want to move this file to trash?') }}')">
+                            <form
+                                method="POST"
+                                action="{{ route('files.destroy', ['file' => $file->uuid]) }}"
+                                onsubmit="return confirm(`{{ __('Are you sure you want to move this file to trash?') }}`)"
+                            >
                                 @method('DELETE')
                                 @csrf
                                 
