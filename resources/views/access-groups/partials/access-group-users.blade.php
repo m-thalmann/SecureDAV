@@ -10,7 +10,7 @@
         </a>
     </div>
 
-    <div class="overflow-auto w-full bg-base-100 rounded-md max-h-[25em]">
+    <div class="overflow-auto w-full bg-base-100 rounded-md min-h-[12em] max-h-[25em]">
         <table class="table">
             <thead>
                 <tr>

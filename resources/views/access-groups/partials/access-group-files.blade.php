@@ -13,7 +13,7 @@
     <div class="overflow-auto w-full bg-base-100 rounded-md">
         <x-files-table.table :filesCount="count($accessGroup->files)" :showCountSummary="false">
             @foreach ($accessGroup->files as $file)
-                <x-files-table.file-row :file="$file">
+                <x-files-table.file-row :file="$file" :hover="false">
                     <x-slot name="actions">
                         <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)">
                             <form

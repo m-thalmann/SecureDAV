@@ -1,8 +1,9 @@
 @props([
-    'file' => null
+    'file' => null,
+    'hover' => true,
 ])
 
-<tr class="hover">
+<tr {{ $attributes->merge(['class' => $hover ? 'hover' : '']) }}>
     <td class="text-center pr-0">
         <i class="{{ $file->fileIcon }} text-xl align-middle"></i>
     </td>
@@ -10,7 +11,7 @@
         <a
             href="{{ route('files.show', ['file' => $file->uuid]) }}"
             class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis"
-        >{{ $file->fileName }}</a>
+        >{{ $file->name }}</a>
 
         @if ($file->isEncrypted)
             <span class="tooltip ml-2" data-tip="{{ __('Encrypted') }}">

@@ -1,4 +1,4 @@
-<x-app-layout :title="$file->fileName">
+<x-app-layout :title="$file->name">
     <div class="files-breadcrumbs flex items-center px-4">
         <x-breadcrumbs :file="$file" />
 
@@ -32,7 +32,7 @@
 
     <x-header-title :iconClass="$file->fileIcon">
         <x:slot name="title">
-            {{ $file->fileName }}
+            {{ $file->name }}
 
             @if ($file->isEncrypted)
                 <span class="tooltip" data-tip="{{ __('Encrypted') }}">

@@ -67,12 +67,11 @@ class FileTest extends TestCase {
     }
 
     public function testFileCanBeCreated(): void {
-        $fileName = 'NewFile';
-        $fileExtension = 'txt';
+        $fileName = 'NewFile.txt';
         $content = fake()->text();
 
         $uploadFile = UploadedFile::fake()->createWithContent(
-            "$fileName.$fileExtension",
+            $fileName,
             $content
         );
 
@@ -106,7 +105,6 @@ class FileTest extends TestCase {
         $this->assertDatabaseHas('files', [
             'user_id' => $this->user->id,
             'name' => $fileName,
-            'extension' => $fileExtension,
             'description' => $description,
         ]);
 
@@ -132,9 +130,8 @@ class FileTest extends TestCase {
             ->for($this->user)
             ->create();
 
-        $fileName = 'NewFile';
-        $fileExtension = 'txt';
-        $uploadFile = UploadedFile::fake()->create("$fileName.$fileExtension");
+        $fileName = 'NewFile.txt';
+        $uploadFile = UploadedFile::fake()->create($fileName);
 
         $response = $this->post('/files', [
             'file' => $uploadFile,
@@ -191,7 +188,7 @@ class FileTest extends TestCase {
         $response->assertForbidden();
     }
 
-    public function testFileCantBeCreatedIfNameAndExtensionIsNotUniqueInDirectory(): void {
+    public function testFileCantBeCreatedIfNameIsNotUniqueInDirectory(): void {
         $directory = Directory::factory()
             ->for($this->user)
             ->create();
@@ -200,9 +197,7 @@ class FileTest extends TestCase {
             ->for($this->user)
             ->create(['directory_id' => $directory->id]);
 
-        $uploadFile = UploadedFile::fake()->create(
-            "test-file.{$file->extension}"
-        );
+        $uploadFile = UploadedFile::fake()->create($file->name);
 
         $response = $this->from('/files/create')->post('/files', [
             'file' => $uploadFile,
@@ -215,39 +210,32 @@ class FileTest extends TestCase {
         $response->assertSessionHasErrors('name');
     }
 
-    public function testFileCanBeCreatedIfNameAndExtensionAreUniqueInDirectory(): void {
+    public function testFileCantBeCreatedIfDirectoryWithSameNameExistsInDirectory(): void {
         $directory = Directory::factory()
             ->for($this->user)
             ->create();
 
-        $file = File::factory()
+        $childDirectory = Directory::factory()
             ->for($this->user)
-            ->create(['directory_id' => $directory->id]);
+            ->create(['parent_directory_id' => $directory->id]);
 
-        $uploadFile = UploadedFile::fake()->create('test-file.other-ext');
+        $uploadFile = UploadedFile::fake()->create($childDirectory->name);
 
         $response = $this->from('/files/create')->post('/files', [
             'file' => $uploadFile,
-            'name' => $file->name,
+            'name' => $childDirectory->name,
             'directory_uuid' => $directory->uuid,
         ]);
 
-        $response->assertSessionHasNoErrors('name');
+        $response->assertRedirect('/files/create');
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $response->assertSessionHasErrors('name');
     }
 
     public function testCreateFileFailsAndDoesNotStoreFileAndVersionIfVersionCantBeCreated(): void {
-        $fileName = 'NewFile';
-        $fileExtension = 'txt';
+        $fileName = 'NewFile.txt';
 
-        $uploadFile = UploadedFile::fake()->create("$fileName.$fileExtension");
+        $uploadFile = UploadedFile::fake()->create($fileName);
 
         $this->mock(
             FileVersionService::class,
@@ -289,7 +277,7 @@ class FileTest extends TestCase {
 
         $response->assertOk();
 
-        $response->assertSee($file->fileName);
+        $response->assertSee($file->name);
         $response->assertSee("($versionCount)");
     }
 
@@ -316,7 +304,7 @@ class FileTest extends TestCase {
 
         $response->assertOk();
 
-        $response->assertSee($file->fileName);
+        $response->assertSee($file->name);
     }
 
     public function testEditFileViewFailsIfFileDoesNotBelongToUser(): void {
@@ -334,7 +322,7 @@ class FileTest extends TestCase {
     }
 
     public function testFileCanBeEdited(): void {
-        $newName = 'New Name';
+        $newName = 'New Name.txt';
         $newDescription = 'New Description';
 
         $file = File::factory()
@@ -366,14 +354,14 @@ class FileTest extends TestCase {
         $file = File::factory()->create();
 
         $response = $this->put("/files/{$file->uuid}", [
-            'name' => 'New Name',
+            'name' => 'New Name.txt',
             'description' => 'New Description',
         ]);
 
         $response->assertForbidden();
     }
 
-    public function testFileCantBeRenamedIfNameAlreadyExistsInSameDirectoryWithSameExtensionForUser(): void {
+    public function testFileCantBeRenamedIfNameAlreadyExistsInSameDirectoryForUser(): void {
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -382,7 +370,6 @@ class FileTest extends TestCase {
             ->for($this->user)
             ->create([
                 'directory_id' => $file->directory_id,
-                'extension' => $file->extension,
             ]);
 
         $response = $this->put("/files/{$file->uuid}", [
@@ -393,32 +380,23 @@ class FileTest extends TestCase {
         $response->assertSessionHasErrors('name');
     }
 
-    public function testFileCanBeRenamedIfNameAlreadyExistsInSameDirectoryWithOtherExtensionForUser(): void {
+    public function testFileCantBeRenamedIfDirectoryWithSameNameAlreadyExistsInSameDirectoryForUser(): void {
         $file = File::factory()
             ->for($this->user)
             ->create();
 
-        $otherFile = File::factory()
+        $childDirectory = File::factory()
             ->for($this->user)
             ->create([
                 'directory_id' => $file->directory_id,
-                'extension' => 'other-ext',
             ]);
 
         $response = $this->put("/files/{$file->uuid}", [
-            'name' => $otherFile->name,
+            'name' => $childDirectory->name,
             'description' => 'New Description',
         ]);
 
-        $response->assertSessionHasNoErrors('name');
-
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $response->assertSessionHasErrors('name');
     }
 
     public function testFileCanBeMovedToTrash(): void {

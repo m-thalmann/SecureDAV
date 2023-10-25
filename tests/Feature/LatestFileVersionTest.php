@@ -61,7 +61,7 @@ class LatestFileVersionTest extends TestCase {
 
         $response->assertOk();
 
-        $response->assertDownload($file->fileName);
+        $response->assertDownload($file->name);
 
         $this->assertEquals(
             $this->storage->get($latestVersion->storage_path),
@@ -128,7 +128,7 @@ class LatestFileVersionTest extends TestCase {
 
         $response->assertOk();
 
-        $response->assertSee($file->fileName);
+        $response->assertSee($file->name);
     }
 
     public function testEditLatestFileVersionViewFailsIfFileHasNoVersions(): void {

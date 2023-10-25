@@ -13,15 +13,9 @@
             <x-form-field name="name" class="md:w-2/3">
                 <x-slot name="label">{{ __('Name') }}</x-slot>
 
-                <div class="relative">
-                    <x-input name="name" class="{{ $file->extension ? 'pr-16' : '' }}" :value="$file->name" autofocus required />
+                <x-input name="name" :value="$file->name" autofocus required />
 
-                    @if ($file->extension)
-                        <span class="absolute top-0 bottom-0 right-0 px-4 flex items-center bg-base-200/50 text-base-content/70 rounded-lg">.{{ $file->extension }}</span>
-                    @endif
-                </div>
-
-                <x-slot name="hint">{{ __('Info') }}: {{ __('Without file extension') }}</x-slot>
+                <x-slot name="hint">{{ __('Info') }}: {{ __('Including file extension') }}</x-slot>
             </x-form-field>
 
             <x-form-field name="description" class="md:w-2/3">

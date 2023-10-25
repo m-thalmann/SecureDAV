@@ -16,7 +16,7 @@
             <span class="w-[3ch] inline-block text-center">
                 <i class="{{ $file->fileIcon }}"></i>
             </span>
-            {{ $file->fileName }}
+            {{ $file->name }}
         </a>
         
         @isset($action)

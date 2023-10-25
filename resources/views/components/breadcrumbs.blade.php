@@ -30,7 +30,7 @@
         @if ($file)
             <li>
                 <a href="{{ $fileRoute($file) }}" class="flex items-center gap-2">
-                    <i class="{{ $file->fileIcon }}"></i> {{ $file->fileName }}
+                    <i class="{{ $file->fileIcon }}"></i> {{ $file->name }}
                 </a>
             </li>
         @endif

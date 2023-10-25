@@ -42,7 +42,7 @@ class FileVersionTest extends TestCase {
 
         $response->assertOk();
 
-        $response->assertSee($file->fileName);
+        $response->assertSee($file->name);
     }
 
     public function testCreateFileVersionViewShowsFileInputIfFileHasNoVersion(): void {
@@ -303,7 +303,7 @@ class FileVersionTest extends TestCase {
 
         $response->assertOk();
 
-        $response->assertDownload($file->fileName);
+        $response->assertDownload($file->name);
 
         $this->assertEquals(
             $this->storage->get($selectedVersion->storage_path),
@@ -362,7 +362,7 @@ class FileVersionTest extends TestCase {
 
         $response->assertOk();
 
-        $response->assertSee($file->fileName);
+        $response->assertSee($file->name);
         $response->assertSee($version);
     }
 

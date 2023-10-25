@@ -18,13 +18,7 @@ class File extends Model {
 
     protected $hidden = ['next_version'];
 
-    protected $fillable = [
-        'directory_id',
-        'name',
-        'description',
-        'mime_type',
-        'extension',
-    ];
+    protected $fillable = ['directory_id', 'name', 'description', 'mime_type'];
 
     protected $attributes = [
         'next_version' => 1,
@@ -53,9 +47,7 @@ class File extends Model {
         Builder $query,
         string $direction = 'asc'
     ): Builder {
-        return $query
-            ->orderBy('name', $direction)
-            ->orderBy('extension', $direction);
+        return $query->orderBy('name', $direction);
     }
 
     public function user(): BelongsTo {
@@ -86,16 +78,20 @@ class File extends Model {
         );
     }
 
-    protected function fileName(): Attribute {
+    protected function extension(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
-                $name = $attributes['name'];
+                $lastDot = strrpos($attributes['name'], '.');
 
-                if ($attributes['extension'] !== null) {
-                    $name .= ".{$attributes['extension']}";
+                if (
+                    $lastDot === false ||
+                    $lastDot === 0 ||
+                    $lastDot === strlen($attributes['name']) - 1
+                ) {
+                    return null;
                 }
 
-                return $name;
+                return substr($attributes['name'], $lastDot + 1);
             }
         );
     }
@@ -103,7 +99,7 @@ class File extends Model {
     protected function fileIcon(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
-                return getFileIconForExtension($attributes['extension']);
+                return getFileIconForExtension($this->extension);
             }
         );
     }

@@ -21,10 +21,9 @@ class FileFactory extends Factory {
             'uuid' => fake()->uuid(),
             'user_id' => User::factory(),
             'directory_id' => fake()->boolean(25) ? Directory::factory() : null,
-            'name' => fake()->words(4, true),
+            'name' => fake()->words(4, true) . '.' . fake()->fileExtension(),
             'description' => null,
             'mime_type' => fake()->mimeType(),
-            'extension' => fake()->fileExtension(),
             'encryption_key' => null,
             'next_version' => 1,
         ];

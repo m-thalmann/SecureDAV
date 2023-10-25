@@ -47,6 +47,10 @@ class DirectoryController extends Controller {
                 Rule::unique('directories', 'name')
                     ->where('parent_directory_id', $parentDirectory?->id)
                     ->where('user_id', authUser()->id),
+                Rule::unique('files', 'name')
+                    ->where('directory_id', $parentDirectory?->id)
+                    ->where('user_id', authUser()->id)
+                    ->withoutTrashed(),
             ],
         ]);
 
@@ -90,6 +94,10 @@ class DirectoryController extends Controller {
                     )
                     ->where('user_id', $directory->user_id)
                     ->ignore($directory),
+                Rule::unique('files', 'name')
+                    ->where('directory_id', $directory->parent_directory_id)
+                    ->where('user_id', $directory->user_id)
+                    ->withoutTrashed(),
             ],
         ]);
 

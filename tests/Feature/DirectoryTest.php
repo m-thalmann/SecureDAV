@@ -165,6 +165,25 @@ class DirectoryTest extends TestCase {
         $response->assertSessionHasErrors('name');
     }
 
+    public function testDirectoryCantBeCreatedIfFileWithSameNameExistsInParentDirectory(): void {
+        $parentDirectory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create(['directory_id' => $parentDirectory->id]);
+
+        $response = $this->from('/directories/create')->post('/directories', [
+            'name' => $file->name,
+            'parent_directory_uuid' => $parentDirectory->uuid,
+        ]);
+
+        $response->assertRedirect('/directories/create');
+
+        $response->assertSessionHasErrors('name');
+    }
+
     public function testEditDirectoryViewCanBeRendered(): void {
         $directory = Directory::factory()
             ->for($this->user)
@@ -234,6 +253,28 @@ class DirectoryTest extends TestCase {
             "/directories/{$directory->uuid}",
             [
                 'name' => $otherDirectory->name,
+            ]
+        );
+
+        $response->assertRedirect("/directories/{$directory->uuid}/edit");
+        $response->assertSessionHasErrors('name');
+    }
+
+    public function testDirectoryCantBeRenamedIfFileWithSameNameAlreadyExistsInSameDirectoryForUser(): void {
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create([
+                'directory_id' => $directory->parent_directory_id,
+            ]);
+
+        $response = $this->from("/directories/{$directory->uuid}/edit")->put(
+            "/directories/{$directory->uuid}",
+            [
+                'name' => $file->name,
             ]
         );
 

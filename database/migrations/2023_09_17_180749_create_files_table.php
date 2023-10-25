@@ -23,7 +23,6 @@ return new class extends Migration {
             $table->string('name');
             $table->string('description')->nullable();
             $table->string('mime_type')->nullable();
-            $table->string('extension')->nullable();
             $table->string('encryption_key', 16)->nullable();
             $table->integer('next_version');
             $table->timestamps();

@@ -55,8 +55,6 @@ class FileController extends Controller {
 
         $requestFile = $request->file('file');
 
-        $extension = $requestFile->getClientOriginalExtension();
-
         $data = $request->validate([
             'name' => [
                 'required',
@@ -65,8 +63,10 @@ class FileController extends Controller {
                 Rule::unique('files', 'name')
                     ->where('directory_id', $directory?->id)
                     ->where('user_id', authUser()->id)
-                    ->where('extension', $extension)
                     ->withoutTrashed(),
+                Rule::unique('directories', 'name')
+                    ->where('parent_directory_id', $directory?->id)
+                    ->where('user_id', authUser()->id),
             ],
 
             'encrypt' => ['nullable'],
@@ -86,7 +86,6 @@ class FileController extends Controller {
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
                 'mime_type' => $requestFile->getClientMimeType(),
-                'extension' => strlen($extension) > 0 ? $extension : null,
                 'encryption_key' => $encryptionKey,
             ]);
 
@@ -146,9 +145,11 @@ class FileController extends Controller {
                 Rule::unique('files', 'name')
                     ->where('directory_id', $file->directory_id)
                     ->where('user_id', $file->user_id)
-                    ->where('extension', $file->extension)
                     ->ignore($file)
                     ->withoutTrashed(),
+                Rule::unique('directories', 'name')
+                    ->where('parent_directory_id', $file->directory_id)
+                    ->where('user_id', $file->user_id),
             ],
 
             'description' => ['nullable', 'string', 'max:512'],

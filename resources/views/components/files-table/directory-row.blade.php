@@ -1,8 +1,9 @@
 @props([
     'directory' => null,
+    'hover' => true,
 ])
 
-<tr class="hover">
+<tr {{ $attributes->merge(['class' => $hover ? 'hover' : '']) }}>
     <td class="text-center pr-0">
         <i class="fas fa-folder text-lg text-secondary align-middle"></i>
     </td>

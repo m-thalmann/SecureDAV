@@ -24,11 +24,9 @@
             <x-form-field name="name"  class="md:w-2/3">
                 <x-slot name="label">{{ __('Name') }}</x-slot>
 
-                <div class="relative" id="name-input-container">
-                    <x-input name="name" :value="old('name')" required />
-                </div>
+                <x-input name="name" :value="old('name')" required />
 
-                <x-slot name="hint">{{ __('Info') }}: {{ __('Without file extension') }}</x-slot>
+                <x-slot name="hint">{{ __('Info') }}: {{ __('Including file extension') }}</x-slot>
             </x-form-field>
 
             <div class="form-control w-fit">
@@ -54,49 +52,4 @@
             <input type="submit" value="{{ __('Create') }}" form="create-form" class="btn btn-primary">
         </x-slot>
     </x-card>
-
-    @push('scripts')
-        <script>
-            function onSelectedFileChange(file) {
-                var name = file.name;
-                var extension = '';
-    
-                var lastDot = name.lastIndexOf('.');
-    
-                if(lastDot !== -1) {
-                    extension = name.substring(lastDot + 1);
-                    name = name.substring(0, lastDot);
-                }
-    
-                document.getElementById('name').value = name;
-                
-                var nameInputExtension = document.getElementById('name-input-extension');
-    
-                if(nameInputExtension) {
-                    nameInputExtension.remove();
-                }
-    
-                if(extension) {
-                    document
-                        .getElementById('name-input-container')
-                        .insertAdjacentHTML(
-                            'beforeend',
-                            '<span id="name-input-extension" class="absolute top-0 bottom-0 right-0 px-4 flex items-center bg-base-200/50 text-base-content/70 rounded-lg">' +
-                                '.' +
-                                extension +
-                                '</span>'
-                        );
-                }
-            }
-            
-            /*
-            |------------
-            |    INIT
-            |------------
-            */
-            if(document.getElementById('file').files.length === 1) {
-                onSelectedFileChange(document.getElementById('file').files[0]);
-            }
-        </script>
-    @endpush
 </x-app-layout>

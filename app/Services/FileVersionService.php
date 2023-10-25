@@ -331,7 +331,7 @@ class FileVersionService {
                         fclose($readStream);
                         fclose($outputStream);
                     },
-                    $file->fileName,
+                    $file->name,
                     [
                         'Content-Type' => $file->mime_type,
                         'Content-Length' => $version->bytes,
@@ -340,7 +340,7 @@ class FileVersionService {
                 ->setEtag($version->checksum);
         } else {
             return $this->storage
-                ->download($version->storage_path, $file->fileName, [
+                ->download($version->storage_path, $file->name, [
                     'Content-Type' => $file->mime_type,
                 ])
                 ->setEtag($version->checksum);
