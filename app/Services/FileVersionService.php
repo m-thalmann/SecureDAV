@@ -293,6 +293,41 @@ class FileVersionService {
     }
 
     /**
+     * Writes the contents of the given file version to the given stream.
+     *
+     * @param \App\Models\File $file
+     * @param \App\Models\FileVersion $version
+     * @param resource $outputStream
+     *
+     * @throws \InvalidArgumentException If the version does not belong to the file
+     */
+    public function writeContentsToStream(
+        File $file,
+        FileVersion $version,
+        mixed $outputStream
+    ): void {
+        if ($version->file_id !== $file->id) {
+            throw new InvalidArgumentException(
+                'Version does not belong to file'
+            );
+        }
+
+        $readStream = $this->storage->readStream($version->storage_path);
+
+        if ($file->isEncrypted) {
+            $this->fileEncryptionService->decrypt(
+                $file->encryption_key,
+                $readStream,
+                $outputStream
+            );
+        } else {
+            stream_copy_to_stream($readStream, $outputStream);
+        }
+
+        fclose($readStream);
+    }
+
+    /**
      * Creates a streamed response to download the given file.
      *
      * @param \App\Models\File $file
@@ -312,39 +347,26 @@ class FileVersionService {
             );
         }
 
-        if ($file->isEncrypted) {
-            return response()
-                ->streamDownload(
-                    function () use ($file, $version) {
-                        $outputStream = fopen('php://output', 'w');
+        return response()
+            ->streamDownload(
+                function () use ($file, $version) {
+                    $outputStream = fopen('php://output', 'w');
 
-                        $readStream = $this->storage->readStream(
-                            $version->storage_path
-                        );
+                    $this->writeContentsToStream(
+                        $file,
+                        $version,
+                        $outputStream
+                    );
 
-                        $this->fileEncryptionService->decrypt(
-                            $file->encryption_key,
-                            $readStream,
-                            $outputStream
-                        );
-
-                        fclose($readStream);
-                        fclose($outputStream);
-                    },
-                    $file->name,
-                    [
-                        'Content-Type' => $file->mime_type,
-                        'Content-Length' => $version->bytes,
-                    ]
-                )
-                ->setEtag($version->checksum);
-        } else {
-            return $this->storage
-                ->download($version->storage_path, $file->name, [
+                    fclose($outputStream);
+                },
+                $file->name,
+                [
                     'Content-Type' => $file->mime_type,
-                ])
-                ->setEtag($version->checksum);
-        }
+                    'Content-Length' => $version->bytes,
+                ]
+            )
+            ->setEtag($version->checksum);
     }
 }
 

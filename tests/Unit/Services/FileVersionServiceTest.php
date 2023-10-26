@@ -624,7 +624,7 @@ class FileVersionServiceTest extends TestCase {
         }
     }
 
-    public function testCreateDownloadResponseDownloadsTheUnencryptedFileVersion(): void {
+    public function testWriteContentsToStreamWritesTheContentsOfTheUnencryptedFileVersionToTheGivenStream(): void {
         $content = fake()->text();
 
         $file = File::factory()->create();
@@ -635,25 +635,18 @@ class FileVersionServiceTest extends TestCase {
 
         $this->storageFake->put($version->storage_path, $content);
 
-        $response = $this->service->createDownloadResponse($file, $version);
+        $stream = fopen('php://memory', 'r+');
 
-        $this->assertEquals(
-            $content,
-            $this->getStreamedResponseContent($response)
-        );
+        $this->service->writeContentsToStream($file, $version, $stream);
 
-        $this->assertEquals(
-            $version->bytes,
-            $response->headers->get('Content-Length')
-        );
+        rewind($stream);
 
-        $this->assertEquals(
-            "\"$version->checksum\"",
-            $response->headers->get('ETag')
-        );
+        $this->assertEquals($content, stream_get_contents($stream));
+
+        fclose($stream);
     }
 
-    public function testCreateDownloadResponseDownloadsTheEncryptedFileVersion(): void {
+    public function testWriteContentsToStreamWritesTheContentsOfTheEncryptedFileVersionToTheGivenStream(): void {
         $content = fake()->text();
 
         $file = File::factory()
@@ -684,11 +677,63 @@ class FileVersionServiceTest extends TestCase {
             })
             ->once();
 
+        $stream = fopen('php://memory', 'r+');
+
+        $this->service->writeContentsToStream($file, $version, $stream);
+
+        rewind($stream);
+
+        $this->assertEquals($content, stream_get_contents($stream));
+
+        fclose($stream);
+    }
+
+    public function testWriteContentsToStreamFailsIfTheFileVersionDoesNotBelongToTheFile(): void {
+        $this->expectException(InvalidArgumentException::class);
+
+        $file = File::factory()->create();
+
+        $version = FileVersion::factory()->create();
+
+        $this->service->writeContentsToStream($file, $version, null);
+    }
+
+    public function testCreateDownloadResponseDownloadsFileVersion(): void {
+        $content = fake()->text();
+
+        $file = File::factory()->create();
+
+        $version = FileVersion::factory()
+            ->for($file)
+            ->create(['bytes' => strlen($content)]);
+
+        $this->service
+            ->shouldReceive('writeContentsToStream')
+            ->withArgs(function (
+                File $receivedFile,
+                FileVersion $receivedVersion,
+                mixed $resource
+            ) use ($file, $version, $content) {
+                $this->assertEquals($file, $receivedFile);
+                $this->assertEquals($version, $receivedVersion);
+                $this->assertIsResource($resource);
+
+                fwrite($resource, $content);
+
+                return true;
+            })
+            ->once();
+
         $response = $this->service->createDownloadResponse($file, $version);
 
         $this->assertEquals(
             $content,
             $this->getStreamedResponseContent($response)
+        );
+
+        $this->assertEquals(
+            $file->mime_type,
+            $response->headers->get('Content-Type')
         );
 
         $this->assertEquals(
