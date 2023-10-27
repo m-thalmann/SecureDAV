@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class FileVersion extends Model {
     use HasFactory, SoftDeletes;
@@ -16,7 +17,13 @@ class FileVersion extends Model {
     protected $fillable = ['file_id', 'label'];
 
     public function scopeLatestVersion(Builder $query): Builder {
-        return $query->orderBy('version', 'desc')->limit(1);
+        return $query->where('version', function (QueryBuilder $query) {
+            $query
+                ->selectRaw('max("fv"."version")')
+                ->from('file_versions as fv')
+                ->whereColumn('fv.file_id', 'file_versions.file_id')
+                ->whereNull('fv.deleted_at');
+        });
     }
 
     public function file(): BelongsTo {

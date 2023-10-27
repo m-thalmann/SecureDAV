@@ -27,11 +27,11 @@ class User extends Authenticatable implements MustVerifyEmail {
     ];
 
     public function files(): HasMany {
-        return $this->hasMany(File::class);
+        return $this->hasMany(File::class)->ordered();
     }
 
     public function directories(): HasMany {
-        return $this->hasMany(Directory::class);
+        return $this->hasMany(Directory::class)->ordered();
     }
 
     public function accessGroups(): HasMany {

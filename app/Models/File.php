@@ -34,10 +34,16 @@ class File extends Model {
 
     public function scopeInDirectory(
         Builder $query,
-        ?Directory $directory
+        ?Directory $directory,
+        bool $filterUser = true
     ): Builder {
         if ($directory === null) {
-            return $query->whereNull('directory_id')->forUser(authUser());
+            return $query
+                ->whereNull('directory_id')
+                ->when(
+                    $filterUser,
+                    fn(Builder $query) => $query->forUser(authUser())
+                );
         }
 
         return $query->where('directory_id', $directory->id);

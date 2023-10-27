@@ -25,12 +25,16 @@ class Directory extends Model {
 
     public function scopeInDirectory(
         Builder $query,
-        ?Directory $directory
+        ?Directory $directory,
+        bool $filterUser = true
     ): Builder {
         if ($directory === null) {
             return $query
                 ->whereNull('parent_directory_id')
-                ->forUser(authUser());
+                ->when(
+                    $filterUser,
+                    fn(Builder $query) => $query->forUser(authUser())
+                );
         }
 
         return $query->where('parent_directory_id', $directory->id);
