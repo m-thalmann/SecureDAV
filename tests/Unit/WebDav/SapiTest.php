@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\WebDav;
 
-use PHPUnit\Framework\TestCase;
 use App\WebDav;
 use Mockery;
+use PHPUnit\Framework\TestCase;
 use Sabre\HTTP\Response as SabreResponse;
 
 class SapiTest extends TestCase {
