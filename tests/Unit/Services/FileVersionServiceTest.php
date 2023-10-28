@@ -756,16 +756,6 @@ class FileVersionServiceTest extends TestCase {
 
         $this->service->createDownloadResponse($file, $version);
     }
-
-    protected function getStreamedResponseContent(
-        StreamedResponse $response
-    ): string|false {
-        ob_start();
-
-        $response->send();
-
-        return ob_get_clean();
-    }
 }
 
 class FileVersionServiceTestClass extends FileVersionService {

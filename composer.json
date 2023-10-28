@@ -14,7 +14,8 @@
     "jenssegers/agent": "^2.6",
     "laravel/fortify": "1.18",
     "laravel/framework": "^10.29",
-    "laravel/tinker": "^2.8"
+    "laravel/tinker": "^2.8",
+    "sabre/dav": "^4.4"
   },
   "require-dev": {
     "fakerphp/faker": "^1.9.1",
@@ -73,3 +74,4 @@
   "minimum-stability": "stable",
   "prefer-stable": true
 }
+

@@ -4,6 +4,7 @@ namespace Tests;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 abstract class TestCase extends BaseTestCase {
     use CreatesApplication;
@@ -22,6 +23,23 @@ abstract class TestCase extends BaseTestCase {
 
     protected function passwordConfirmed(): void {
         $this->session(['auth.password_confirmed_at' => time()]);
+    }
+
+    protected function getStreamedResponseContent(
+        StreamedResponse $response
+    ): string|false {
+        ob_start();
+
+        $response->send();
+
+        return ob_get_clean();
+    }
+
+    protected function assertHasSubArray(array $subarray, array $array): void {
+        foreach ($subarray as $key => $value) {
+            $this->assertArrayHasKey($key, $array);
+            $this->assertEquals($value, $array[$key]);
+        }
     }
 }
 
