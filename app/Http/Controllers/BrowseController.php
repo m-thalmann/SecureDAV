@@ -26,9 +26,15 @@ class BrowseController extends Controller {
 
         $breadcrumbs = $directory ? $directory->breadcrumbs : [];
 
+        $webdavUrl = match ($directory) {
+            null => route('webdav.directories'),
+            default => $directory->webdavUrl,
+        };
+
         return view('browse', [
             'currentDirectory' => $directory ?? null,
             'breadcrumbs' => $breadcrumbs,
+            'webdavUrl' => $webdavUrl,
 
             'directories' => $directories,
             'files' => $files,

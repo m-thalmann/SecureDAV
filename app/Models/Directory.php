@@ -15,6 +15,8 @@ class Directory extends Model {
 
     protected $fillable = ['parent_directory_id', 'name'];
 
+    protected ?array $computedBreadcrumbs = null;
+
     public function uniqueIds(): array {
         return ['uuid'];
     }
@@ -69,6 +71,10 @@ class Directory extends Model {
     protected function breadcrumbs(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
+                if ($this->computedBreadcrumbs) {
+                    return $this->computedBreadcrumbs;
+                }
+
                 $breadcrumbs = [];
 
                 $directory = $this;
@@ -79,7 +85,7 @@ class Directory extends Model {
                     $directory = $directory->parentDirectory;
                 }
 
-                return $breadcrumbs;
+                return $this->computedBreadcrumbs = $breadcrumbs;
             }
         );
     }
@@ -89,6 +95,18 @@ class Directory extends Model {
             get: function (mixed $value, array $attributes) {
                 return $this->directories()->count() === 0 &&
                     $this->files()->count() === 0;
+            }
+        );
+    }
+
+    protected function webdavUrl(): Attribute {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                return route('webdav.directories', [
+                    'path' => collect($this->breadcrumbs)
+                        ->map(fn(Directory $directory) => $directory->name)
+                        ->join('/'),
+                ]);
             }
         );
     }

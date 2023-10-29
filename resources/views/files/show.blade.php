@@ -61,9 +61,22 @@
             <x-slot name="label">{{ __('WebDAV URL') }}</x-slot>
 
             <div class="flex gap-2 items-center">
-                <x-input name="web-dav-url" class="input-sm bg-base-200" value="<TODO: webdav url>" readonly />
+                <x-input name="web-dav-url" class="input-sm bg-base-200" :value="$file->webdavUrl" readonly />
         
                 <x-copy-button inputId="web-dav-url" plain class="btn btn-sm btn-neutral" />
+
+                @if ($file->accessGroups->count() === 0)
+                    <div class="dropdown dropdown-end">
+                        <label tabindex="0" class="btn btn-circle btn-ghost btn-xs text-info">
+                            <i class="fa-solid fa-circle-info text-info"></i>
+                        </label>
+                        <div tabindex="0" class="card compact dropdown-content z-[1] shadow bg-base-300 rounded-box w-64">
+                            <div class="card-body">
+                                {{ __('You have to add this file to an access group for it to be accessible via WebDAV') }}
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
         </x-form-field>
 

@@ -25,6 +25,26 @@ class BrowseTest extends TestCase {
     public function testBrowseViewCanBeRendered(): void {
         $response = $this->get('/browse');
 
+        $response->assertSee(route('webdav.directories'));
+
+        $response->assertOk();
+    }
+
+    public function testBrowseViewCanBeRenderedWithDirectory(): void {
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get("/browse/$directory->uuid");
+
+        $response->assertSee(
+            route('webdav.directories', [
+                'path' => collect($directory->breadcrumbs)
+                    ->map(fn(Directory $directory) => $directory->name)
+                    ->join('/'),
+            ])
+        );
+
         $response->assertOk();
     }
 

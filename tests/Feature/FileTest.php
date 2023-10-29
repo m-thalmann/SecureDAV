@@ -271,13 +271,15 @@ class FileTest extends TestCase {
         $file = File::factory()
             ->for($this->user)
             ->has(FileVersion::factory($versionCount), 'versions')
-            ->create();
+            ->create(['description' => fake()->text]);
 
         $response = $this->get("/files/{$file->uuid}");
 
         $response->assertOk();
 
         $response->assertSee($file->name);
+        $response->assertSee($file->description);
+        $response->assertSee($file->webdavUrl);
         $response->assertSee("($versionCount)");
     }
 

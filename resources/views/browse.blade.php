@@ -21,13 +21,25 @@
             </li>
         </x-dropdown>
 
-        @if ($currentDirectory)
-            <span class="flex-1"></span>
+        
+        <span class="flex-1"></span>
 
-            <x-dropdown align="end">
+        <x-dropdown align="end" width="w-52">
+            <li>
+                <x-copy-button :data="$webdavUrl" plain containerClass="flex items-center gap-2">
+                    <i class="fas fa-server w-6"></i>
+                    {{ __('Copy WebDAV url') }}
+
+                    <x-slot name="success">
+                        <i class="fa-solid fa-check text-success w-6"></i>
+                        {{ __('Copy WebDAV url') }}
+                    </x-slot>
+                </x-copy-button>
+            </li>
+            @if ($currentDirectory)
                 <li>
                     <a href="{{ route('directories.edit', ['directory' => $currentDirectory->uuid]) }}">
-                        <i class="fas fa-edit mr-2"></i>
+                        <i class="fas fa-edit w-6"></i>
                         {{ __('Edit directory') }}
                     </a>
                 </li>
@@ -38,13 +50,13 @@
                     
                     <li>
                         <button class="hover:bg-error hover:text-error-content">
-                            <i class="fas fa-trash mr-2"></i>
+                            <i class="fas fa-trash w-6"></i>
                             {{ __('Delete directory') }}
                         </button>
                     </li>
                 </form>
-            </x-dropdown>
-        @endif
+            @endif
+        </x-dropdown>
     </div>
 
     <div class="overflow-auto w-full">

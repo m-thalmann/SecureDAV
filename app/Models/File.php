@@ -109,5 +109,16 @@ class File extends Model {
             }
         );
     }
+
+    protected function webdavUrl(): Attribute {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                return route('webdav.files', [
+                    'uuid' => $attributes['uuid'],
+                    'name' => $attributes['name'],
+                ]);
+            }
+        );
+    }
 }
 
