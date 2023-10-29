@@ -63,14 +63,7 @@
             <div class="flex gap-2 items-center">
                 <x-input name="web-dav-url" class="input-sm bg-base-200" value="<TODO: webdav url>" readonly />
         
-                <button
-                    class="btn btn-sm btn-neutral"
-                    onclick="document.getElementById('web-dav-url').select();
-                                document.execCommand('copy');
-                                changeClass(this.getElementsByTagName('i')[0], 'fa-solid fa-check', 1000)"
-                >
-                    <i class="fa-solid fa-copy"></i>
-                </button>
+                <x-copy-button inputId="web-dav-url" plain class="btn btn-sm btn-neutral" />
             </div>
         </x-form-field>
 

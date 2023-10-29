@@ -1,23 +1,46 @@
 @props([
-    'icon' => null,
     'data' => '',
+    'inputId' => null,
+    'containerClass' => ''
 ])
 
 @php
     $data = str_replace('\\', '\\\\', $data);
     $data = str_replace('`', '\\`', $data);
+
+    $copyAction = "navigator.clipboard.writeText(`$data`)";
+
+    if($inputId !== null) {
+        $copyAction = "document.getElementById('$inputId').select(); document.execCommand('copy')";
+    }
 @endphp
 
 <button
-    {{ $attributes->merge(['class' => 'btn btn-circle btn-sm btn-ghost']) }}
-    onclick="
-        navigator.clipboard.writeText(`{{ $data }}`);
-        changeClass(this.getElementsByTagName('i')[0], 'fa-solid fa-check text-success', 1000)
+    {{ $attributes->merge(['class' => !$attributes->has('plain') ? 'btn btn-circle btn-sm btn-ghost' : '']) }}
+    x-data="{ success: false }"
+    x-on:click="
+        {{ $copyAction }};
+        success = true;
+        setTimeout(() => { success = false }, 1000)
     "
 >
-    @if($icon !== null)
-        {{ $icon }}
-    @else
-        <i class="fa-solid fa-copy"></i>
-    @endif
+    <template x-if="!success" class="content">
+        @if ($slot->isNotEmpty())
+            <div @class([$containerClass])>
+                {{ $slot }}
+            </div>
+        @else
+            <i class="fa-solid fa-copy"></i>
+        @endif
+    </template>
+
+    <template x-if="success" class="success-content">
+        @isset ($success)
+            <div @class([$containerClass])>
+                {{ $success }}
+            </div>
+        @else
+            <i class="fa-solid fa-check text-success"></i>
+        @endisset
+    </template>
 </button>
