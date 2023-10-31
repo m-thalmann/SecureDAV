@@ -23,6 +23,7 @@
                         <th class="text-center w-0"><i class="fa-solid fa-clock-rotate-left"></i></th>
                         <th>{{ __('Label') }}</th>
                         <th>{{ __('Size') }}</th>
+                        <th>{{ __('MIME-Type') }}</th>
                         <th>{{ __('Created') }}</th>
                         <th>{{ __('Last updated') }}</th>
                         <th class="w-0">{{ __('Checksum (MD5)') }}</th>
@@ -35,6 +36,7 @@
                             <td class="text-center">{{ $version->version }}</td>
                             <td>{{ $version->label ?? '-' }}</td>
                             <td>{{ formatBytes($version->bytes) }}</td>
+                            <td>{{ $version->mime_type ?? '-' }}</td>
                             <td>
                                 <span class="tooltip" data-tip="{{ $version->created_at }}">{{ $version->created_at->diffForHumans() }}</span>
                             </td>

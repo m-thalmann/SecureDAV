@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Exceptions\FileAlreadyExistsException;
 use App\Exceptions\FileWriteException;
-use App\Exceptions\MimeTypeMismatchException;
 use App\Exceptions\NoVersionFoundException;
 use App\Models\File;
 use App\Models\FileVersion;
@@ -59,6 +58,7 @@ class FileVersionService {
         $this->createVersion(
             $file,
             $storeFileAction,
+            $version->mime_type,
             $version->checksum,
             $version->bytes,
             $label
@@ -72,7 +72,6 @@ class FileVersionService {
      * @param \Illuminate\Http\UploadedFile $uploadedFile
      * @param string|null $label The optional label for the new version
      *
-     * @throws \App\Exceptions\MimeTypeMismatchException
      * @throws \App\Exceptions\FileAlreadyExistsException
      * @throws \App\Exceptions\FileWriteException
      * @throws \RuntimeException
@@ -83,13 +82,6 @@ class FileVersionService {
         ?string $label = null
     ) {
         $mimeType = $uploadedFile->getClientMimeType();
-
-        if ($mimeType !== $file->mime_type) {
-            throw new MimeTypeMismatchException(
-                expectedMimeType: $file->mime_type,
-                actualMimeType: $mimeType
-            );
-        }
 
         $fileSize = $uploadedFile->getSize();
         $checksum = md5_file($uploadedFile->path());
@@ -109,6 +101,7 @@ class FileVersionService {
         $this->createVersion(
             $file,
             $storeFileAction,
+            $mimeType,
             $checksum,
             $fileSize,
             $label
@@ -132,6 +125,7 @@ class FileVersionService {
     protected function createVersion(
         File $file,
         Closure $storeFileAction,
+        ?string $mimeType,
         string $checksum,
         int $bytes,
         ?string $label = null
@@ -145,6 +139,7 @@ class FileVersionService {
         DB::transaction(function () use (
             $file,
             $storeFileAction,
+            $mimeType,
             $label,
             $checksum,
             $bytes,
@@ -156,6 +151,7 @@ class FileVersionService {
                 ->forceFill([
                     'label' => $label,
                     'version' => $file->next_version,
+                    'mime_type' => $mimeType,
                     'storage_path' => $newPath,
                     'checksum' => $checksum,
                     'bytes' => $bytes,
@@ -183,7 +179,6 @@ class FileVersionService {
      * @param \App\Models\File $file
      * @param \Illuminate\Http\UploadedFile $uploadedFile
      *
-     * @throws \App\Exceptions\MimeTypeMismatchException
      * @throws \App\Exceptions\NoVersionFoundException
      * @throws \App\Exceptions\FileWriteException
      */
@@ -192,13 +187,6 @@ class FileVersionService {
         UploadedFile $uploadedFile
     ) {
         $mimeType = $uploadedFile->getClientMimeType();
-
-        if ($mimeType !== $file->mime_type) {
-            throw new MimeTypeMismatchException(
-                expectedMimeType: $file->mime_type,
-                actualMimeType: $mimeType
-            );
-        }
 
         $fileSize = $uploadedFile->getSize();
         $checksum = md5_file($uploadedFile->path());
@@ -212,11 +200,13 @@ class FileVersionService {
         DB::transaction(function () use (
             $file,
             $latestVersion,
+            $mimeType,
             $fileSize,
             $checksum,
             $uploadedFile
         ) {
             $latestVersion->forceFill([
+                'mime_type' => $mimeType,
                 'checksum' => $checksum,
                 'bytes' => $fileSize,
             ]);
@@ -362,7 +352,7 @@ class FileVersionService {
                 },
                 $file->name,
                 [
-                    'Content-Type' => $file->mime_type,
+                    'Content-Type' => $version->mime_type,
                     'Content-Length' => $version->bytes,
                 ]
             )

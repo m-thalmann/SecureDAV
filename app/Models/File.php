@@ -18,7 +18,7 @@ class File extends Model {
 
     protected $hidden = ['next_version'];
 
-    protected $fillable = ['directory_id', 'name', 'description', 'mime_type'];
+    protected $fillable = ['directory_id', 'name', 'description'];
 
     protected $attributes = [
         'next_version' => 1,

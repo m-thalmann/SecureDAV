@@ -50,7 +50,7 @@ class VirtualFile extends DAV\File {
     }
 
     function getContentType(): string {
-        return $this->file->mime_type;
+        return $this->fileVersion->mime_type;
     }
 
     function getLastModified(): int {

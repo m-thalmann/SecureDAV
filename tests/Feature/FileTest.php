@@ -279,6 +279,7 @@ class FileTest extends TestCase {
 
         $response->assertSee($file->name);
         $response->assertSee($file->description);
+        $response->assertSee($file->latestVersion->mime_type);
         $response->assertSee($file->webdavUrl);
         $response->assertSee("($versionCount)");
     }

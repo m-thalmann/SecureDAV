@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\MimeTypeMismatchException;
 use App\Exceptions\NoVersionFoundException;
 use App\Models\File;
 use App\Models\FileVersion;
@@ -66,12 +65,6 @@ class FileVersionController extends Controller {
                     )
                 )
             );
-        } catch (MimeTypeMismatchException $e) {
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'file' => __('The uploaded file has the wrong type.'),
-                ]);
         } catch (Exception $e) {
             return back()
                 ->withInput()

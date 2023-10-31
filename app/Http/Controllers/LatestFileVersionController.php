@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\MimeTypeMismatchException;
 use App\Models\File;
 use App\Services\FileVersionService;
 use App\Support\SessionMessage;
@@ -65,12 +64,6 @@ class LatestFileVersionController extends Controller {
 
         try {
             $fileVersionService->updateLatestVersion($file, $uploadedFile);
-        } catch (MimeTypeMismatchException $e) {
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'file' => __('The uploaded file has the wrong type.'),
-                ]);
         } catch (Exception $e) {
             return back()
                 ->withInput()

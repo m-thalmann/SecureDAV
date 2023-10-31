@@ -14,7 +14,7 @@ class FileVersion extends Model {
 
     protected $hidden = ['storage_path'];
 
-    protected $fillable = ['file_id', 'label'];
+    protected $fillable = ['file_id', 'label', 'mime_type'];
 
     public function scopeLatestVersion(Builder $query): Builder {
         return $query->where('version', function (QueryBuilder $query) {

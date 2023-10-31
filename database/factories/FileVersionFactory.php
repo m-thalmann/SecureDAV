@@ -21,6 +21,7 @@ class FileVersionFactory extends Factory {
         return [
             'file_id' => File::factory(),
             'label' => null,
+            'mime_type' => 'text/plain',
             'version' => 1,
             'storage_path' => null,
             'checksum' => $this->faker->md5(),
@@ -47,10 +48,13 @@ class FileVersionFactory extends Factory {
             }
 
             $path = Str::uuid()->toString();
+            $content = $this->faker->text(50);
 
-            Storage::disk('files')->put($path, $this->faker->text(50));
+            Storage::disk('files')->put($path, $content);
 
             $fileVersion->storage_path = $path;
+            $fileVersion->checksum = md5($content);
+            $fileVersion->bytes = strlen($content);
         });
     }
 }

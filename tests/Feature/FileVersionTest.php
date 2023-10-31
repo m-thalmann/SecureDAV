@@ -98,7 +98,7 @@ class FileVersionTest extends TestCase {
 
         $file = File::factory()
             ->for($this->user)
-            ->create(['mime_type' => $uploadedFile->getClientMimeType()]);
+            ->create();
 
         $label = 'New version';
 
@@ -119,6 +119,7 @@ class FileVersionTest extends TestCase {
 
         $this->assertDatabaseHas('file_versions', [
             'file_id' => $file->id,
+            'mime_type' => $uploadedFile->getMimeType(),
             'label' => $label,
             'version' => 1,
         ]);
@@ -159,6 +160,7 @@ class FileVersionTest extends TestCase {
 
         $this->assertDatabaseHas('file_versions', [
             'file_id' => $file->id,
+            'mime_type' => $fileVersion->mime_type,
             'label' => 'New version',
             'version' => $fileVersion->version + 1,
         ]);
@@ -213,21 +215,6 @@ class FileVersionTest extends TestCase {
         $response = $this->post("/files/{$file->uuid}/versions");
 
         $response->assertForbidden();
-    }
-
-    public function testNewFileVersionCantBeCreatedIfMimeTypesMismatch(): void {
-        $file = File::factory()
-            ->for($this->user)
-            ->create(['mime_type' => 'text/plain']);
-
-        $response = $this->post("/files/{$file->uuid}/versions", [
-            'file' => UploadedFile::fake()->create(
-                'new-version.jpg',
-                'image/jpeg'
-            ),
-        ]);
-
-        $response->assertSessionHasErrors(['file']);
     }
 
     public function testNewFileVersionCantBeCreatedWithoutAnUploadFileIfFileDoesntHaveAnyVersions(): void {

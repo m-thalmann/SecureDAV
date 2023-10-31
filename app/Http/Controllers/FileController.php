@@ -85,7 +85,6 @@ class FileController extends Controller {
                 'directory_id' => $directory?->id,
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
-                'mime_type' => $requestFile->getClientMimeType(),
                 'encryption_key' => $encryptionKey,
             ]);
 

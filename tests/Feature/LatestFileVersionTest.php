@@ -177,11 +177,11 @@ class LatestFileVersionTest extends TestCase {
 
         $file = File::factory()
             ->for($this->user)
-            ->create(['mime_type' => $uploadedFile->getClientMimeType()]);
+            ->create();
 
         $fileVersion = FileVersion::factory()
             ->for($file)
-            ->create();
+            ->create(['mime_type' => 'application/json']);
 
         $response = $this->put("/files/{$file->uuid}/versions/latest", [
             'file' => $uploadedFile,
@@ -204,30 +204,12 @@ class LatestFileVersionTest extends TestCase {
             $file->refresh()->latestVersion->id
         );
 
+        $this->assertEquals(
+            $uploadedFile->getClientMimeType(),
+            $fileVersion->mime_type
+        );
+
         $this->storage->assertExists($fileVersion->storage_path, $content);
-    }
-
-    public function testLatestFileVersionCantBeUpdatedIfMimeTypesMismatch(): void {
-        $file = File::factory()
-            ->for($this->user)
-            ->create(['mime_type' => 'text/plain']);
-
-        $fileVersion = FileVersion::factory()
-            ->for($file)
-            ->create();
-
-        $response = $this->from(
-            "/files/{$file->uuid}/versions/latest/edit"
-        )->put("/files/{$file->uuid}/versions/latest", [
-            'file' => UploadedFile::fake()->create(
-                'new-version.jpg',
-                'image/jpeg'
-            ),
-        ]);
-
-        $response->assertRedirect("/files/{$file->uuid}/versions/latest/edit");
-
-        $response->assertSessionHasErrors(['file']);
     }
 
     public function testLatestFileVersionCantBeUpdatedIfFileHasNoLatestVersion(): void {

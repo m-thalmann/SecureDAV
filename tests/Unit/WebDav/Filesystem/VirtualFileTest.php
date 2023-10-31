@@ -100,7 +100,7 @@ class VirtualFileTest extends TestCase {
 
     public function testGetContentTypeReturnsTheMimeTypeOfTheFile(): void {
         $this->assertEquals(
-            $this->file->mime_type,
+            $this->file->latestVersion->mime_type,
             $this->virtualFile->getContentType()
         );
     }

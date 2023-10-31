@@ -15,6 +15,7 @@ return new class extends Migration {
                 ->cascadeOnDelete();
             $table->string('label')->nullable();
             $table->integer('version');
+            $table->string('mime_type')->nullable();
             $table->string('storage_path');
             $table->string('checksum', 32);
             $table->unsignedBigInteger('bytes');

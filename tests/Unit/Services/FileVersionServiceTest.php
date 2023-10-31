@@ -4,7 +4,6 @@ namespace Tests\Unit\Services;
 
 use App\Exceptions\FileAlreadyExistsException;
 use App\Exceptions\FileWriteException;
-use App\Exceptions\MimeTypeMismatchException;
 use App\Exceptions\NoVersionFoundException;
 use App\Models\File;
 use App\Models\FileVersion;
@@ -65,11 +64,13 @@ class FileVersionServiceTest extends TestCase {
             ->withArgs(function (
                 File $file,
                 Closure $storeFileAction,
+                ?string $mimeType,
                 string $checksum,
                 int $bytes,
                 string $label
             ) use ($latestVersion, $newLabel) {
                 $this->assertEquals($latestVersion->file_id, $file->id);
+                $this->assertEquals($latestVersion->mime_type, $mimeType);
                 $this->assertEquals($latestVersion->checksum, $checksum);
                 $this->assertEquals($latestVersion->bytes, $bytes);
                 $this->assertEquals($newLabel, $label);
@@ -111,6 +112,7 @@ class FileVersionServiceTest extends TestCase {
             ->withArgs(function (
                 File $file,
                 Closure $storeFileAction,
+                ?string $mimeType,
                 string $checksum,
                 int $bytes,
                 ?string $label
@@ -141,9 +143,11 @@ class FileVersionServiceTest extends TestCase {
             $content
         );
 
+        $uploadedMimeType = $uploadedFile->getClientMimeType();
+
         $file = File::factory()
             ->encrypted()
-            ->create(['mime_type' => $uploadedFile->getClientMimeType()]);
+            ->create();
 
         $expectedBytes = $uploadedFile->getSize();
 
@@ -161,11 +165,20 @@ class FileVersionServiceTest extends TestCase {
             ->withArgs(function (
                 File $receivedFile,
                 Closure $storeFileAction,
+                ?string $mimeType,
                 string $checksum,
                 int $bytes,
                 string $label
-            ) use ($file, $content, $expectedBytes, $newLabel, $newPath) {
+            ) use (
+                $file,
+                $content,
+                $uploadedMimeType,
+                $expectedBytes,
+                $newLabel,
+                $newPath
+            ) {
                 $this->assertEquals($file->id, $receivedFile->id);
+                $this->assertEquals($uploadedMimeType, $mimeType);
                 $this->assertEquals(md5($content), $checksum);
                 $this->assertEquals($expectedBytes, $bytes);
                 $this->assertEquals($newLabel, $label);
@@ -179,28 +192,6 @@ class FileVersionServiceTest extends TestCase {
         $this->service->createNewVersion($file, $uploadedFile, $newLabel);
     }
 
-    public function testCreateNewVersionFailsIfMimeTypesDontMatch(): void {
-        $this->expectException(MimeTypeMismatchException::class);
-
-        $file = File::factory()->create(['mime_type' => 'application/json']);
-
-        try {
-            $this->service->createNewVersion(
-                $file,
-                UploadedFile::fake()->create(
-                    'test.pdf',
-                    mimeType: 'application/pdf'
-                )
-            );
-        } catch (Exception $e) {
-            $this->assertDatabaseMissing('file_versions', [
-                'file_id' => $file->id,
-            ]);
-
-            throw $e;
-        }
-    }
-
     public function testCreateVersionCreatesANewVersion(): void {
         $nextVersion = 55;
 
@@ -210,6 +201,8 @@ class FileVersionServiceTest extends TestCase {
         $expectedChecksum = md5('test');
 
         $newLabel = 'test-label';
+
+        $mimeType = 'application/json';
 
         $storeFileActionCalled = Mockery::mock('invokedTest');
         $storeFileActionCalled->shouldReceive('invoked')->once();
@@ -228,6 +221,7 @@ class FileVersionServiceTest extends TestCase {
         $this->service->createVersion(
             $file,
             $storeFileAction,
+            $mimeType,
             $expectedChecksum,
             $expectedBytes,
             $newLabel
@@ -237,6 +231,7 @@ class FileVersionServiceTest extends TestCase {
             'file_id' => $file->id,
             'label' => $newLabel,
             'version' => $nextVersion,
+            'mime_type' => $mimeType,
             'storage_path' => $foundNewPath,
             'checksum' => $expectedChecksum,
             'bytes' => $expectedBytes,
@@ -256,7 +251,13 @@ class FileVersionServiceTest extends TestCase {
         $file = File::factory()->create();
 
         try {
-            $this->service->createVersion($file, fn() => null, 'test', 4);
+            $this->service->createVersion(
+                $file,
+                fn() => null,
+                'text/plain',
+                'test',
+                4
+            );
         } catch (Exception $e) {
             Str::createUuidsNormally();
 
@@ -282,7 +283,13 @@ class FileVersionServiceTest extends TestCase {
         $file->updating(fn() => false);
 
         try {
-            $this->service->createVersion($file, fn() => null, 'test', 4);
+            $this->service->createVersion(
+                $file,
+                fn() => null,
+                'text/plain',
+                'test',
+                4
+            );
         } catch (Exception $e) {
             $this->assertDatabaseMissing('file_versions', [
                 'file_id' => $file->id,
@@ -303,6 +310,7 @@ class FileVersionServiceTest extends TestCase {
             $this->service->createVersion(
                 $file,
                 fn() => throw $exception,
+                'text/plain',
                 'test',
                 4
             );
@@ -323,13 +331,15 @@ class FileVersionServiceTest extends TestCase {
             $content
         );
 
+        $uploadedMimeType = $uploadedFile->getClientMimeType();
+
         $file = File::factory()
             ->encrypted()
-            ->create(['mime_type' => $uploadedFile->getClientMimeType()]);
+            ->create();
 
         $version = FileVersion::factory()
             ->for($file)
-            ->create();
+            ->create(['mime_type' => 'application/json']);
 
         $expectedBytes = $uploadedFile->getSize();
 
@@ -349,6 +359,7 @@ class FileVersionServiceTest extends TestCase {
             'id' => $version->id,
             'file_id' => $file->id,
             'version' => $version->version,
+            'mime_type' => $uploadedMimeType,
             'storage_path' => $version->storage_path,
             'checksum' => md5($content),
             'bytes' => $expectedBytes,
@@ -360,9 +371,7 @@ class FileVersionServiceTest extends TestCase {
 
         $uploadedFile = UploadedFile::fake()->create('test.txt');
 
-        $file = File::factory()->create([
-            'mime_type' => $uploadedFile->getClientMimeType(),
-        ]);
+        $file = File::factory()->create();
 
         $this->service->updateLatestVersion($file, $uploadedFile);
     }
@@ -377,13 +386,13 @@ class FileVersionServiceTest extends TestCase {
             $content
         );
 
-        $file = File::factory()->create([
-            'mime_type' => $uploadedFile->getClientMimeType(),
-        ]);
+        $file = File::factory()->create();
 
         $version = FileVersion::factory()
             ->for($file)
-            ->create();
+            ->create([
+                'mime_type' => 'application/json',
+            ]);
 
         $this->service
             ->shouldReceive('storeFile')
@@ -397,37 +406,7 @@ class FileVersionServiceTest extends TestCase {
                 'id' => $version->id,
                 'file_id' => $file->id,
                 'version' => $version->version,
-                'storage_path' => $version->storage_path,
-                'checksum' => $version->checksum,
-                'bytes' => $version->bytes,
-            ]);
-
-            throw $e;
-        }
-    }
-
-    public function testUpdateLatestVersionFailsIfMimeTypesDontMatch(): void {
-        $this->expectException(MimeTypeMismatchException::class);
-
-        $file = File::factory()->create(['mime_type' => 'application/json']);
-
-        $version = FileVersion::factory()
-            ->for($file)
-            ->create();
-
-        try {
-            $this->service->updateLatestVersion(
-                $file,
-                UploadedFile::fake()->create(
-                    'test.pdf',
-                    mimeType: 'application/pdf'
-                )
-            );
-        } catch (Exception $e) {
-            $this->assertDatabaseHas('file_versions', [
-                'id' => $version->id,
-                'file_id' => $file->id,
-                'version' => $version->version,
+                'mime_type' => $version->mime_type,
                 'storage_path' => $version->storage_path,
                 'checksum' => $version->checksum,
                 'bytes' => $version->bytes,
@@ -732,7 +711,7 @@ class FileVersionServiceTest extends TestCase {
         );
 
         $this->assertEquals(
-            $file->mime_type,
+            $version->mime_type,
             $response->headers->get('Content-Type')
         );
 
@@ -762,6 +741,7 @@ class FileVersionServiceTestClass extends FileVersionService {
     public function createVersion(
         File $file,
         Closure $storeFileAction,
+        ?string $mimeType,
         string $checksum,
         int $bytes,
         ?string $label = null
@@ -769,6 +749,7 @@ class FileVersionServiceTestClass extends FileVersionService {
         parent::createVersion(
             $file,
             $storeFileAction,
+            $mimeType,
             $checksum,
             $bytes,
             $label
@@ -788,3 +769,4 @@ class FileVersionServiceTestClass extends FileVersionService {
         return static::TMP_SUFFIX;
     }
 }
+

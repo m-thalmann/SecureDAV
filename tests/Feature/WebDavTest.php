@@ -31,7 +31,7 @@ class WebDavTest extends TestCase {
     public function testAccessFailsWithNoAuthentication(
         string $routeName
     ): void {
-        $response = $this->get(route('webdav.files.base'));
+        $response = $this->get(route($routeName));
 
         $response->assertUnauthorized();
 
@@ -44,7 +44,7 @@ class WebDavTest extends TestCase {
     public function testAccessFailsWithInvalidAuthentication(
         string $routeName
     ): void {
-        $response = $this->get(route('webdav.files.base'), [
+        $response = $this->get(route($routeName), [
             'Authorization' => 'Basic not-user:wrong-password',
         ]);
 
@@ -59,7 +59,7 @@ class WebDavTest extends TestCase {
     public function testAccessFailsWhenGroupNotActive(string $routeName): void {
         $this->user->accessGroup->update(['active' => false]);
 
-        $response = $this->fetchWebDav(route('webdav.files.base'));
+        $response = $this->fetchWebDav(route($routeName));
 
         $response->assertUnauthorized();
 
@@ -267,6 +267,6 @@ class WebDavTest extends TestCase {
     }
 
     public static function webdavRouteProvider(): array {
-        return [['webdav.files'], ['webdav.directories']];
+        return [['webdav.files.base'], ['webdav.directories']];
     }
 }
