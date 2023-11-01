@@ -164,10 +164,7 @@ class ServerTest extends TestCase {
         $this->createServer();
 
         $responseBodyContent = 'test body';
-        $responseBody = fopen('php://memory', 'r+');
-
-        fwrite($responseBody, $responseBodyContent);
-        rewind($responseBody);
+        $responseBody = $this->createStream($responseBodyContent);
 
         $responseStatus = 200;
         $responseHeaders = [

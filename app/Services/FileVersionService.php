@@ -7,10 +7,10 @@ use App\Exceptions\FileWriteException;
 use App\Exceptions\NoVersionFoundException;
 use App\Models\File;
 use App\Models\FileVersion;
+use App\Support\FileInfo;
 use Closure;
 use Exception;
 use Illuminate\Filesystem\FilesystemAdapter;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -36,8 +36,13 @@ class FileVersionService {
      * @throws \App\Exceptions\FileAlreadyExistsException
      * @throws \App\Exceptions\FileWriteException
      * @throws \RuntimeException
+     *
+     * @return \App\Models\FileVersion
      */
-    public function copyLatestVersion(File $file, ?string $label = null): void {
+    public function copyLatestVersion(
+        File $file,
+        ?string $label = null
+    ): FileVersion {
         $version = $file->latestVersion;
 
         if ($version === null) {
@@ -55,57 +60,47 @@ class FileVersionService {
             }
         };
 
-        $this->createVersion(
+        return $this->createVersion(
             $file,
             $storeFileAction,
-            $version->mime_type,
-            $version->checksum,
-            $version->bytes,
-            $label
+            $label,
+            fileInfo: new FileInfo(
+                $this->storage->path($version->storage_path),
+                $version->mime_type,
+                $version->bytes,
+                $version->checksum
+            )
         );
     }
 
     /**
-     * Creates a new version for the given file with the uploaded file.
+     * Creates a new version for the given file with the contents of the resource.
      *
      * @param \App\Models\File $file
-     * @param \Illuminate\Http\UploadedFile $uploadedFile
+     * @param resource $resource
      * @param string|null $label The optional label for the new version
      *
      * @throws \App\Exceptions\FileAlreadyExistsException
      * @throws \App\Exceptions\FileWriteException
      * @throws \RuntimeException
+     *
+     * @return \App\Models\FileVersion
      */
     public function createNewVersion(
         File $file,
-        UploadedFile $uploadedFile,
+        mixed $resource,
         ?string $label = null
-    ) {
-        $mimeType = $uploadedFile->getClientMimeType();
-
-        $fileSize = $uploadedFile->getSize();
-        $checksum = md5_file($uploadedFile->path());
-
-        $storeFileAction = function (string $newPath) use (
-            $file,
-            $uploadedFile
-        ) {
+    ): FileVersion {
+        $storeFileAction = function (string $newPath) use ($file, $resource) {
             $this->storeFile(
-                $uploadedFile,
+                $resource,
                 $newPath,
                 $file->encryption_key,
                 useTemporaryFile: false
             );
         };
 
-        $this->createVersion(
-            $file,
-            $storeFileAction,
-            $mimeType,
-            $checksum,
-            $fileSize,
-            $label
-        );
+        return $this->createVersion($file, $storeFileAction, $label);
     }
 
     /**
@@ -115,48 +110,47 @@ class FileVersionService {
      *
      * @param \App\Models\File $file
      * @param \Closure $storeFileAction The action to store the file. It receives the new path (inside of the disk) as the first argument.
-     * @param string $checksum The checksum of the file
-     * @param int $bytes The size of the file in bytes
      * @param string|null $label The optional label for the new version
      *
      * @throws \App\Exceptions\FileAlreadyExistsException
      * @throws \RuntimeException
+     *
+     * @return \App\Models\FileVersion
      */
     protected function createVersion(
         File $file,
         Closure $storeFileAction,
-        ?string $mimeType,
-        string $checksum,
-        int $bytes,
-        ?string $label = null
-    ): void {
+        ?string $label = null,
+        ?FileInfo $fileInfo = null
+    ): FileVersion {
         $newPath = Str::uuid()->toString();
 
         if ($this->storage->exists($newPath)) {
             throw new FileAlreadyExistsException();
         }
 
-        DB::transaction(function () use (
-            $file,
-            $storeFileAction,
-            $mimeType,
-            $label,
-            $checksum,
-            $bytes,
-            $newPath
-        ) {
+        $storeFileAction($newPath);
+
+        if ($fileInfo === null) {
+            $fileInfo = FileInfo::fromStorage($this->storage, $newPath);
+        }
+
+        try {
+            DB::beginTransaction();
+
             $newVersion = $file
                 ->versions()
                 ->make()
                 ->forceFill([
                     'label' => $label,
                     'version' => $file->next_version,
-                    'mime_type' => $mimeType,
+                    'mime_type' => $fileInfo->mimeType,
                     'storage_path' => $newPath,
-                    'checksum' => $checksum,
-                    'bytes' => $bytes,
-                ])
-                ->save();
+                    'checksum' => $fileInfo->checksum,
+                    'bytes' => $fileInfo->size,
+                ]);
+
+            $newVersion->save();
 
             $nextVersionSetSuccessfully = $file
                 ->forceFill([
@@ -168,115 +162,103 @@ class FileVersionService {
                 throw new RuntimeException('Next version could not be set');
             }
 
-            $storeFileAction($newPath);
-        });
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            $this->storage->delete($newPath);
+
+            throw $e;
+        }
+
+        return $newVersion;
     }
 
     /**
-     * Updates the latest version of the given file with the uploaded file.
-     * **Info:** This function uses a transaction
+     * Updates the latest version of the given file with the contents of the resource.
      *
      * @param \App\Models\File $file
-     * @param \Illuminate\Http\UploadedFile $uploadedFile
+     * @param resource $resource The resource to read the file from
      *
      * @throws \App\Exceptions\NoVersionFoundException
      * @throws \App\Exceptions\FileWriteException
      */
-    public function updateLatestVersion(
-        File $file,
-        UploadedFile $uploadedFile
-    ) {
-        $mimeType = $uploadedFile->getClientMimeType();
-
-        $fileSize = $uploadedFile->getSize();
-        $checksum = md5_file($uploadedFile->path());
-
+    public function updateLatestVersion(File $file, mixed $resource) {
         $latestVersion = $file->latestVersion;
 
         if ($latestVersion === null) {
             throw new NoVersionFoundException();
         }
 
-        DB::transaction(function () use (
-            $file,
-            $latestVersion,
-            $mimeType,
-            $fileSize,
-            $checksum,
-            $uploadedFile
-        ) {
-            $latestVersion->forceFill([
-                'mime_type' => $mimeType,
-                'checksum' => $checksum,
-                'bytes' => $fileSize,
-            ]);
+        $this->storeFile(
+            $resource,
+            $latestVersion->storage_path,
+            $file->encryption_key,
+            useTemporaryFile: true
+        );
 
-            $latestVersion->save();
+        $fileInfo = FileInfo::fromStorage(
+            $this->storage,
+            $latestVersion->storage_path
+        );
 
-            $this->storeFile(
-                $uploadedFile,
-                $latestVersion->storage_path,
-                $file->encryption_key,
-                useTemporaryFile: true
-            );
-        });
+        $latestVersion
+            ->forceFill([
+                'mime_type' => $fileInfo->mimeType,
+                'checksum' => $fileInfo->checksum,
+                'bytes' => $fileInfo->size,
+            ])
+            ->save();
     }
 
     /**
-     * Stores the given file at the given path.
+     * Stores the given resource to the given path.
      * If an encryption key is set, the file is encrypted before storing it.
      *
-     * @param \Illuminate\Http\UploadedFile $file
+     * @param resource $resource
      * @param string $path
      * @param string|null $encryptionKey
-     * @param bool $useTemporaryFile Whether the file should be stored to a temporary file and then moved to the correct path (only when using encryption)
+     * @param bool $useTemporaryFile Whether the file should be stored to a temporary file and then moved to the correct path
      *
      * @throws \App\Exceptions\FileWriteException
      */
     protected function storeFile(
-        UploadedFile $file,
+        mixed $resource,
         string $path,
         ?string $encryptionKey,
         bool $useTemporaryFile
     ): void {
-        if ($encryptionKey) {
-            $tmpPath = $path;
+        $tmpPath = $path;
 
-            if ($useTemporaryFile) {
-                $tmpPath .= static::TMP_SUFFIX;
-            }
+        if ($useTemporaryFile) {
+            $tmpPath .= static::TMP_SUFFIX;
+        }
 
-            $outputPath = $this->storage->path($tmpPath);
-
-            $inputResource = fopen($file->path(), 'rb');
-            $outputResource = fopen($outputPath, 'w');
-
-            try {
-                $this->fileEncryptionService->encrypt(
-                    $encryptionKey,
-                    $inputResource,
-                    $outputResource
-                );
-            } catch (Exception $e) {
-                fclose($inputResource);
-                fclose($outputResource);
-
-                $this->storage->delete($tmpPath);
-
-                throw $e;
-            }
-
-            fclose($inputResource);
-            fclose($outputResource);
-
-            if ($useTemporaryFile) {
-                if (!$this->storage->move($tmpPath, $path)) {
-                    $this->storage->delete($tmpPath);
-                    throw new FileWriteException();
-                }
+        if (!$encryptionKey) {
+            if (!$this->storage->writeStream($tmpPath, $resource)) {
+                throw new FileWriteException();
             }
         } else {
-            if (!$this->storage->putFileAs('', $file, $path)) {
+            $outputPath = $this->storage->path($tmpPath);
+
+            processFile(
+                $outputPath,
+                function (mixed $outputResource) use (
+                    $resource,
+                    $encryptionKey
+                ) {
+                    $this->fileEncryptionService->encrypt(
+                        $encryptionKey,
+                        $resource,
+                        $outputResource
+                    );
+                },
+                mode: 'w'
+            );
+        }
+
+        if ($useTemporaryFile) {
+            if (!$this->storage->move($tmpPath, $path)) {
+                $this->storage->delete($tmpPath);
                 throw new FileWriteException();
             }
         }
@@ -340,15 +322,17 @@ class FileVersionService {
         return response()
             ->streamDownload(
                 function () use ($file, $version) {
-                    $outputStream = fopen('php://output', 'w');
-
-                    $this->writeContentsToStream(
-                        $file,
-                        $version,
-                        $outputStream
+                    processFile(
+                        'php://output',
+                        function (mixed $outputStream) use ($file, $version) {
+                            $this->writeContentsToStream(
+                                $file,
+                                $version,
+                                $outputStream
+                            );
+                        },
+                        mode: 'w'
                     );
-
-                    fclose($outputStream);
                 },
                 $file->name,
                 [

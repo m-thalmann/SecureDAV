@@ -83,10 +83,15 @@ class FileTest extends TestCase {
                 ->shouldReceive('createNewVersion')
                 ->withArgs(function (
                     File $createdFile,
-                    UploadedFile $receivedFile
-                ) use ($fileName, $uploadFile) {
+                    mixed $receivedResource
+                ) use ($fileName, $content) {
                     $this->assertEquals($fileName, $createdFile->name);
-                    $this->assertEquals($uploadFile, $receivedFile);
+                    $this->assertIsResource($receivedResource);
+
+                    $receivedContent = stream_get_contents($receivedResource);
+                    rewind($receivedResource);
+
+                    $this->assertEquals($content, $receivedContent);
 
                     $this->assertIsString($createdFile->encryption_key);
 

@@ -2,7 +2,10 @@
 
 namespace Tests\Unit;
 
+use Exception;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -109,6 +112,156 @@ class HelpersTest extends TestCase {
         $this->assertNull(authUser());
     }
 
+    public function testProcessFileOpensTheFileAndPassesItToTheCallback(): void {
+        $path = 'test.txt';
+        $contents = 'test contents';
+
+        /**
+         * @var FilesystemAdapter
+         */
+        $storage = Storage::fake();
+        $storage->put($path, $contents);
+
+        $expectedResponse = 'test response';
+
+        $response = processFile($storage->path($path), function (
+            mixed $file
+        ) use ($contents, $expectedResponse) {
+            $this->assertIsResource($file);
+            $this->assertEquals($contents, stream_get_contents($file));
+
+            return $expectedResponse;
+        });
+
+        $this->assertEquals($expectedResponse, $response);
+    }
+
+    public function testProcessFileUsesTheDefaultModeIfNoneProvided(): void {
+        $path = 'test.txt';
+
+        /**
+         * @var FilesystemAdapter
+         */
+        $storage = Storage::fake();
+        $storage->put($path, 'test contents');
+
+        processFile($storage->path($path), function (mixed $file) {
+            $this->assertEquals('rb', stream_get_meta_data($file)['mode']);
+        });
+    }
+
+    public function testProcessFileUsesTheProvidedMode(): void {
+        $path = 'test.txt';
+
+        /**
+         * @var FilesystemAdapter
+         */
+        $storage = Storage::fake();
+        $storage->put($path, 'test contents');
+
+        processFile(
+            $storage->path($path),
+            function (mixed $file) {
+                $this->assertEquals('w', stream_get_meta_data($file)['mode']);
+            },
+            mode: 'w'
+        );
+    }
+
+    public function testProcessFileClosesTheStreamAfterTheCallbackIsFinished(): void {
+        $path = 'test.txt';
+
+        /**
+         * @var FilesystemAdapter
+         */
+        $storage = Storage::fake();
+        $storage->put($path, '123');
+
+        $resource = processFile($storage->path($path), function (mixed $file) {
+            $this->assertIsNotClosedResource($file);
+
+            return $file;
+        });
+
+        $this->assertIsClosedResource($resource);
+    }
+
+    public function testProcessFileClosesTheStreamOnExceptionAndRethrows(): void {
+        $expectedException = new Exception('test exception');
+        $path = 'test.txt';
+
+        /**
+         * @var FilesystemAdapter
+         */
+        $storage = Storage::fake();
+        $storage->put($path, '123');
+
+        $this->expectExceptionObject($expectedException);
+
+        $resource = null;
+
+        try {
+            processFile($storage->path($path), function (mixed $file) use (
+                $expectedException,
+                &$resource
+            ) {
+                $this->assertIsNotClosedResource($file);
+
+                $resource = $file;
+
+                throw $expectedException;
+            });
+        } catch (Exception $e) {
+            $this->assertIsClosedResource($resource);
+
+            throw $e;
+        }
+    }
+
+    public function testProcessFileExecutesExceptionCallbackOnException(): void {
+        $expectedException = new Exception('test exception');
+        $path = 'test.txt';
+
+        /**
+         * @var FilesystemAdapter
+         */
+        $storage = Storage::fake();
+        $storage->put($path, '123');
+
+        $this->expectExceptionObject($expectedException);
+
+        $resource = null;
+
+        $callbackExecuted = false;
+
+        try {
+            processFile(
+                $storage->path($path),
+                function (mixed $file) use ($expectedException, &$resource) {
+                    $resource = $file;
+
+                    throw $expectedException;
+                },
+                function (Exception $e) use (
+                    $expectedException,
+                    &$resource,
+                    &$callbackExecuted
+                ) {
+                    $this->assertEquals($expectedException, $e);
+                    $this->assertIsClosedResource($resource);
+
+                    $callbackExecuted = true;
+                }
+            );
+        } catch (Exception $e) {
+            $this->assertIsClosedResource($resource);
+
+            $this->assertTrue($callbackExecuted);
+
+            throw $e;
+        }
+    }
+
     public static function formatBytesProvider(): array {
         return [
             [1, '1 B'],
@@ -173,3 +326,4 @@ class HelpersTest extends TestCase {
         ];
     }
 }
+

@@ -78,27 +78,31 @@ class FileController extends Controller {
             ? Str::random(16)
             : null;
 
-        $file = authUser()
-            ->files()
-            ->make()
-            ->forceFill([
-                'directory_id' => $directory?->id,
-                'name' => $data['name'],
-                'description' => $data['description'] ?? null,
-                'encryption_key' => $encryptionKey,
-            ]);
-
         try {
-            DB::transaction(function () use (
-                $fileVersionService,
-                $file,
-                $requestFile
-            ) {
-                $file->save();
+            DB::beginTransaction();
 
-                $fileVersionService->createNewVersion($file, $requestFile);
+            $file = authUser()
+                ->files()
+                ->make()
+                ->forceFill([
+                    'directory_id' => $directory?->id,
+                    'name' => $data['name'],
+                    'description' => $data['description'] ?? null,
+                    'encryption_key' => $encryptionKey,
+                ]);
+
+            $file->save();
+
+            processFile($requestFile->path(), function (
+                mixed $fileResource
+            ) use ($fileVersionService, $file) {
+                $fileVersionService->createNewVersion($file, $fileResource);
             });
+
+            DB::commit();
         } catch (Exception $e) {
+            DB::rollBack();
+
             return back()
                 ->withInput()
                 ->with(

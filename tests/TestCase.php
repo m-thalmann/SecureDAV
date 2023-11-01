@@ -35,6 +35,14 @@ abstract class TestCase extends BaseTestCase {
         return ob_get_clean();
     }
 
+    protected function createStream(string $content): mixed {
+        $stream = fopen('php://memory', 'r+');
+        fwrite($stream, $content);
+        rewind($stream);
+
+        return $stream;
+    }
+
     protected function assertHasSubArray(array $subarray, array $array): void {
         foreach ($subarray as $key => $value) {
             $this->assertArrayHasKey($key, $array);

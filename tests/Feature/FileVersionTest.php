@@ -94,7 +94,10 @@ class FileVersionTest extends TestCase {
     }
 
     public function testNewFileVersionCanBeCreatedWithUploadFile(): void {
-        $uploadedFile = UploadedFile::fake()->create('new-version.txt');
+        $uploadedFile = UploadedFile::fake()->createWithContent(
+            'new-version.txt',
+            'Test content'
+        );
 
         $file = File::factory()
             ->for($this->user)

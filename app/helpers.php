@@ -152,3 +152,43 @@ if (!function_exists('authUser')) {
         return auth($guard)->user();
     }
 }
+
+if (!function_exists('processFile')) {
+    /**
+     * Opens a file and passes it to a callback function for processing.
+     * After the callback function has finished (or an exception occurs), the file is closed.
+     *
+     * @param string $path The path to the file to open.
+     * @param Closure $callback The callback function to process the file.
+     * @param Closure|null $exceptionCallback An optional callback function to handle any exceptions thrown during processing.
+     * @param string $mode The mode to use when opening the file (default 'rb').
+     *
+     * @return mixed The result of the callback function.
+     */
+    function processFile(
+        string $path,
+        Closure $callback,
+        ?Closure $exceptionCallback = null,
+        string $mode = 'rb'
+    ): mixed {
+        $file = fopen($path, $mode);
+
+        $returnValue = null;
+
+        try {
+            $returnValue = $callback($file);
+        } catch (Exception $e) {
+            fclose($file);
+
+            if ($exceptionCallback !== null) {
+                $exceptionCallback($e);
+            }
+
+            throw $e;
+        }
+
+        fclose($file);
+
+        return $returnValue;
+    }
+}

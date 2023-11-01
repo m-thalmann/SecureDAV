@@ -45,11 +45,15 @@ class FileVersionController extends Controller {
 
         try {
             if ($uploadedFile !== null) {
-                $fileVersionService->createNewVersion(
-                    $file,
-                    $uploadedFile,
-                    $data['label'] ?? null
-                );
+                processFile($uploadedFile->path(), function (
+                    mixed $fileResource
+                ) use ($fileVersionService, $file, $data) {
+                    $fileVersionService->createNewVersion(
+                        $file,
+                        $fileResource,
+                        $data['label'] ?? null
+                    );
+                });
             } else {
                 $fileVersionService->copyLatestVersion(
                     $file,

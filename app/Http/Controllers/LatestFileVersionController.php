@@ -63,7 +63,11 @@ class LatestFileVersionController extends Controller {
         $uploadedFile = $request->file('file');
 
         try {
-            $fileVersionService->updateLatestVersion($file, $uploadedFile);
+            processFile($uploadedFile->path(), function (
+                mixed $fileResource
+            ) use ($fileVersionService, $file) {
+                $fileVersionService->updateLatestVersion($file, $fileResource);
+            });
         } catch (Exception $e) {
             return back()
                 ->withInput()
