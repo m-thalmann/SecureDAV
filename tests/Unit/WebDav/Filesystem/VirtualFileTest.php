@@ -2,6 +2,8 @@
 
 namespace Tests\Unit\WebDav\Filesystem;
 
+use App\Models\AccessGroup;
+use App\Models\AccessGroupUser;
 use App\Models\File;
 use App\Models\FileVersion;
 use App\Services\FileVersionService;
@@ -10,6 +12,7 @@ use App\WebDav\Filesystem\VirtualFile;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Mockery;
 use Mockery\MockInterface;
+use Sabre\DAV;
 use Tests\TestCase;
 
 class VirtualFileTest extends TestCase {
@@ -82,6 +85,61 @@ class VirtualFileTest extends TestCase {
         $this->assertEquals($contents, stream_get_contents($outputStream));
 
         fclose($outputStream);
+    }
+
+    public function testPutUpdatesTheFileOfTheVersionWithTheProvidedData(): void {
+        $contents = 'test contents';
+
+        $resource = $this->createStream($contents);
+
+        $group = AccessGroup::factory()->create([
+            'readonly' => false,
+        ]);
+        $user = AccessGroupUser::factory()
+            ->for($group)
+            ->create();
+
+        $this->authBackend
+            ->shouldReceive('getAuthenticatedUser')
+            ->once()
+            ->andReturn($user);
+
+        $this->fileVersionService
+            ->shouldReceive('updateLatestVersion')
+            ->withArgs([$this->file, $resource])
+            ->once();
+
+        $this->virtualFile->put($resource);
+
+        fclose($resource);
+    }
+
+    public function testPutFailsIfTheAccessGroupIsReadonly(): void {
+        $contents = 'test contents';
+
+        $resource = $this->createStream($contents);
+
+        $group = AccessGroup::factory()->create([
+            'readonly' => true,
+        ]);
+        $user = AccessGroupUser::factory()
+            ->for($group)
+            ->create();
+
+        $this->authBackend
+            ->shouldReceive('getAuthenticatedUser')
+            ->once()
+            ->andReturn($user);
+
+        $this->fileVersionService
+            ->shouldReceive('updateLatestVersion')
+            ->never();
+
+        $this->expectException(DAV\Exception\Forbidden::class);
+
+        $this->virtualFile->put($resource);
+
+        fclose($resource);
     }
 
     public function testGetSizeReturnsTheFileSizeOfTheVersion(): void {

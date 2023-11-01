@@ -28,7 +28,7 @@ class VirtualFile extends DAV\File {
     }
 
     function get(): mixed {
-        $stream = fopen('php://memory', 'r+');
+        $stream = fopen('php://memory', 'rb+');
 
         $this->fileVersionService->writeContentsToStream(
             $this->file,
@@ -39,6 +39,21 @@ class VirtualFile extends DAV\File {
         rewind($stream);
 
         return $stream;
+    }
+
+    function put(mixed $updateResource): string {
+        if ($this->authBackend->getAuthenticatedUser()->accessGroup->readonly) {
+            throw new DAV\Exception\Forbidden();
+        }
+
+        $this->fileVersionService->updateLatestVersion(
+            $this->file,
+            $updateResource
+        );
+
+        $this->fileVersion->refresh();
+
+        return $this->getETag();
     }
 
     function getSize(): int {

@@ -18,10 +18,11 @@ class Server extends DAV\Server {
     public const METHODS = [
         'GET',
         'PROPFIND',
-        'PROPPATCH',
         'LOCK',
         'UNLOCK',
-        'POST',
+        'PUT',
+        'OPTIONS',
+        'HEAD',
     ];
 
     public function __construct(
