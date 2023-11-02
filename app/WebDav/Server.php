@@ -27,6 +27,7 @@ class Server extends DAV\Server {
 
     public function __construct(
         AuthBackend $authBackend,
+        LocksBackend $locksBackend,
         string $basePath,
         DAV\Tree $tree
     ) {
@@ -46,6 +47,7 @@ class Server extends DAV\Server {
         );
 
         $this->addPlugin(new DAV\Auth\Plugin($authBackend));
+        $this->addPlugin(new DAV\Locks\Plugin($locksBackend));
 
         // TODO: add locks
         // TODO: handle cors

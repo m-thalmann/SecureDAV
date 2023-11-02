@@ -254,16 +254,98 @@ class WebDavTest extends TestCase {
         $this->assertEquals($expectedContent, $content);
     }
 
+    public function testFileCanBeLockedAndUnlocked(): void {
+        $file = File::factory()
+            ->for($this->user->accessGroup->user)
+            ->has(FileVersion::factory(), 'versions')
+            ->hasAttached($this->user->accessGroup)
+            ->create(['directory_id' => null]);
+
+        $lockRequest = <<<XML
+<?xml version="1.0" encoding="utf-8" ?>
+<D:lockinfo xmlns:D="DAV:">
+    <D:lockscope>
+        <D:exclusive />
+    </D:lockscope>
+    <D:locktype>
+        <D:write />
+    </D:locktype>
+    <D:owner>test-owner</D:owner>
+</D:lockinfo>
+XML;
+
+        $response = $this->fetchWebDav(
+            route('webdav.directories', [
+                'path' => $file->name,
+            ]),
+            'LOCK',
+            data: $lockRequest
+        );
+
+        $response->assertStatus(200);
+
+        $response->assertHeader('Lock-Token');
+
+        $lockToken = $response->baseResponse->headers->get('Lock-Token');
+
+        $response = $this->fetchWebDav(
+            route('webdav.directories', [
+                'path' => $file->name,
+            ]),
+            'UNLOCK',
+            headers: [
+                'Lock-Token' => $lockToken,
+            ]
+        );
+
+        $response->assertStatus(204);
+    }
+
+    public function testFileOfOtherUserCantBeLocked(): void {
+        $otherUser = $this->createUser();
+
+        $file = File::factory()
+            ->for($otherUser)
+            ->has(FileVersion::factory(), 'versions')
+            ->create(['directory_id' => null]);
+
+        $lockRequest = <<<XML
+<?xml version="1.0" encoding="utf-8" ?>
+<D:lockinfo xmlns:D="DAV:">
+    <D:lockscope>
+        <D:exclusive />
+    </D:lockscope>
+    <D:locktype>
+        <D:write />
+    </D:locktype>
+    <D:owner>test-owner</D:owner>
+</D:lockinfo>
+XML;
+
+        $response = $this->fetchWebDav(
+            route('webdav.directories', [
+                'path' => $file->name,
+            ]),
+            'LOCK',
+            data: $lockRequest
+        );
+
+        $response->assertStatus(403);
+    }
+
     protected function fetchWebDav(
         string $path,
-        string $method = 'GET'
+        string $method = 'GET',
+        array $headers = [],
+        ?string $data = null
     ): TestResponse {
         $server = $this->transformHeadersToServerVars([
             'Authorization' =>
                 'Basic ' . base64_encode($this->user->username . ':password'),
+            ...$headers,
         ]);
 
-        return $this->call($method, $path, server: $server);
+        return $this->call($method, $path, content: $data, server: $server);
     }
 
     public static function webdavRouteProvider(): array {

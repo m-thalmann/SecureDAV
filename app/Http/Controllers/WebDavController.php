@@ -10,11 +10,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class WebDavController extends Controller {
     protected WebDav\AuthBackend $authBackend;
+    protected WebDav\LocksBackend $locksBackend;
 
     public function __construct(
         protected FileVersionService $fileVersionService
     ) {
         $this->authBackend = new WebDav\AuthBackend();
+        $this->locksBackend = new WebDav\LocksBackend($this->authBackend);
     }
 
     public function files(Request $request): Response {
@@ -52,6 +54,7 @@ class WebDavController extends Controller {
     ): Response {
         $server = new WebDav\Server(
             $this->authBackend,
+            $this->locksBackend,
             route($baseRoute, null, absolute: false),
             new DAV\Tree($rootNode)
         );

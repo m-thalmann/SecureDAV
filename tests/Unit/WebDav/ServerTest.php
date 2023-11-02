@@ -18,6 +18,7 @@ class ServerTest extends TestCase {
     protected WebDavServerTestClass|MockInterface $server;
 
     protected WebDav\AuthBackend|MockInterface $authBackend;
+    protected WebDav\LocksBackend|MockInterface $locksBackend;
     protected string $basePath = 'dav-test';
     protected DAV\Tree $tree;
 
@@ -25,10 +26,11 @@ class ServerTest extends TestCase {
         parent::setUp();
 
         $this->authBackend = Mockery::mock(WebDav\AuthBackend::class);
+        $this->locksBackend = Mockery::mock(WebDav\LocksBackend::class);
         $this->tree = new DAV\Tree(new DAV\SimpleCollection('root'));
     }
 
-    public function testConstructorSetsBaseUriAndAuthPlugin(): void {
+    public function testConstructorSetsBaseUriAndPlugins(): void {
         config(['app.debug' => false]);
 
         $this->createServer();
@@ -39,7 +41,14 @@ class ServerTest extends TestCase {
 
         $this->assertEquals($basePath, $this->server->getBaseUri());
 
-        $this->assertNotNull($this->server->getPlugin('auth'));
+        $this->assertInstanceOf(
+            DAV\Auth\Plugin::class,
+            $this->server->getPlugin('auth')
+        );
+        $this->assertInstanceOf(
+            DAV\Locks\Plugin::class,
+            $this->server->getPlugin('locks')
+        );
 
         $this->assertFalse($this->server->debugExceptions);
     }
@@ -268,6 +277,7 @@ class ServerTest extends TestCase {
         if (count($mockedMethods) === 0) {
             $this->server = new WebDavServerTestClass(
                 $this->authBackend,
+                $this->locksBackend,
                 $this->basePath,
                 $this->tree
             );
@@ -283,7 +293,12 @@ class ServerTest extends TestCase {
                 '[' .
                 join(',', $mockedMethods) .
                 ']',
-            [$this->authBackend, $this->basePath, $this->tree]
+            [
+                $this->authBackend,
+                $this->locksBackend,
+                $this->basePath,
+                $this->tree,
+            ]
         );
 
         $this->server->makePartial();
