@@ -3,7 +3,6 @@
 namespace Tests\Unit\WebDav\Filesystem;
 
 use App\Models\AccessGroup;
-use App\Models\AccessGroupUser;
 use App\Models\File;
 use App\Models\FileVersion;
 use App\Services\FileVersionService;
@@ -95,14 +94,11 @@ class VirtualFileTest extends TestCase {
         $group = AccessGroup::factory()->create([
             'readonly' => false,
         ]);
-        $user = AccessGroupUser::factory()
-            ->for($group)
-            ->create();
 
         $this->authBackend
-            ->shouldReceive('getAuthenticatedUser')
+            ->shouldReceive('getAuthenticatedAccessGroup')
             ->once()
-            ->andReturn($user);
+            ->andReturn($group);
 
         $this->fileVersionService
             ->shouldReceive('updateLatestVersion')
@@ -122,14 +118,11 @@ class VirtualFileTest extends TestCase {
         $group = AccessGroup::factory()->create([
             'readonly' => true,
         ]);
-        $user = AccessGroupUser::factory()
-            ->for($group)
-            ->create();
 
         $this->authBackend
-            ->shouldReceive('getAuthenticatedUser')
+            ->shouldReceive('getAuthenticatedAccessGroup')
             ->once()
-            ->andReturn($user);
+            ->andReturn($group);
 
         $this->fileVersionService
             ->shouldReceive('updateLatestVersion')

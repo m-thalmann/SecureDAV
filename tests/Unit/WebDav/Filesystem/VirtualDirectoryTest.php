@@ -3,7 +3,6 @@
 namespace Tests\Unit\WebDav\Filesystem;
 
 use App\Models\AccessGroup;
-use App\Models\AccessGroupUser;
 use App\Models\Directory;
 use App\Models\File;
 use App\Models\FileVersion;
@@ -24,7 +23,7 @@ class VirtualDirectoryTest extends TestCase {
     protected AuthBackend|MockInterface $authBackend;
     protected FileVersionService|MockInterface $fileVersionService;
 
-    protected AccessGroupUser $user;
+    protected AccessGroup $accessGroup;
 
     protected function setUp(): void {
         parent::setUp();
@@ -35,11 +34,15 @@ class VirtualDirectoryTest extends TestCase {
         $this->authBackend = Mockery::mock(AuthBackend::class);
         $this->fileVersionService = Mockery::mock(FileVersionService::class);
 
-        $this->user = AccessGroupUser::factory()->create();
+        $this->accessGroup = AccessGroup::factory()->create();
 
         $this->authBackend
             ->shouldReceive('getAuthenticatedUser')
-            ->andReturn($this->user);
+            ->andReturn($this->accessGroup->user);
+
+        $this->authBackend
+            ->shouldReceive('getAuthenticatedAccessGroup')
+            ->andReturn($this->accessGroup);
     }
 
     public function testGetNameReturnsTheDirectoryName(): void {
@@ -84,12 +87,12 @@ class VirtualDirectoryTest extends TestCase {
         $this->createVirtualDirectory(null);
 
         $directories = Directory::factory(5)
-            ->for($this->user->accessGroup->user)
+            ->for($this->accessGroup->user)
             ->create();
 
         // should not be included
         $otherDirectories = Directory::factory(5)
-            ->for($this->user->accessGroup->user)
+            ->for($this->accessGroup->user)
             ->for($directories->first(), 'parentDirectory')
             ->create();
 
@@ -110,24 +113,24 @@ class VirtualDirectoryTest extends TestCase {
 
     public function testLoadDirectoriesReturnsDirectoriesInGivenDirectory(): void {
         $directory = Directory::factory()
-            ->for($this->user->accessGroup->user)
+            ->for($this->accessGroup->user)
             ->create();
 
         $this->createVirtualDirectory($directory);
 
         $directories = Directory::factory(5)
-            ->for($this->user->accessGroup->user)
+            ->for($this->accessGroup->user)
             ->for($directory, 'parentDirectory')
             ->create();
 
         // should not be included
         $otherDirectory = Directory::factory()
-            ->for($this->user->accessGroup->user)
+            ->for($this->accessGroup->user)
             ->create();
 
         // should not be included
         $otherDirectories = Directory::factory(5)
-            ->for($this->user->accessGroup->user)
+            ->for($this->accessGroup->user)
             ->for($otherDirectory, 'parentDirectory')
             ->create();
 
@@ -150,17 +153,17 @@ class VirtualDirectoryTest extends TestCase {
         $this->createVirtualDirectory(null);
 
         $files = File::factory(5)
-            ->hasAttached($this->user->accessGroup)
+            ->hasAttached($this->accessGroup)
             ->has(FileVersion::factory(), 'versions')
             ->create(['directory_id' => null]);
 
         $otherDirectory = Directory::factory()
-            ->for($this->user->accessGroup->user)
+            ->for($this->accessGroup->user)
             ->create();
 
         // should not be included
         $otherFiles = File::factory(5)
-            ->hasAttached($this->user->accessGroup)
+            ->hasAttached($this->accessGroup)
             ->has(FileVersion::factory(), 'versions')
             ->for($otherDirectory)
             ->create();
@@ -180,24 +183,24 @@ class VirtualDirectoryTest extends TestCase {
 
     public function testLoadFilesReturnsFilesInGivenDirectory(): void {
         $directory = Directory::factory()
-            ->for($this->user->accessGroup->user)
+            ->for($this->accessGroup->user)
             ->create();
 
         $this->createVirtualDirectory($directory);
 
         $files = File::factory(5)
-            ->hasAttached($this->user->accessGroup)
+            ->hasAttached($this->accessGroup)
             ->has(FileVersion::factory(), 'versions')
             ->for($directory)
             ->create();
 
         $otherDirectory = Directory::factory()
-            ->for($this->user->accessGroup->user)
+            ->for($this->accessGroup->user)
             ->create();
 
         // should not be included
         $otherFiles = File::factory(5)
-            ->hasAttached($this->user->accessGroup)
+            ->hasAttached($this->accessGroup)
             ->has(FileVersion::factory(), 'versions')
             ->for($otherDirectory)
             ->create();
@@ -219,13 +222,13 @@ class VirtualDirectoryTest extends TestCase {
         $this->createVirtualDirectory(null);
 
         $files = File::factory(5)
-            ->hasAttached($this->user->accessGroup)
+            ->hasAttached($this->accessGroup)
             ->has(FileVersion::factory(), 'versions')
             ->create(['directory_id' => null]);
 
         // should not be included
         $noVersionFiles = File::factory(5)
-            ->hasAttached($this->user->accessGroup)
+            ->hasAttached($this->accessGroup)
             ->create(['directory_id' => null]);
 
         $fileIds = $files->map(fn(File $file) => $file->id);
@@ -245,12 +248,12 @@ class VirtualDirectoryTest extends TestCase {
         $this->createVirtualDirectory(null);
 
         $files = File::factory(5)
-            ->hasAttached($this->user->accessGroup)
+            ->hasAttached($this->accessGroup)
             ->has(FileVersion::factory(), 'versions')
             ->create(['directory_id' => null]);
 
         $otherAccessGroup = AccessGroup::factory()
-            ->for($this->user->accessGroup->user)
+            ->for($this->accessGroup->user)
             ->create();
 
         // should not be included

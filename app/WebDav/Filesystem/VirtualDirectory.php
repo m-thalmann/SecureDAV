@@ -34,7 +34,7 @@ class VirtualDirectory extends AbstractVirtualDirectory {
     protected function loadDirectories(): array {
         return $this->authBackend
             ->getAuthenticatedUser()
-            ->accessGroup->user->directories()
+            ->directories()
             ->inDirectory($this->directory, filterUser: false)
             ->get()
             ->map(function (Directory $directory) {
@@ -49,8 +49,8 @@ class VirtualDirectory extends AbstractVirtualDirectory {
 
     protected function loadFiles(): array {
         return $this->authBackend
-            ->getAuthenticatedUser()
-            ->accessGroup->files()
+            ->getAuthenticatedAccessGroup()
+            ->files()
             ->inDirectory($this->directory, filterUser: false)
             ->has('latestVersion')
             ->with('latestVersion')

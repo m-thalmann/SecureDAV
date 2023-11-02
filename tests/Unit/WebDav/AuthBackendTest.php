@@ -54,11 +54,58 @@ class AuthBackendTest extends TestCase {
 
         $this->assertEquals(
             $user->id,
+            $this->authBackend->getAuthenticatedAccessGroupUser()->id
+        );
+    }
+
+    public function testGetAuthenticatedAccessGroupUserReturnsNullIfNoUserIsAuthenticated(): void {
+        $this->assertNull(
+            $this->authBackend->getAuthenticatedAccessGroupUser()
+        );
+    }
+
+    public function testGetAuthenticatedAccessGroupReturnsGroupIfUserIsAuthenticated(): void {
+        $user = AccessGroupUser::factory()->create();
+
+        $this->authBackend->validateUserPass($user->username, 'password');
+
+        $this->assertEquals(
+            $user->accessGroup->id,
+            $this->authBackend->getAuthenticatedAccessGroup()->id
+        );
+    }
+
+    public function testGetAuthenticatedAccessGroupReturnsNullIfNoUserIsAuthenticated(): void {
+        $this->assertNull($this->authBackend->getAuthenticatedAccessGroup());
+    }
+
+    public function testGetAuthenticatedUserReturnsUserIfUserIsAuthenticated(): void {
+        $user = AccessGroupUser::factory()->create();
+
+        $this->authBackend->validateUserPass($user->username, 'password');
+
+        $this->assertEquals(
+            $user->accessGroup->user->id,
             $this->authBackend->getAuthenticatedUser()->id
         );
     }
 
     public function testGetAuthenticatedUserReturnsNullIfNoUserIsAuthenticated(): void {
         $this->assertNull($this->authBackend->getAuthenticatedUser());
+    }
+
+    public function testGetAuthenticatedUserIdReturnsUserIdIfUserIsAuthenticated(): void {
+        $user = AccessGroupUser::factory()->create();
+
+        $this->authBackend->validateUserPass($user->username, 'password');
+
+        $this->assertEquals(
+            $user->accessGroup->user->id,
+            $this->authBackend->getAuthenticatedUserId()
+        );
+    }
+
+    public function testGetAuthenticatedUserIdReturnsNullIfNoUserIsAuthenticated(): void {
+        $this->assertNull($this->authBackend->getAuthenticatedUserId());
     }
 }

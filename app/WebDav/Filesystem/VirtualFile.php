@@ -42,7 +42,7 @@ class VirtualFile extends DAV\File {
     }
 
     function put(mixed $updateResource): string {
-        if ($this->authBackend->getAuthenticatedUser()->accessGroup->readonly) {
+        if ($this->authBackend->getAuthenticatedAccessGroup()->readonly) {
             throw new DAV\Exception\Forbidden();
         }
 

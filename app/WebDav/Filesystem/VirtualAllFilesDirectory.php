@@ -23,8 +23,8 @@ class VirtualAllFilesDirectory extends AbstractVirtualDirectory {
 
     protected function loadChildren(): array {
         return $this->authBackend
-            ->getAuthenticatedUser()
-            ->accessGroup->files()
+            ->getAuthenticatedAccessGroup()
+            ->files()
             ->has('latestVersion')
             ->get()
             ->map(function (File $file) {

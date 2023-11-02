@@ -2,7 +2,9 @@
 
 namespace App\WebDav;
 
+use App\Models\AccessGroup;
 use App\Models\AccessGroupUser;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Sabre\DAV;
 
@@ -10,7 +12,7 @@ use Sabre\DAV;
  * Authentication backend for WebDAV which uses the AccessGroupUser model to authenticate users
  */
 class AuthBackend extends DAV\Auth\Backend\AbstractBasic {
-    private ?AccessGroupUser $authenticatedUser = null;
+    private ?AccessGroupUser $authenticatedAccessGroupUser = null;
 
     public function validateUserPass(mixed $username, mixed $password): bool {
         // TODO: add rate limiting
@@ -28,12 +30,24 @@ class AuthBackend extends DAV\Auth\Backend\AbstractBasic {
             return false;
         }
 
-        $this->authenticatedUser = $accessGroupUser;
+        $this->authenticatedAccessGroupUser = $accessGroupUser;
 
         return true;
     }
 
-    public function getAuthenticatedUser(): ?AccessGroupUser {
-        return $this->authenticatedUser;
+    public function getAuthenticatedAccessGroupUser(): ?AccessGroupUser {
+        return $this->authenticatedAccessGroupUser;
+    }
+
+    public function getAuthenticatedAccessGroup(): ?AccessGroup {
+        return $this->authenticatedAccessGroupUser?->accessGroup;
+    }
+
+    public function getAuthenticatedUser(): ?User {
+        return $this->authenticatedAccessGroupUser?->accessGroup->user;
+    }
+
+    public function getAuthenticatedUserId(): ?int {
+        return $this->authenticatedAccessGroupUser?->accessGroup->user_id;
     }
 }

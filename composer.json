@@ -55,8 +55,8 @@
     "post-create-project-cmd": [
       "@php artisan key:generate --ansi"
     ],
-    "test": "vendor/bin/phpunit",
-    "test-coverage": "vendor/bin/phpunit --coverage-clover=coverage.xml --coverage-text"
+    "test": "vendor/bin/phpunit --colors=always",
+    "test-coverage": "vendor/bin/phpunit --colors=always --coverage-clover=coverage.xml --coverage-text"
   },
   "extra": {
     "laravel": {
@@ -74,4 +74,3 @@
   "minimum-stability": "stable",
   "prefer-stable": true
 }
-
