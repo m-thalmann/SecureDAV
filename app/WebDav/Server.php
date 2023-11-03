@@ -48,9 +48,6 @@ class Server extends DAV\Server {
 
         $this->addPlugin(new DAV\Auth\Plugin($authBackend));
         $this->addPlugin(new DAV\Locks\Plugin($locksBackend));
-
-        // TODO: add locks
-        // TODO: handle cors
     }
 
     /**
@@ -83,6 +80,13 @@ class Server extends DAV\Server {
         $status = $this->httpResponse->getStatus();
         $headers = $this->httpResponse->getHeaders();
 
+        if (config('webdav.cors.enabled', false)) {
+            $headers = array_merge(
+                $headers,
+                $this->getCorsHeaders($this->httpRequest->getHeader('Origin'))
+            );
+        }
+
         if ($body === null || is_string($body)) {
             return response($body, $status, $headers);
         }
@@ -105,5 +109,41 @@ class Server extends DAV\Server {
         }
 
         return "$url?$query";
+    }
+
+    /**
+     * Returns the headers required for CORS
+     *
+     * @param string|null $requestOrigin The origin of the request to allow multiple origins
+     *
+     * @return array
+     */
+    public function getCorsHeaders(?string $requestOrigin): array {
+        $configuredAllowedOrigins = config('webdav.cors.allowed_origins', []);
+
+        $allowOrigin = null;
+
+        foreach ($configuredAllowedOrigins as $origin) {
+            if ($origin === '*' || $origin === $requestOrigin) {
+                $allowOrigin = $requestOrigin ?? '*';
+                break;
+            }
+        }
+
+        return [
+            'Access-Control-Allow-Origin' => $allowOrigin,
+
+            'Access-Control-Allow-Methods' => join(', ', static::METHODS),
+
+            'Access-Control-Expose-Headers' => config(
+                'webdav.cors.expose_headers'
+            ),
+
+            'Access-Control-Allow-Headers' => config(
+                'webdav.cors.allowed_headers'
+            ),
+
+            'Access-Control-Allow-Credentials' => 'true',
+        ];
     }
 }

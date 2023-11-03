@@ -220,6 +220,97 @@ class ServerTest extends TestCase {
         fclose($responseBody);
     }
 
+    public function testGetResponseIncludesCorsHeadersIfEnabled(): void {
+        $this->createServer(['getCorsHeaders']);
+
+        $requestOrigin = 'http://test.com';
+
+        config(['webdav.cors.enabled' => true]);
+
+        $mockHeaders = ['x-test' => ['true']];
+
+        $this->server
+            ->shouldReceive('getCorsHeaders')
+            ->with($requestOrigin)
+            ->once()
+            ->andReturn($mockHeaders);
+
+        /**
+         * @var SabreRequest|MockInterface
+         */
+        $serverHttpRequestMock = Mockery::mock($this->server->httpRequest);
+        $this->server->httpRequest = $serverHttpRequestMock;
+
+        $serverHttpRequestMock
+            ->shouldReceive('getHeader')
+            ->with('Origin')
+            ->once()
+            ->andReturn($requestOrigin);
+
+        /**
+         * @var SabreResponse|MockInterface
+         */
+        $serverHttpResponseMock = Mockery::mock($this->server->httpResponse);
+        $this->server->httpResponse = $serverHttpResponseMock;
+
+        $serverHttpResponseMock
+            ->shouldReceive('getBody')
+            ->withNoArgs()
+            ->once()
+            ->andReturn(null);
+        $serverHttpResponseMock
+            ->shouldReceive('getStatus')
+            ->withNoArgs()
+            ->once()
+            ->andReturn(200);
+        $serverHttpResponseMock
+            ->shouldReceive('getHeaders')
+            ->withNoArgs()
+            ->once()
+            ->andReturn([]);
+
+        $response = $this->server->getResponse();
+
+        /**
+         * @var array
+         */
+        $responseHeaders = $response->headers->all();
+
+        $this->assertHasSubArray($mockHeaders, $responseHeaders);
+    }
+
+    public function testGetResponseDoesNotIncludeCorsHeadersIfDisabled(): void {
+        $this->createServer(['getCorsHeaders']);
+
+        config(['webdav.cors.enabled' => false]);
+
+        $this->server->shouldNotReceive('getCorsHeaders');
+
+        /**
+         * @var SabreResponse|MockInterface
+         */
+        $serverHttpResponseMock = Mockery::mock($this->server->httpResponse);
+        $this->server->httpResponse = $serverHttpResponseMock;
+
+        $serverHttpResponseMock
+            ->shouldReceive('getBody')
+            ->withNoArgs()
+            ->once()
+            ->andReturn(null);
+        $serverHttpResponseMock
+            ->shouldReceive('getStatus')
+            ->withNoArgs()
+            ->once()
+            ->andReturn(200);
+        $serverHttpResponseMock
+            ->shouldReceive('getHeaders')
+            ->withNoArgs()
+            ->once()
+            ->andReturn([]);
+
+        $this->server->getResponse();
+    }
+
     public function testGetFullUrlReturnsTheUrlWithTrailingSlashAndQuery(): void {
         $this->createServer();
 
@@ -271,6 +362,82 @@ class ServerTest extends TestCase {
         $expectedUrl = "{$requestPathInfo}/";
 
         $this->assertEquals($expectedUrl, $this->server->getFullUrl($request));
+    }
+
+    public function testGetCorsHeadersReturnsTheConfiguredHeaders(): void {
+        $this->createServer();
+
+        $requestOrigin = 'http://test.com';
+
+        $exposeHeaders = 'X-Exposed-Header';
+        $allowedHeaders = 'X-Allowed-Header';
+
+        config([
+            'webdav.cors.allowed_origins' => [
+                $requestOrigin,
+                'https://other-origin.com',
+            ],
+        ]);
+        config(['webdav.cors.expose_headers' => $exposeHeaders]);
+        config(['webdav.cors.allowed_headers' => $allowedHeaders]);
+
+        $expectedHeaders = [
+            'Access-Control-Allow-Origin' => $requestOrigin,
+            'Access-Control-Allow-Methods' => join(
+                ', ',
+                WebDav\Server::METHODS
+            ),
+            'Access-Control-Expose-Headers' => $exposeHeaders,
+            'Access-Control-Allow-Headers' => $allowedHeaders,
+            'Access-Control-Allow-Credentials' => 'true',
+        ];
+
+        $headers = $this->server->getCorsHeaders($requestOrigin);
+
+        $this->assertEquals($expectedHeaders, $headers);
+    }
+
+    public function testGetCorsHeadersReturnsNullAllowOriginHeaderWhenNoMatch(): void {
+        $this->createServer();
+
+        $requestOrigin = 'http://test.com';
+
+        config([
+            'webdav.cors.allowed_origins' => ['https://other-origin.com'],
+        ]);
+
+        $headers = $this->server->getCorsHeaders($requestOrigin);
+
+        $this->assertNull($headers['Access-Control-Allow-Origin']);
+    }
+
+    public function testGetCorsHeadersReturnsRequestOriginIfWildcardIsConfigured(): void {
+        $this->createServer();
+
+        $requestOrigin = 'http://test.com';
+
+        config([
+            'webdav.cors.allowed_origins' => ['http://other-origin.com', '*'],
+        ]);
+
+        $headers = $this->server->getCorsHeaders($requestOrigin);
+
+        $this->assertEquals(
+            $requestOrigin,
+            $headers['Access-Control-Allow-Origin']
+        );
+    }
+
+    public function testGetCorsHeadersReturnsWildcardIfWildcardIsConfiguredAndRequestOriginIsNull(): void {
+        $this->createServer();
+
+        $requestOrigin = null;
+
+        config(['webdav.cors.allowed_origins' => ['*']]);
+
+        $headers = $this->server->getCorsHeaders($requestOrigin);
+
+        $this->assertEquals('*', $headers['Access-Control-Allow-Origin']);
     }
 
     protected function createServer(array $mockedMethods = []): void {

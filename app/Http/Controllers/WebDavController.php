@@ -19,13 +19,32 @@ class WebDavController extends Controller {
         $this->locksBackend = new WebDav\LocksBackend($this->authBackend);
     }
 
+    public function cors(Request $request): Response {
+        $server = $this->createServer(
+            'webdav.cors',
+            new DAV\SimpleCollection('cors')
+        );
+
+        $response = response()->noContent();
+
+        if (config('webdav.cors.enabled', false)) {
+            $response->withHeaders(
+                $server->getCorsHeaders($request->header('Origin'))
+            );
+        }
+
+        return $response;
+    }
+
     public function files(Request $request): Response {
         $root = new WebDav\Filesystem\VirtualAllFilesDirectory(
             $this->authBackend,
             $this->fileVersionService
         );
 
-        return $this->execute($request, 'webdav.files.base', $root);
+        $server = $this->createServer('webdav.files.base', $root);
+
+        return $this->execute($server, $request);
     }
 
     public function directories(Request $request): Response {
@@ -35,23 +54,42 @@ class WebDavController extends Controller {
             directory: null
         );
 
-        return $this->execute($request, 'webdav.directories', $root);
+        $server = $this->createServer('webdav.directories', $root);
+
+        return $this->execute($server, $request);
     }
 
     /**
-     * Creates the server and executes it.
+     * Executes the webdav server.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param string $baseRoute
-     * @param \Sabre\DAV\INode $rootNode
+     * @param WebDav\Server $server
+     * @param Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response|\Symfony\Component\HttpFoundation\StreamedResponse
      */
     protected function execute(
-        Request $request,
+        WebDav\Server $server,
+        Request $request
+    ): Response {
+        $server->setRequest($request);
+
+        $server->start();
+
+        return $server->getResponse();
+    }
+
+    /**
+     * Creates the webdav server.
+     *
+     * @param string $baseRoute
+     * @param \Sabre\DAV\INode $rootNode
+     *
+     * @return \App\WebDav\Server
+     */
+    protected function createServer(
         string $baseRoute,
         DAV\INode $rootNode
-    ): Response {
+    ): WebDav\Server {
         $server = new WebDav\Server(
             $this->authBackend,
             $this->locksBackend,
@@ -59,11 +97,7 @@ class WebDavController extends Controller {
             new DAV\Tree($rootNode)
         );
 
-        $server->setRequest($request);
-
-        $server->start();
-
-        return $server->getResponse();
+        return $server;
     }
 }
 

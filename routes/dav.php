@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Route;
 Route::controller(WebDavController::class)
     ->as('webdav.')
     ->group(function () {
+        Route::options('{path?}', 'cors')
+            ->where('path', '.*')
+            ->name('cors');
+
         Route::prefix('files')
             ->as('files')
             ->group(function () {

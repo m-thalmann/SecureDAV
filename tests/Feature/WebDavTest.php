@@ -25,6 +25,32 @@ class WebDavTest extends TestCase {
         $this->user = AccessGroupUser::factory()->create();
     }
 
+    public function testCorsRequestIsHandledIfCorsIsEnabled(): void {
+        config([
+            'webdav.cors.enabled' => true,
+            'webdav.cors.allowed_origins' => ['*'],
+        ]);
+
+        $response = $this->options(route('webdav.default'));
+
+        $response->assertNoContent();
+
+        $response->assertHeader('Access-Control-Allow-Origin', '*');
+    }
+
+    public function testCorsRequestIsNotHandledIfCorsIsDisabled(): void {
+        config([
+            'webdav.cors.enabled' => false,
+            'webdav.cors.allowed_origins' => ['*'],
+        ]);
+
+        $response = $this->options(route('webdav.default'));
+
+        $response->assertNoContent();
+
+        $response->assertHeaderMissing('Access-Control-Allow-Origin');
+    }
+
     /**
      * @dataProvider webdavRouteProvider
      */
