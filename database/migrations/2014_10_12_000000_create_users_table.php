@@ -13,6 +13,7 @@ return new class extends Migration {
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->boolean('is_admin');
+            $table->boolean('is_webdav_suspended');
             $table->rememberToken();
             $table->timestamps();
         });

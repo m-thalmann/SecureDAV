@@ -21,7 +21,7 @@ class LocksBackend extends DAV\Locks\Backend\AbstractBackend {
     public function getLocks(mixed $uri, mixed $returnChildLocks): array {
         $query = $this->query()
             ->whereRaw('((created + timeout) > ?)', [time()])
-            ->where('user_id', $this->authBackend->getAuthenticatedUserId())
+            ->where('user_id', $this->authBackend->getAuthenticatedUser()->id)
             ->where(function (Builder $query) use ($uri, $returnChildLocks) {
                 $query->where('uri', $uri);
 
@@ -72,7 +72,7 @@ class LocksBackend extends DAV\Locks\Backend\AbstractBackend {
 
         return $this->query()->upsert(
             [
-                'user_id' => $this->authBackend->getAuthenticatedUserId(),
+                'user_id' => $this->authBackend->getAuthenticatedUser()->id,
                 'owner' => $lockInfo->owner,
                 'timeout' => $timeout,
                 'scope' => $lockInfo->scope,
@@ -89,7 +89,7 @@ class LocksBackend extends DAV\Locks\Backend\AbstractBackend {
         return $this->query()
             ->where('uri', $uri)
             ->where('token', $lockInfo->token)
-            ->where('user_id', $this->authBackend->getAuthenticatedUserId())
+            ->where('user_id', $this->authBackend->getAuthenticatedUser()->id)
             ->delete() === 1;
     }
 

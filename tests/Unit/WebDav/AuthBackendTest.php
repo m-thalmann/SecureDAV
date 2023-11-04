@@ -4,6 +4,7 @@ namespace Tests\Unit\WebDav;
 
 use App\Models\AccessGroup;
 use App\Models\AccessGroupUser;
+use App\Models\User;
 use App\WebDav;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -42,6 +43,21 @@ class AuthBackendTest extends TestCase {
 
         $this->assertFalse(
             $this->authBackend->validateUserPass($user->username, 'password')
+        );
+    }
+
+    public function testValidateUserPassReturnsFalseIfUserHasSuspendedWebDav(): void {
+        $user = User::factory()->create(['is_webdav_suspended' => true]);
+
+        $accessUser = AccessGroupUser::factory()
+            ->for(AccessGroup::factory()->for($user))
+            ->create();
+
+        $this->assertFalse(
+            $this->authBackend->validateUserPass(
+                $accessUser->username,
+                'password'
+            )
         );
     }
 
@@ -92,20 +108,5 @@ class AuthBackendTest extends TestCase {
 
     public function testGetAuthenticatedUserReturnsNullIfNoUserIsAuthenticated(): void {
         $this->assertNull($this->authBackend->getAuthenticatedUser());
-    }
-
-    public function testGetAuthenticatedUserIdReturnsUserIdIfUserIsAuthenticated(): void {
-        $user = AccessGroupUser::factory()->create();
-
-        $this->authBackend->validateUserPass($user->username, 'password');
-
-        $this->assertEquals(
-            $user->accessGroup->user->id,
-            $this->authBackend->getAuthenticatedUserId()
-        );
-    }
-
-    public function testGetAuthenticatedUserIdReturnsNullIfNoUserIsAuthenticated(): void {
-        $this->assertNull($this->authBackend->getAuthenticatedUserId());
     }
 }

@@ -2,18 +2,14 @@
 
 namespace Tests\Unit\WebDav;
 
-use App\Models\AccessGroup;
-use App\Models\AccessGroupUser;
 use App\Models\User;
 use App\WebDav\AuthBackend;
 use App\WebDav\LocksBackend;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Mockery;
 use Mockery\MockInterface;
 use Sabre\DAV\Locks\LockInfo;
-use Sabre\DAV\Xml\Request\Lock;
 use Tests\TestCase;
 
 class LocksBackendTest extends TestCase {
@@ -36,8 +32,8 @@ class LocksBackendTest extends TestCase {
         $this->user = User::factory()->create(['id' => 41]);
 
         $this->authBackend
-            ->shouldReceive('getAuthenticatedUserId')
-            ->andReturn($this->user->id);
+            ->shouldReceive('getAuthenticatedUser')
+            ->andReturn($this->user);
     }
 
     public function testGetLocksReturnsLockForGivenPath(): void {

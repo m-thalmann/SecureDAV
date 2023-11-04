@@ -19,13 +19,14 @@ class AuthBackend extends DAV\Auth\Backend\AbstractBasic {
 
         $accessGroupUser = AccessGroupUser::query()
             ->where('username', $username)
-            ->with('accessGroup')
+            ->with('accessGroup.user')
             ->first();
 
         if (
             $accessGroupUser === null ||
             !Hash::check($password, $accessGroupUser->password) ||
-            !$accessGroupUser->accessGroup->active
+            !$accessGroupUser->accessGroup->active ||
+            $accessGroupUser->accessGroup->user->is_webdav_suspended
         ) {
             return false;
         }
@@ -45,9 +46,5 @@ class AuthBackend extends DAV\Auth\Backend\AbstractBasic {
 
     public function getAuthenticatedUser(): ?User {
         return $this->authenticatedAccessGroupUser?->accessGroup->user;
-    }
-
-    public function getAuthenticatedUserId(): ?int {
-        return $this->authenticatedAccessGroupUser?->accessGroup->user_id;
     }
 }

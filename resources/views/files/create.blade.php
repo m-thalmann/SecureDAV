@@ -52,4 +52,23 @@
             <input type="submit" value="{{ __('Create') }}" form="create-form" class="btn btn-primary">
         </x-slot>
     </x-card>
+
+    @push('scripts')
+        <script>
+            function onSelectedFileChange(file) {
+                var name = file.name;
+    
+                document.getElementById('name').value = name;
+            }
+            
+            /*
+            |------------
+            |    INIT
+            |------------
+            */
+            if(document.getElementById('file').files.length === 1) {
+                onSelectedFileChange(document.getElementById('file').files[0]);
+            }
+        </script>
+    @endpush
 </x-app-layout>

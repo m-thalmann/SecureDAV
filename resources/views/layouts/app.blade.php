@@ -6,6 +6,13 @@
         <div class="drawer-content flex flex-col overflow-hidden h-full">
             @include('layouts.partials.app-header')
             
+            @if ($user->is_webdav_suspended)
+                <span class="bg-warning text-warning-content py-1 px-2 flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-power-off"></i>
+                    {{ __('You have suspended your account\'s WebDAV. No files can be viewed or updated.') }}
+                </span>
+            @endif
+
             <main {{ $attributes->merge(['class' => 'py-12 w-full h-full max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6']) }}>
                 {{ $slot }}
             </main>

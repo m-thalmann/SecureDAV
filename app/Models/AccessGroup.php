@@ -15,6 +15,11 @@ class AccessGroup extends Model {
 
     protected $fillable = ['label', 'active', 'readonly'];
 
+    protected $casts = [
+        'active' => 'boolean',
+        'readonly' => 'boolean',
+    ];
+
     public function uniqueIds(): array {
         return ['uuid'];
     }

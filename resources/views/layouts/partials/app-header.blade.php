@@ -42,6 +42,28 @@
                         </a>
                     </li>
 
+                    <form method="POST" action="{{ route('settings.webdav-suspension') }}">
+                        @method('PUT')
+                        @csrf
+
+                        <input type="hidden" name="suspended" value="{{ !$user->is_webdav_suspended }}">
+                        
+                        <li>
+                            <button @class([
+                                'hover:bg-error hover:text-error-content' => !$user->is_webdav_suspended,
+                                'hover:bg-success hover:text-success-content' => $user->is_webdav_suspended,
+                            ])>
+                                <i class="fa-solid fa-power-off mr-2"></i>
+
+                                @if (!$user->is_webdav_suspended)
+                                    {{ __('Suspend WebDAV') }}
+                                @else
+                                    {{ __('Resume WebDAV') }}
+                                @endif
+                            </button>
+                        </li>
+                    </form>
+
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         

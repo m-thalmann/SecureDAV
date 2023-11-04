@@ -10,6 +10,7 @@ use App\Http\Controllers\FileVersionController;
 use App\Http\Controllers\LatestFileVersionController;
 use App\Http\Controllers\Settings\LogoutBrowserSessionsController;
 use App\Http\Controllers\Settings\ProfileSettingsController;
+use App\Http\Controllers\Settings\WebDavSuspensionController;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
@@ -226,5 +227,10 @@ Route::prefix('settings')
                     LogoutBrowserSessionsController::class
                 )->name('sessions.destroy');
             });
+
+        Route::put(
+            'webdav-suspension',
+            WebDavSuspensionController::class
+        )->name('webdav-suspension');
     });
 
