@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Directory;
+use App\Rules\NotStringContains;
 use App\Support\SessionMessage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,7 +44,8 @@ class DirectoryController extends Controller {
             'name' => [
                 'required',
                 'string',
-                'max:128',
+                'max:' . config('core.files.max_name_length'),
+                new NotStringContains(config('core.files.illegal_characters')),
                 Rule::unique('directories', 'name')
                     ->where('parent_directory_id', $parentDirectory?->id)
                     ->where('user_id', authUser()->id),
@@ -86,7 +88,8 @@ class DirectoryController extends Controller {
             'name' => [
                 'required',
                 'string',
-                'max:128',
+                'max:' . config('core.files.max_name_length'),
+                new NotStringContains(config('core.files.illegal_characters')),
                 Rule::unique('directories', 'name')
                     ->where(
                         'parent_directory_id',

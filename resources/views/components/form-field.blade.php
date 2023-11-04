@@ -20,7 +20,7 @@
         </span>
         
         @isset ($hint)
-            <span class="label-text-alt">{{ $hint }}</span>
+            <span class="label-text-alt text-right">{{ $hint }}</span>
         @endisset
     </label>
 </div>

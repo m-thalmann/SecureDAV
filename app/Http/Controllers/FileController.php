@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Directory;
 use App\Models\File;
+use App\Rules\NotStringContains;
 use App\Services\FileVersionService;
 use App\Support\SessionMessage;
 use Exception;
@@ -59,7 +60,8 @@ class FileController extends Controller {
             'name' => [
                 'required',
                 'string',
-                'max:128',
+                'max:' . config('core.files.max_name_length'),
+                new NotStringContains(config('core.files.illegal_characters')),
                 Rule::unique('files', 'name')
                     ->where('directory_id', $directory?->id)
                     ->where('user_id', authUser()->id)
@@ -144,7 +146,8 @@ class FileController extends Controller {
             'name' => [
                 'required',
                 'string',
-                'max:128',
+                'max:' . config('core.files.max_name_length'),
+                new NotStringContains(config('core.files.illegal_characters')),
                 Rule::unique('files', 'name')
                     ->where('directory_id', $file->directory_id)
                     ->where('user_id', $file->user_id)
