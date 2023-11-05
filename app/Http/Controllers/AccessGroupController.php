@@ -53,10 +53,12 @@ class AccessGroupController extends Controller {
     }
 
     public function show(AccessGroup $accessGroup): View {
+        $accessGroup
+            ->load('users')
+            ->load(['files.latestVersion', 'files.directory']);
+
         return view('access-groups.show', [
-            'accessGroup' => $accessGroup
-                ->load('users')
-                ->load('files.latestVersion'),
+            'accessGroup' => $accessGroup,
         ]);
     }
 

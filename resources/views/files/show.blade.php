@@ -46,7 +46,7 @@
         </x:slot>
 
         <x-slot name="subtitle">
-            @if ($file->latestVersion->mime_type)
+            @if ($file->latestVersion?->mime_type)
                 <span class="tooltip" data-tip="{{ __('MIME-Type') }}">{{ $file->latestVersion->mime_type }}</span>
                 
                 <span class="mx-1">&CenterDot;</span>

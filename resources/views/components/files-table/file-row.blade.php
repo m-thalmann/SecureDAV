@@ -1,6 +1,7 @@
 @props([
     'file' => null,
     'hover' => true,
+    'includeParentDirectory' => false,
 ])
 
 <tr {{ $attributes->merge(['class' => $hover ? 'hover' : '']) }}>
@@ -8,10 +9,31 @@
         <i class="{{ $file->fileIcon }} text-xl align-middle"></i>
     </td>
     <td class="pl-2">
-        <a
-            href="{{ route('files.show', ['file' => $file->uuid]) }}"
-            class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis"
-        >{{ $file->name }}</a>
+        <div class="text-sm breadcrumbs">
+            <ul>
+                @if ($includeParentDirectory)
+                    <li>
+                        <a
+                            href="{{ route('browse.index', ['directory' => $file->directory?->uuid]) }}"
+                            class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis text-base-content/50">
+                            @if ($file->directory)
+                                {{ $file->directory->name }}
+                            @else
+                                <i class="fas fa-home"></i>
+                            @endif
+                        </a>
+                    </li> 
+                @endif
+                <li>
+                    <a
+                        href="{{ route('files.show', ['file' => $file->uuid]) }}"
+                        class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis"
+                    >
+                        {{ $file->name }}
+                    </a>
+                </li>
+            </ul>
+        </div>
 
         @if ($file->isEncrypted)
             <span class="tooltip ml-2" data-tip="{{ __('Encrypted') }}">

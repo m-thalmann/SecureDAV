@@ -13,9 +13,11 @@
                 </span>
             @endif
 
-            <main {{ $attributes->merge(['class' => 'py-12 w-full h-full max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6']) }}>
-                {{ $slot }}
-            </main>
+            <div class="h-full overflow-auto py-12 sm:px-6 lg:px-8">
+                <main {{ $attributes->merge(['class' => 'w-full max-w-7xl mx-auto space-y-6']) }}>
+                    {{ $slot }}
+                </main>
+            </div>
         </div> 
 
         {{-- Mobile drawer --}}
