@@ -7,17 +7,18 @@ use App\Models\AccessGroupUser;
 use App\Models\User;
 use App\WebDav;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Http\Response;
 use Tests\TestCase;
 
 class AuthBackendTest extends TestCase {
     use LazilyRefreshDatabase;
 
-    protected WebDav\AuthBackend $authBackend;
+    protected AuthBackendTestClass $authBackend;
 
     protected function setUp(): void {
         parent::setUp();
 
-        $this->authBackend = new WebDav\AuthBackend();
+        $this->authBackend = new AuthBackendTestClass();
     }
 
     public function testValidateUserPassReturnsFalseIfUserDoesNotExist(): void {
@@ -74,6 +75,96 @@ class AuthBackendTest extends TestCase {
         );
     }
 
+    public function testValidateUserPassIsRateLimited(): void {
+        $username = 'wrong-user';
+
+        $availableIn = 43;
+
+        $rateLimiterMock = $this->mockRateLimiter(['availableIn']);
+        $rateLimiterMock
+            ->shouldReceive('availableIn')
+            ->once()
+            ->andReturn($availableIn);
+
+        for ($i = 0; $i < $this->authBackend->getRateLimiterAttempts(); $i++) {
+            $this->assertFalse(
+                $this->authBackend->validateUserPass($username, 'password')
+            );
+        }
+
+        try {
+            $this->authBackend->validateUserPass($username, 'password');
+        } catch (WebDav\Exceptions\TooManyRequestsException $e) {
+            $this->assertEquals(
+                __('auth.throttle', [
+                    'seconds' => $availableIn,
+                    'minutes' => ceil($availableIn / 60),
+                ]),
+                $e->getMessage()
+            );
+
+            $this->assertEquals(
+                Response::HTTP_TOO_MANY_REQUESTS,
+                $e->getHTTPCode()
+            );
+
+            $this->assertEquals(
+                ['Retry-After' => $availableIn],
+                $e->getHTTPHeaders(null)
+            );
+
+            return;
+        }
+
+        $this->fail('TooManyRequestsException was not thrown');
+    }
+
+    public function testValidateUserPassIsRateLimitedPerUsername(): void {
+        $username = 'wrong-user';
+
+        for ($i = 0; $i < $this->authBackend->getRateLimiterAttempts(); $i++) {
+            $this->authBackend->validateUserPass($username, 'password');
+        }
+
+        try {
+            $this->authBackend->validateUserPass($username, 'password');
+        } catch (WebDav\Exceptions\TooManyRequestsException $e) {
+            $this->assertFalse(
+                $this->authBackend->validateUserPass('another-user', 'password')
+            );
+
+            return;
+        }
+
+        $this->fail('TooManyRequestsException was not thrown');
+    }
+
+    public function testValidateUserPassRateLimitingIsResetAfterSuccessfulLogin(): void {
+        $user = AccessGroupUser::factory()->create();
+
+        for (
+            $i = 0;
+            $i < $this->authBackend->getRateLimiterAttempts() - 1;
+            $i++
+        ) {
+            $this->authBackend->validateUserPass(
+                $user->username,
+                'wrong-password'
+            );
+        }
+
+        $this->assertTrue(
+            $this->authBackend->validateUserPass($user->username, 'password')
+        );
+
+        $this->assertFalse(
+            $this->authBackend->validateUserPass(
+                $user->username,
+                'wrong-password'
+            )
+        );
+    }
+
     public function testGetAuthenticatedAccessGroupUserReturnsNullIfNoUserIsAuthenticated(): void {
         $this->assertNull(
             $this->authBackend->getAuthenticatedAccessGroupUser()
@@ -108,5 +199,11 @@ class AuthBackendTest extends TestCase {
 
     public function testGetAuthenticatedUserReturnsNullIfNoUserIsAuthenticated(): void {
         $this->assertNull($this->authBackend->getAuthenticatedUser());
+    }
+}
+
+class AuthBackendTestClass extends WebDav\AuthBackend {
+    public function getRateLimiterAttempts(): int {
+        return static::RATE_LIMITER_ATTEMPTS;
     }
 }

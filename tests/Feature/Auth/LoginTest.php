@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use App\Support\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -42,11 +41,13 @@ class LoginTest extends TestCase {
     }
 
     public function testRateLimitsAfterCertainAmountOfBadRequests(): void {
-        // TODO: enable when https://github.com/laravel/framework/issues/48248 is fixed (and use it below in assert -> 'auth.throttle')
-        // RateLimiter::partialMock()
-        //     ->shouldReceive('availableIn')
-        //     ->once()
-        //     ->andReturn(60);
+        $availableIn = 43;
+
+        $rateLimiterMock = $this->mockRateLimiter(['availableIn']);
+        $rateLimiterMock
+            ->shouldReceive('availableIn')
+            ->once()
+            ->andReturn($availableIn);
 
         for ($i = 0; $i < static::LOGIN_THROTTLE_LIMIT; $i++) {
             $response = $this->post('/login', [
@@ -64,9 +65,15 @@ class LoginTest extends TestCase {
 
         $response->assertSessionHas('session-message', function (
             SessionMessage $message
-        ) {
+        ) use ($availableIn) {
             $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-            $this->assertNotEquals(__('auth.failed'), $message->message);
+            $this->assertEquals(
+                __('auth.throttle', [
+                    'seconds' => $availableIn,
+                    'minutes' => ceil($availableIn / 60),
+                ]),
+                $message->message
+            );
 
             return true;
         });

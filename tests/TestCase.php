@@ -3,7 +3,11 @@
 namespace Tests;
 
 use App\Models\User;
+use Illuminate\Cache\RateLimiter as CacheRateLimiter;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\RateLimiter;
+use Mockery;
+use Mockery\MockInterface;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 abstract class TestCase extends BaseTestCase {
@@ -23,6 +27,19 @@ abstract class TestCase extends BaseTestCase {
 
     protected function passwordConfirmed(): void {
         $this->session(['auth.password_confirmed_at' => time()]);
+    }
+
+    protected function mockRateLimiter(
+        array $mockedMethods
+    ): CacheRateLimiter|MockInterface {
+        $rateLimiterMock = Mockery::mock(
+            CacheRateLimiter::class . '[' . join(',', $mockedMethods) . ']',
+            [$this->app->make('cache.store')]
+        );
+
+        RateLimiter::swap($rateLimiterMock);
+
+        return $rateLimiterMock;
     }
 
     protected function getStreamedResponseContent(
