@@ -19,7 +19,7 @@ class DirectoryFactory extends Factory {
             'uuid' => fake()->uuid(),
             'user_id' => User::factory(),
             'parent_directory_id' => null,
-            'name' => fake()->words(4, true),
+            'name' => fake()->words(2, true),
         ];
     }
 }

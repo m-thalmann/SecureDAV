@@ -16,6 +16,10 @@ class FileVersion extends Model {
 
     protected $fillable = ['file_id', 'label', 'mime_type'];
 
+    protected $casts = [
+        'file_updated_at' => 'datetime',
+    ];
+
     public function scopeLatestVersion(Builder $query): Builder {
         return $query->where('version', function (QueryBuilder $query) {
             $query

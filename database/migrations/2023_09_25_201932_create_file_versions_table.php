@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('storage_path');
             $table->string('checksum', 32);
             $table->unsignedBigInteger('bytes');
+            $table->timestamp('file_updated_at');
             $table->timestamps();
             $table->softDeletes();
 

@@ -41,7 +41,7 @@
                                 <span class="tooltip" data-tip="{{ $version->created_at }}">{{ $version->created_at->diffForHumans() }}</span>
                             </td>
                             <td>
-                                <span class="tooltip" data-tip="{{ $version->updated_at }}">{{ $version->updated_at->diffForHumans() }}</span>
+                                <span class="tooltip" data-tip="{{ $version->file_updated_at }}">{{ $version->file_updated_at->diffForHumans() }}</span>
                             </td>
                             <td class="font-mono">{{ $version->checksum }}</td>
                             <td class="flex gap-2 items-center">

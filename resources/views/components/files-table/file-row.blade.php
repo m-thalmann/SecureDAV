@@ -35,7 +35,7 @@
         @endif
     </td>
     <td>
-        <span class="tooltip" data-tip="{{ $file->latestVersion?->updated_at ?? __('No versions yet') }}">{{ $file->latestVersion?->updated_at?->diffForHumans() ?? '-' }}</span>
+        <span class="tooltip" data-tip="{{ $file->fileLastUpdatedAt?->diffForHumans() ?? __('No versions yet') }}">{{ $file->fileLastUpdatedAt?->diffForHumans() ?? '-' }}</span>
     </td>
     <td class="flex justify-end gap-2 items-center">
         {{ $actions ?? '' }}

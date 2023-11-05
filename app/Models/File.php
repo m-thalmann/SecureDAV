@@ -102,6 +102,14 @@ class File extends Model {
         );
     }
 
+    protected function fileLastUpdatedAt(): Attribute {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                return $this->latestVersion?->file_updated_at;
+            }
+        );
+    }
+
     protected function fileIcon(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {

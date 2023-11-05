@@ -26,6 +26,7 @@ class FileVersionFactory extends Factory {
             'storage_path' => null,
             'checksum' => $this->faker->md5(),
             'bytes' => $this->faker->numberBetween(1, 1000000),
+            'file_updated_at' => now(),
         ];
     }
 

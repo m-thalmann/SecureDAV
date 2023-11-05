@@ -15,11 +15,7 @@
             {{ $directory->name }}
         </a>
     </td>
-    <td class="max-sm:hidden text-right">-</td>
-    <td>-</td>
-    <td>
-        <span class="tooltip" data-tip="{{ $directory->updated_at }}">{{ $directory->updated_at->diffForHumans() }}</span>
-    </td>
+    <td colspan="3"></td>
     <td class="flex justify-end gap-2 items-center">
         {{ $actions ?? '' }}
     </td>

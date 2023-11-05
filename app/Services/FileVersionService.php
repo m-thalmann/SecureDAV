@@ -148,6 +148,7 @@ class FileVersionService {
                     'storage_path' => $newPath,
                     'checksum' => $fileInfo->checksum,
                     'bytes' => $fileInfo->size,
+                    'file_updated_at' => now(),
                 ]);
 
             $newVersion->save();
@@ -206,6 +207,7 @@ class FileVersionService {
                 'mime_type' => $fileInfo->mimeType,
                 'checksum' => $fileInfo->checksum,
                 'bytes' => $fileInfo->size,
+                'file_updated_at' => now(),
             ])
             ->save();
     }

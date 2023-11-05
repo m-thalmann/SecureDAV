@@ -69,6 +69,6 @@ class VirtualFile extends DAV\File {
     }
 
     function getLastModified(): int {
-        return $this->fileVersion->updated_at->timestamp;
+        return $this->fileVersion->file_updated_at->timestamp;
     }
 }
