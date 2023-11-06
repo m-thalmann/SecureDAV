@@ -19,7 +19,7 @@
         <x-session-message :message="session('session-message')" class="my-3"></x-session-message>
 
         <form
-            action="{{ route('files.versions.latest.update', ['file' => $file->uuid]) }}"
+            action="{{ route('files.versions.latest.update', [$file]) }}"
             method="post"
             enctype="multipart/form-data"
             id="edit-form"
@@ -35,7 +35,7 @@
         </form>
 
         <x-slot name="actions">
-            <a href="{{ route('files.show', ['file' => $file]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ route('files.show', [$file]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Save') }}" form="edit-form" class="btn btn-primary">
         </x-slot>
     </x-card>

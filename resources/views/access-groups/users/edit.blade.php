@@ -8,7 +8,7 @@
             {{ $accessGroupUser->accessGroup->label }}
         </x-slot>
 
-        <form action="{{ route('access-group-users.update', ['access_group_user' => $accessGroupUser->username]) }}" method="post" id="edit-form">
+        <form action="{{ route('access-group-users.update', [$accessGroupUser]) }}" method="post" id="edit-form">
             @method('PUT')
             @csrf
 
@@ -20,7 +20,7 @@
         </form>
 
         <x-slot name="actions">
-            <a href="{{ route('access-groups.show', ['access_group' => $accessGroupUser->accessGroup->uuid]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ route('access-groups.show', [$accessGroupUser->accessGroup]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Save') }}" form="edit-form" class="btn btn-primary">
         </x-slot>
     </x-card>

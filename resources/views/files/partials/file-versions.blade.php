@@ -4,12 +4,12 @@
     </x-slot>
 
     <div class="actions flex gap-4 items-center mb-4">
-        <a href="{{ route('files.versions.create', ['file' => $file]) }}" class="btn btn-neutral btn-sm">
+        <a href="{{ route('files.versions.create', [$file]) }}" class="btn btn-neutral btn-sm">
             <i class="fa-solid fa-clock-rotate-left mr-2"></i>
             {{ __('Create new version') }}
         </a>
 
-        <a href="{{ route('files.versions.latest.edit', ['file' => $file]) }}" class="btn btn-neutral btn-sm" @disabled($file->latestVersion === null)>
+        <a href="{{ route('files.versions.latest.edit', [$file]) }}" class="btn btn-neutral btn-sm" @disabled($file->latestVersion === null)>
             <i class="fa-solid fa-upload mr-2"></i>
             {{ __('Upload file') }}
         </a>
@@ -45,7 +45,7 @@
                             </td>
                             <td class="font-mono">{{ $version->checksum }}</td>
                             <td class="flex gap-2 items-center">
-                                <a href="{{ route('files.versions.show', ['file' => $file->uuid, 'version' => $version->version]) }}" class="btn btn-sm btn-square">
+                                <a href="{{ route('files.versions.show', [$file, $version]) }}" class="btn btn-sm btn-square">
                                     <i class="fas fa-download"></i>
                                 </a>
 
@@ -54,7 +54,7 @@
                                     width="w-56"
                                 >
                                     <li>
-                                        <a href="{{ route('files.versions.edit', ['file' => $file->uuid, 'version' => $version->version]) }}">
+                                        <a href="{{ route('files.versions.edit', [$file, $version]) }}">
                                             <i class="fas fa-edit mr-2"></i>
                                             {{ __('Edit label') }}
                                         </a>
@@ -62,7 +62,7 @@
 
                                     <form
                                         method="POST"
-                                        action="{{ route('files.versions.destroy', ['file' => $file->uuid, 'version' => $version->version]) }}"
+                                        action="{{ route('files.versions.destroy', [$file, $version]) }}"
                                         onsubmit="return confirm(`{{ __('Are you sure you want to move this version to trash?') }}`)"
                                     >
                                         @method('DELETE')

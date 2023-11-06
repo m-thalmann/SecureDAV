@@ -122,8 +122,8 @@ class File extends Model {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
                 return route('webdav.files', [
-                    'uuid' => $attributes['uuid'],
-                    'name' => $attributes['name'],
+                    $attributes['uuid'],
+                    $attributes['name'],
                 ]);
             }
         );

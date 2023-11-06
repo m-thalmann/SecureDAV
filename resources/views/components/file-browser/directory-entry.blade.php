@@ -5,7 +5,7 @@
 
 <li>
     <div class="flex !cursor-default">
-        <a href="{{ route('browse.index', ['directory' => $directory->uuid]) }}" target="_blank" rel="noreferrer noopener" class="btn btn-xs btn-circle">
+        <a href="{{ route('browse.index', [$directory]) }}" target="_blank" rel="noreferrer noopener" class="btn btn-xs btn-circle">
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
         </a>
 

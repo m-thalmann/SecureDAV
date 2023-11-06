@@ -103,7 +103,7 @@ class Directory extends Model {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
                 return route('webdav.directories', [
-                    'path' => collect($this->breadcrumbs)
+                    collect($this->breadcrumbs)
                         ->map(fn(Directory $directory) => $directory->name)
                         ->join('/'),
                 ]);

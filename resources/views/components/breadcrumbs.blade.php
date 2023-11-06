@@ -1,8 +1,8 @@
 @props([
     'directories' => null,
     'file' => null,
-    'directoryRoute' => fn(?\App\Models\Directory $directory) => route('browse.index', ['directory' => $directory?->uuid]),
-    'fileRoute' => fn(\App\Models\File $file) => route('files.show', ['file' => $file->uuid]),
+    'directoryRoute' => fn(?\App\Models\Directory $directory) => route('browse.index', [$directory]),
+    'fileRoute' => fn(\App\Models\File $file) => route('files.show', [$file]),
 ])
 
 @php

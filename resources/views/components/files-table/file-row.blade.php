@@ -14,7 +14,7 @@
                 @if ($includeParentDirectory)
                     <li>
                         <a
-                            href="{{ route('browse.index', ['directory' => $file->directory?->uuid]) }}"
+                            href="{{ route('browse.index', [$file->directory]) }}"
                             class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis text-base-content/50">
                             @if ($file->directory)
                                 {{ $file->directory->name }}
@@ -26,7 +26,7 @@
                 @endif
                 <li>
                     <a
-                        href="{{ route('files.show', ['file' => $file->uuid]) }}"
+                        href="{{ route('files.show', [$file]) }}"
                         class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis"
                     >
                         {{ $file->name }}

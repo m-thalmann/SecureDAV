@@ -6,7 +6,7 @@
 
         <x-dropdown align="end">
             <li>
-                <a href="{{ route('files.edit', ['file' => $file->uuid]) }}">
+                <a href="{{ route('files.edit', [$file]) }}">
                     <i class="fas fa-edit mr-2"></i>
                     {{ __('Edit file') }}
                 </a>
@@ -14,7 +14,7 @@
 
             <form
                 method="POST"
-                action="{{ route('files.destroy', ['file' => $file->uuid]) }}"
+                action="{{ route('files.destroy', [$file]) }}"
                 onsubmit="return confirm(`{{ __('Are you sure you want to move this file to trash?') }}`)"
             >
                 @method('DELETE')
@@ -80,7 +80,7 @@
             </div>
         </x-form-field>
 
-        <a href="{{ route('files.versions.latest.show', ['file' => $file->uuid]) }}" class="btn btn-primary btn-circle" @disabled($file->latestVersion === null)>
+        <a href="{{ route('files.versions.latest.show', [$file]) }}" class="btn btn-primary btn-circle" @disabled($file->latestVersion === null)>
             <i class="fas fa-download"></i>
         </a>
     </div>

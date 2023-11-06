@@ -39,7 +39,7 @@ class BrowseTest extends TestCase {
 
         $response->assertSee(
             route('webdav.directories', [
-                'path' => collect($directory->breadcrumbs)
+                collect($directory->breadcrumbs)
                     ->map(fn(Directory $directory) => $directory->name)
                     ->join('/'),
             ])

@@ -38,13 +38,13 @@
             </li>
             @if ($currentDirectory)
                 <li>
-                    <a href="{{ route('directories.edit', ['directory' => $currentDirectory->uuid]) }}">
+                    <a href="{{ route('directories.edit', [$currentDirectory]) }}">
                         <i class="fas fa-edit w-6"></i>
                         {{ __('Edit directory') }}
                     </a>
                 </li>
 
-                <form method="POST" action="{{ route('directories.destroy', ['directory' => $currentDirectory->uuid]) }}">
+                <form method="POST" action="{{ route('directories.destroy', [$currentDirectory]) }}">
                     @method('DELETE')
                     @csrf
                     
@@ -66,13 +66,13 @@
                     <x-slot name="actions">
                         <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, count($files) + $loop->count, 2)">
                             <li>
-                                <a href="{{ route('directories.edit', ['directory' => $directory->uuid]) }}">
+                                <a href="{{ route('directories.edit', [$directory]) }}">
                                     <i class="fas fa-edit mr-2"></i>
                                     {{ __('Edit directory') }}
                                 </a>
                             </li>
 
-                            <form method="POST" action="{{ route('directories.destroy', ['directory' => $directory->uuid]) }}">
+                            <form method="POST" action="{{ route('directories.destroy', [$directory]) }}">
                                 @method('DELETE')
                                 @csrf
                                 
@@ -92,14 +92,14 @@
                 <x-files-table.file-row :file="$file">
                     <x-slot name="actions">
                         @if ($file->latestVersion !== null)
-                            <a href="{{ route('files.versions.latest.show', ['file' => $file]) }}" class="btn btn-sm btn-square">
+                            <a href="{{ route('files.versions.latest.show', [$file]) }}" class="btn btn-sm btn-square">
                                 <i class="fas fa-download"></i>
                             </a>
                         @endif
 
                         <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned(count($directories) + $loop->index, count($directories) + $loop->count, 2)">
                             <li>
-                                <a href="{{ route('files.edit', ['file' => $file->uuid]) }}">
+                                <a href="{{ route('files.edit', [$file]) }}">
                                     <i class="fas fa-edit mr-2"></i>
                                     {{ __('Edit file') }}
                                 </a>
@@ -107,7 +107,7 @@
 
                             <form
                                 method="POST"
-                                action="{{ route('files.destroy', ['file' => $file->uuid]) }}"
+                                action="{{ route('files.destroy', [$file]) }}"
                                 onsubmit="return confirm(`{{ __('Are you sure you want to move this file to trash?') }}`)"
                             >
                                 @method('DELETE')

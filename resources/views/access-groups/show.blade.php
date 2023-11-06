@@ -33,7 +33,7 @@
 
             <x-dropdown align="end" width="w-56">
                 <li>
-                    <a href="{{ route('access-groups.edit', ['access_group' => $accessGroup->uuid]) }}">
+                    <a href="{{ route('access-groups.edit', [$accessGroup]) }}">
                         <i class="fas fa-edit mr-2"></i>
                         {{ __('Edit access group') }}
                     </a>
@@ -41,7 +41,7 @@
 
                 <form
                     method="POST"
-                    action="{{ route('access-groups.destroy', ['access_group' => $accessGroup->uuid]) }}"
+                    action="{{ route('access-groups.destroy', [$accessGroup]) }}"
                     onsubmit="return confirm(`{{ __('Are you sure you want to delete this access group and all of it\'s users?') }}`)"
                 >
                     @method('DELETE')

@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="actions my-4">
-        <a href="{{ route('access-groups.access-group-users.create', ['access_group' => $accessGroup->uuid]) }}" class="btn btn-neutral btn-sm">
+        <a href="{{ route('access-groups.access-group-users.create', [$accessGroup]) }}" class="btn btn-neutral btn-sm">
             <i class="fa-solid fa-user-plus mr-2"></i>
             {{ __('Create group user') }}
         </a>
@@ -36,7 +36,7 @@
                         <td>
                             <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 3)" width="w-52">
                                 <li>
-                                    <a href="{{ route('access-group-users.edit', ['access_group_user' => $accessGroupUser->username]) }}">
+                                    <a href="{{ route('access-group-users.edit', [$accessGroupUser]) }}">
                                         <i class="fas fa-edit mr-2"></i>
                                         {{ __('Edit group user') }}
                                     </a>
@@ -44,7 +44,7 @@
 
                                 <form
                                     method="POST"
-                                    action="{{ route('access-group-users.reset-password', ['access_group_user' => $accessGroupUser->username]) }}"
+                                    action="{{ route('access-group-users.reset-password', [$accessGroupUser]) }}"
                                 >
                                     @csrf
                                     
@@ -58,7 +58,7 @@
 
                                 <form
                                     method="POST"
-                                    action="{{ route('access-group-users.destroy', ['access_group_user' => $accessGroupUser->username]) }}"
+                                    action="{{ route('access-group-users.destroy', [$accessGroupUser]) }}"
                                     onsubmit="return confirm(`{{ __('Are you sure you want to delete this group user?') }}`)"
                                 >
                                     @method('DELETE')

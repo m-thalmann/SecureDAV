@@ -32,14 +32,14 @@
             @endif
         </x-file-browser.list>
 
-        <form action="{{ route('access-groups.files.store', ['access_group' => $accessGroup->uuid]) }}" method="post">
+        <form action="{{ route('access-groups.files.store', [$accessGroup]) }}" method="post">
             @csrf
 
             <input type="hidden" name="file_uuid" value="" id="selected-file-input" />
         </form>
 
         <x-slot name="actions" class="mt-4">
-            <a href="{{ route('access-groups.show', ['access_group' => $accessGroup->uuid]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ route('access-groups.show', [$accessGroup]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
         </x-slot>
     </x-card>
 

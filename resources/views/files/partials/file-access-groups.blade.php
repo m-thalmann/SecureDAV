@@ -27,7 +27,7 @@
                     @foreach ($file->accessGroups as $accessGroup)
                         <tr>
                             <td>
-                                <a href="{{ route('access-groups.show', ['access_group' => $accessGroup->uuid]) }}" class="link">{{ $accessGroup->label }}</a>
+                                <a href="{{ route('access-groups.show', [$accessGroup]) }}" class="link">{{ $accessGroup->label }}</a>
                             </td>
                             <td class="text-right">{{ $accessGroup->users_count }}</td>
                             <td class="text-center">
@@ -47,7 +47,7 @@
                                 <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)">
                                     <form
                                         method="POST"
-                                        action="{{ route('access-groups.files.destroy', ['access_group' => $accessGroup->uuid, 'file' => $file->uuid]) }}"
+                                        action="{{ route('access-groups.files.destroy', [$accessGroup, $file]) }}"
                                         onsubmit="return confirm(`{{ __('Are you sure you want to revoke access to this file?') }}`)"
                                     >
                                         @method('DELETE')

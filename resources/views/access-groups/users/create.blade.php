@@ -13,7 +13,7 @@
             <span>{{ __('The username and password will be generated automatically') }}</span>
         </div>
 
-        <form action="{{ route('access-groups.access-group-users.store', ['access_group' => $accessGroup->uuid]) }}" method="post" id="create-form">
+        <form action="{{ route('access-groups.access-group-users.store', [$accessGroup]) }}" method="post" id="create-form">
             @csrf
 
             <x-form-field name="label" class="md:w-2/3">
@@ -24,7 +24,7 @@
         </form>
 
         <x-slot name="actions">
-            <a href="{{ route('access-groups.show', ['access_group' => $accessGroup->uuid]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ route('access-groups.show', [$accessGroup]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Create') }}" form="create-form" class="btn btn-primary">
         </x-slot>
     </x-card>

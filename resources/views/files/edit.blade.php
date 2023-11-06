@@ -6,7 +6,7 @@
             {{ __('Edit file') }}
         </x-slot>
 
-        <form action="{{ route('files.update', ['file' => $file->uuid]) }}" method="post" id="edit-form">
+        <form action="{{ route('files.update', [$file]) }}" method="post" id="edit-form">
             @method('PUT')
             @csrf
 
@@ -30,7 +30,7 @@
         </form>
 
         <x-slot name="actions">
-            <a href="{{ route('files.show', ['file' => $file->uuid]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ route('files.show', [$file]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Save') }}" form="edit-form" class="btn btn-primary">
         </x-slot>
     </x-card>

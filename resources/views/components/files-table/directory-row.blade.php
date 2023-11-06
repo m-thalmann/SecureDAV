@@ -14,7 +14,7 @@
                 @if ($includeParentDirectory)
                     <li>
                         <a
-                            href="{{ route('browse.index', ['directory' => $directory->parentDirectory?->uuid]) }}"
+                            href="{{ route('browse.index', [$directory->parentDirectory]) }}"
                             class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis text-base-content/50"
                         >
                             @if ($directory->parentDirectory)
@@ -27,7 +27,7 @@
                 @endif
                 <li>
                     <a
-                        href="{{ route('browse.index', ['directory' => $directory->uuid]) }}"
+                        href="{{ route('browse.index', [$directory]) }}"
                         class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis"
                     >
                         {{ $directory->name }}

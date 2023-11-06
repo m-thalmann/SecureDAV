@@ -100,10 +100,7 @@ class WebDavTest extends TestCase {
             ->create();
 
         $response = $this->fetchWebDav(
-            route('webdav.files', [
-                'uuid' => $file->uuid,
-                'name' => $file->name,
-            ])
+            route('webdav.files', [$file->uuid, $file->name])
         );
 
         $response->assertOk();
@@ -129,10 +126,7 @@ class WebDavTest extends TestCase {
             ->create();
 
         $response = $this->fetchWebDav(
-            route('webdav.files', [
-                'uuid' => $file->uuid,
-                'name' => $file->name,
-            ])
+            route('webdav.files', [$file->uuid, $file->name])
         );
 
         $response->assertNotFound();
@@ -147,10 +141,7 @@ class WebDavTest extends TestCase {
             ->create();
 
         $response = $this->fetchWebDav(
-            route('webdav.files', [
-                'uuid' => $file->uuid,
-                'name' => $file->name,
-            ])
+            route('webdav.files', [$file->uuid, $file->name])
         );
 
         $response->assertNotFound();
@@ -199,7 +190,7 @@ class WebDavTest extends TestCase {
 
         $response = $this->fetchWebDav(
             route('webdav.directories', [
-                'path' => collect($directory->breadcrumbs)
+                collect($directory->breadcrumbs)
                     ->map(fn(Directory $directory) => $directory->name)
                     ->join('/'),
             ]),
@@ -259,9 +250,7 @@ class WebDavTest extends TestCase {
             ->create(['directory_id' => null]);
 
         $response = $this->fetchWebDav(
-            route('webdav.directories', [
-                'path' => $file->name,
-            ])
+            route('webdav.directories', [$file->name])
         );
 
         $response->assertOk();
@@ -301,9 +290,7 @@ class WebDavTest extends TestCase {
 XML;
 
         $response = $this->fetchWebDav(
-            route('webdav.directories', [
-                'path' => $file->name,
-            ]),
+            route('webdav.directories', [$file->name]),
             'LOCK',
             data: $lockRequest
         );
@@ -315,9 +302,7 @@ XML;
         $lockToken = $response->baseResponse->headers->get('Lock-Token');
 
         $response = $this->fetchWebDav(
-            route('webdav.directories', [
-                'path' => $file->name,
-            ]),
+            route('webdav.directories', [$file->name]),
             'UNLOCK',
             headers: [
                 'Lock-Token' => $lockToken,
@@ -349,9 +334,7 @@ XML;
 XML;
 
         $response = $this->fetchWebDav(
-            route('webdav.directories', [
-                'path' => $file->name,
-            ]),
+            route('webdav.directories', [$file->name]),
             'LOCK',
             data: $lockRequest
         );

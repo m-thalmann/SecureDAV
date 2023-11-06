@@ -6,7 +6,7 @@
             {{ __('Edit directory') }}
         </x-slot>
 
-        <form action="{{ route('directories.update', ['directory' => $directory->uuid]) }}" method="post" id="edit-form">
+        <form action="{{ route('directories.update', [$directory]) }}" method="post" id="edit-form">
             @method('PUT')
             @csrf
 
@@ -18,7 +18,7 @@
         </form>
 
         <x-slot name="actions">
-            <a href="{{ route('browse.index', ['directory' => $directory->uuid]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ route('browse.index', [$directory]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Save') }}" form="edit-form" class="btn btn-primary">
         </x-slot>
     </x-card>

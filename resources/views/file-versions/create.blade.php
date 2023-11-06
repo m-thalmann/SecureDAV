@@ -12,7 +12,7 @@
 
         <x-session-message :message="session('session-message')" class="my-3"></x-session-message>
 
-        <form action="{{ route('files.versions.store', ['file' => $file]) }}" method="post" enctype="multipart/form-data" id="create-form">
+        <form action="{{ route('files.versions.store', [$file]) }}" method="post" enctype="multipart/form-data" id="create-form">
             @csrf
 
             <x-form-field name="label" class="md:w-2/3">
@@ -40,7 +40,7 @@
         </form>
 
         <x-slot name="actions">
-            <a href="{{ route('files.show', ['file' => $file->uuid]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ route('files.show', [$file]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Save') }}" form="create-form" class="btn btn-primary">
         </x-slot>
     </x-card>
