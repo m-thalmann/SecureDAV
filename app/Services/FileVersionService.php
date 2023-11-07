@@ -8,6 +8,7 @@ use App\Exceptions\NoVersionFoundException;
 use App\Models\File;
 use App\Models\FileVersion;
 use App\Support\FileInfo;
+use Carbon\Carbon;
 use Closure;
 use Exception;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -176,18 +177,34 @@ class FileVersionService {
 
     /**
      * Updates the latest version of the given file with the contents of the resource.
+     * If the file has an auto version interval and the latest version is older than the interval, a new version is created instead.
      *
      * @param \App\Models\File $file
      * @param resource $resource The resource to read the file from
      *
      * @throws \App\Exceptions\NoVersionFoundException
      * @throws \App\Exceptions\FileWriteException
+     *
+     * @return bool True if the latest version was updated, false if a new version was created
      */
-    public function updateLatestVersion(File $file, mixed $resource) {
+    public function updateLatestVersion(File $file, mixed $resource): bool {
         $latestVersion = $file->latestVersion;
 
         if ($latestVersion === null) {
             throw new NoVersionFoundException();
+        }
+
+        if ($file->auto_version_hours !== null) {
+            $versionCreated = new Carbon($latestVersion->created_at);
+
+            $needsNewVersion = $versionCreated
+                ->addRealHours($file->auto_version_hours)
+                ->isPast();
+
+            if ($needsNewVersion) {
+                $this->createNewVersion($file, $resource);
+                return false;
+            }
         }
 
         $this->storeFile(
@@ -210,6 +227,8 @@ class FileVersionService {
                 'file_updated_at' => now(),
             ])
             ->save();
+
+        return true;
     }
 
     /**

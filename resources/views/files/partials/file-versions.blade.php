@@ -3,6 +3,30 @@
         {{ __('Versions') }}
     </x-slot>
 
+    <x-slot name="titleSuffix">
+        <form action="{{ route('files.auto-version-hours.update', [$file]) }}" method="post" class="font-normal flex items-center gap-4">
+            @method('PUT')
+            @csrf
+
+            <span class="text-sm flex items-center gap-1">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                {{ __('Auto version') }}
+
+                <x-card-dropdown>
+                    {{ __('A new version of the file will be created automatically after the given delay (when updating the file)') }}
+                </x-card-dropdown>
+            </span>
+
+            <select name="hours" class="select select-sm" onchange="this.form.submit()">
+                <option value="" @selected($file->auto_version_hours === null)>{{ __('Disabled') }}</option>
+
+                @foreach (\App\Models\File::AUTO_VERSION_HOURS as $hours)
+                    <option value="{{ $hours }}" @selected($file->auto_version_hours === $hours)>{{ formatHours($hours) }}</option>
+                @endforeach
+            </select>
+        </form>
+    </x-slot>
+
     <div class="actions flex gap-4 items-center mb-4">
         <a href="{{ route('files.versions.create', [$file]) }}" class="btn btn-neutral btn-sm">
             <i class="fa-solid fa-clock-rotate-left mr-2"></i>

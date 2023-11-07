@@ -63,11 +63,15 @@ class LatestFileVersionController extends Controller {
         $uploadedFile = $request->file('file');
 
         try {
-            processFile($uploadedFile->path(), function (
-                mixed $fileResource
-            ) use ($fileVersionService, $file) {
-                $fileVersionService->updateLatestVersion($file, $fileResource);
-            });
+            $versionUpdated = processFile(
+                $uploadedFile->path(),
+                fn(
+                    mixed $fileResource
+                ) => $fileVersionService->updateLatestVersion(
+                    $file,
+                    $fileResource
+                )
+            );
         } catch (Exception $e) {
             return back()
                 ->withInput()
@@ -87,7 +91,13 @@ class LatestFileVersionController extends Controller {
             ->with(
                 'snackbar',
                 SessionMessage::success(
-                    __('A new version of this file has been created.')
+                    $versionUpdated
+                        ? __(
+                            'The latest version of this file has been updated.'
+                        )
+                        : __(
+                            'A new version of this file has been created (auto version).'
+                        )
                 )->forDuration()
             );
     }

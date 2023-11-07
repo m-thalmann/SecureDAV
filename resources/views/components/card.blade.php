@@ -31,6 +31,12 @@
                         </small>
                     @endisset
                 </div>
+
+                @isset ($titleSuffix)
+                    <span class="flex-1"></span>
+
+                    {{ $titleSuffix }}
+                @endisset
             </h2>
         @endisset
 

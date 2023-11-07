@@ -31,6 +31,16 @@ class HelpersTest extends TestCase {
         $this->assertEquals('-1 B', formatBytes(-1));
     }
 
+    /**
+     * @dataProvider formatHoursProvider
+     */
+    public function testFormatHoursReturnsTheExpectedFormat(
+        float $hours,
+        string $expectedFormat
+    ): void {
+        $this->assertEquals($expectedFormat, formatHours($hours));
+    }
+
     public function testGenerateInitialsReturnsTheFirstCharacterOfTheFirstAndLastName(): void {
         $firstName = fake()->firstName();
         $middleName = fake()->firstName();
@@ -269,6 +279,16 @@ class HelpersTest extends TestCase {
             [1055770, '1.01 MB'],
             [1083741825, '1.01 GB'],
             [1109511627777, '1.01 TB'],
+        ];
+    }
+
+    public static function formatHoursProvider(): array {
+        return [
+            [0.5, '30 minutes'],
+            [1, '1 hour'],
+            [2.5, '2 hours, 30 minutes'],
+            [24.5, '1 day, 30 minutes'],
+            [720, '30 days'],
         ];
     }
 

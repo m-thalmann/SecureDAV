@@ -16,11 +16,33 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class File extends Model {
     use HasFactory, HasUuids, SoftDeletes;
 
+    /**
+     * Possible options for the auto version hours.
+     *
+     * @var float[]
+     */
+    const AUTO_VERSION_HOURS = [
+        0.5, // 30 min
+        1, // 1 hour
+        2, // 2 hours
+        12, // 12 hours
+        24, // 1 day
+        48, // 2 days
+        168, // 1 week
+        720, // 30 days
+    ];
+
     protected $hidden = ['next_version'];
 
-    protected $fillable = ['directory_id', 'name', 'description'];
+    protected $fillable = [
+        'directory_id',
+        'name',
+        'description',
+        'auto_version_hours',
+    ];
 
     protected $attributes = [
+        'auto_version_hours' => null,
         'next_version' => 1,
     ];
 

@@ -407,6 +407,45 @@ class FileTest extends TestCase {
         $response->assertSessionHasErrors('name');
     }
 
+    public function testAutoVersionHoursCanBeUpdated(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $hours = 23.5;
+
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->put(
+            "/files/{$file->uuid}/auto-version-hours",
+            [
+                'hours' => $hours,
+            ]
+        );
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $file->refresh();
+
+        $this->assertEquals($hours, $file->auto_version_hours);
+    }
+
+    public function testUpdateAutoVersionHoursFailsIfFileDoesNotBelongToUser(): void {
+        $file = File::factory()->create();
+
+        $response = $this->put("/files/{$file->uuid}/auto-version-hours", [
+            'hours' => 23.5,
+        ]);
+
+        $response->assertForbidden();
+    }
+
     public function testFileCanBeMovedToTrash(): void {
         $directory = Directory::factory()
             ->for($this->user)

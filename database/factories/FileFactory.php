@@ -24,6 +24,7 @@ class FileFactory extends Factory {
             'name' => fake()->word() . '.txt',
             'description' => null,
             'encryption_key' => null,
+            'auto_version_hours' => null,
             'next_version' => 1,
         ];
     }

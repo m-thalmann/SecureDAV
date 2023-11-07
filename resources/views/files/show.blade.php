@@ -65,18 +65,9 @@
         
                 <x-copy-button inputId="web-dav-url" plain class="btn btn-sm btn-neutral" />
 
-                @if ($file->accessGroups->count() === 0)
-                    <div class="dropdown dropdown-end">
-                        <label tabindex="0" class="btn btn-circle btn-ghost btn-xs text-info">
-                            <i class="fa-solid fa-circle-info text-info"></i>
-                        </label>
-                        <div tabindex="0" class="card compact dropdown-content z-[1] shadow bg-base-300 rounded-box w-64">
-                            <div class="card-body">
-                                {{ __('You have to add this file to an access group for it to be accessible via WebDAV') }}
-                            </div>
-                        </div>
-                    </div>
-                @endif
+                <x-card-dropdown>
+                    {{ __('The file can only be access through WebDAV using a access-group-user (see below).') }}
+                </x-card-dropdown>
             </div>
         </x-form-field>
 

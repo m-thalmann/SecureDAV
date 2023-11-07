@@ -160,6 +160,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->scoped(['directory' => 'uuid'])
         ->except(['index', 'show']);
 
+    Route::put('files/{file:uuid}/auto-version-hours', [
+        FileController::class,
+        'updateAutoVersionHours',
+    ])->name('files.auto-version-hours.update');
+
     Route::resource('files', FileController::class)
         ->scoped(['file' => 'uuid'])
         ->except(['index']);

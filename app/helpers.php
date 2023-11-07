@@ -29,6 +29,39 @@ if (!function_exists('formatBytes')) {
     }
 }
 
+if (!function_exists('formatHours')) {
+    /**
+     * Format hours to days, hours, minutes
+     * Example: 1.5 hours => 1 hour, 30 minutes
+     *
+     * @param float $hours The hours to format
+     *
+     * @return string
+     */
+    function formatHours(float $hours): string {
+        $minutes = round(($hours - floor($hours)) * 60);
+        $days = floor($hours / 24);
+        $hours = (int) $hours - $days * 24;
+
+        $minutesString =
+            $minutes > 0
+                ? trans_choice('{1} 1 minute|[2,*] :count minutes', $minutes)
+                : null;
+        $hoursString =
+            $hours > 0
+                ? trans_choice('{1} 1 hour|[2,*] :count hours', $hours)
+                : null;
+        $daysString =
+            $days > 0
+                ? trans_choice('{1} 1 day|[2,*] :count days', $days)
+                : null;
+
+        $strings = array_filter([$daysString, $hoursString, $minutesString]);
+
+        return join(', ', $strings);
+    }
+}
+
 if (!function_exists('generateInitials')) {
     /**
      * Generates the initials of the given name.

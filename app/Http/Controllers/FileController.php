@@ -173,6 +173,28 @@ class FileController extends Controller {
             );
     }
 
+    public function updateAutoVersionHours(
+        Request $request,
+        File $file
+    ): RedirectResponse {
+        $this->authorize('update', $file);
+
+        $data = $request->validate([
+            'hours' => ['nullable', 'decimal:0,1', 'min:0.1'],
+        ]);
+
+        $file->update([
+            'auto_version_hours' => $data['hours'],
+        ]);
+
+        return back()->with(
+            'snackbar',
+            SessionMessage::success(
+                __('Auto versioning time updated successfully.')
+            )->forDuration()
+        );
+    }
+
     public function destroy(File $file): RedirectResponse {
         // TODO: confirm password
 

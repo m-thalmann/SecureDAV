@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->string('name');
             $table->string('description')->nullable();
             $table->string('encryption_key', 16)->nullable();
+            $table->unsignedFloat('auto_version_hours', 4, 1)->nullable();
             $table->integer('next_version');
             $table->timestamps();
             $table->softDeletes();

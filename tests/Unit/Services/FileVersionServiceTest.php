@@ -198,8 +198,7 @@ class FileVersionServiceTest extends TestCase {
 
         $newLabel = 'test-label';
 
-        $storeFileActionCalled = Mockery::mock('invokedTest');
-        $storeFileActionCalled->shouldReceive('invoked')->once();
+        $storeFileActionCalled = false;
 
         $foundNewPath = null;
 
@@ -210,11 +209,11 @@ class FileVersionServiceTest extends TestCase {
         );
 
         $storeFileAction = function (string $newPath) use (
-            $storeFileActionCalled,
+            &$storeFileActionCalled,
             &$foundNewPath,
             $uploadFile
         ) {
-            $storeFileActionCalled->invoked();
+            $storeFileActionCalled = true;
 
             $foundNewPath = $newPath;
 
@@ -226,6 +225,8 @@ class FileVersionServiceTest extends TestCase {
             $storeFileAction,
             $newLabel
         );
+
+        $this->assertTrue($storeFileActionCalled);
 
         $expectedBytes = $uploadFile->getSize();
         $expectedChecksum = md5($uploadContent);
@@ -396,7 +397,9 @@ class FileVersionServiceTest extends TestCase {
 
         $this->storageFake->put($version->storage_path, $content);
 
-        $this->service->updateLatestVersion($file, $resource);
+        $result = $this->service->updateLatestVersion($file, $resource);
+
+        $this->assertTrue($result);
 
         $this->assertDatabaseHas('file_versions', [
             'id' => $version->id,
@@ -407,6 +410,71 @@ class FileVersionServiceTest extends TestCase {
             'checksum' => md5($content),
             'bytes' => strlen($content),
         ]);
+
+        fclose($resource);
+    }
+
+    public function testUpdateLatestVersionCreatesANewVersionIfAutoVersioningIsEnabledAndTheDelayHasPassed(): void {
+        $content = fake()->text();
+        $autoVersionHours = 1.5;
+
+        $resource = $this->createStream($content);
+
+        $file = File::factory()
+            ->encrypted()
+            ->create(['auto_version_hours' => $autoVersionHours]);
+
+        $version = FileVersion::factory()
+            ->for($file)
+            ->create([
+                'mime_type' => 'application/json',
+                'created_at' => now()->subRealHours($autoVersionHours + 0.01),
+            ]);
+
+        $this->service
+            ->shouldReceive('createNewVersion')
+            ->withArgs([$file, $resource])
+            ->once();
+
+        $result = $this->service->updateLatestVersion($file, $resource);
+
+        $this->assertFalse($result);
+
+        fclose($resource);
+    }
+
+    public function testUpdateLatestVersionReplacesTheFileForTheLatestVersionIfAutoVersioningIsEnabledAndTheDelayHasNotPassed(): void {
+        $content = fake()->text();
+        $autoVersionHours = 1.5;
+
+        $resource = $this->createStream($content);
+
+        $file = File::factory()
+            ->encrypted()
+            ->create(['auto_version_hours' => $autoVersionHours]);
+
+        $version = FileVersion::factory()
+            ->for($file)
+            ->create([
+                'mime_type' => 'application/json',
+                'created_at' => now()->subRealHours($autoVersionHours - 0.01),
+            ]);
+
+        $this->service
+            ->shouldReceive('storeFile')
+            ->withArgs([
+                $resource,
+                $version->storage_path,
+                $file->encryption_key,
+                true,
+            ])
+            ->once();
+
+        $this->storageFake->put($version->storage_path, $content);
+
+        $result = $this->service->updateLatestVersion($file, $resource);
+
+        $this->assertTrue($result);
 
         fclose($resource);
     }
