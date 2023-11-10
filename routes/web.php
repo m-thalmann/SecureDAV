@@ -8,6 +8,7 @@ use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\FileVersionController;
 use App\Http\Controllers\LatestFileVersionController;
+use App\Http\Controllers\SearchFileController;
 use App\Http\Controllers\Settings\LogoutBrowserSessionsController;
 use App\Http\Controllers\Settings\ProfileSettingsController;
 use App\Http\Controllers\Settings\WebDavSuspensionController;
@@ -159,6 +160,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('directories', DirectoryController::class)
         ->scoped(['directory' => 'uuid'])
         ->except(['index', 'show']);
+
+    Route::get('files/search', SearchFileController::class)->name(
+        'files.search'
+    );
 
     Route::put('files/{file:uuid}/auto-version-hours', [
         FileController::class,
