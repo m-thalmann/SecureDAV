@@ -21,7 +21,7 @@
             </ul>
         </div>
 
-        <div class="flex-none">
+        <div class="flex-none gap-1">
             <a href="{{ route('files.search') }}" class="btn btn-ghost btn-circle">
                 <i class="fa-solid fa-search"></i>
             </a>

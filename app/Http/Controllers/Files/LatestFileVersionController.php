@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Files;
 
+use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Services\FileVersionService;
 use App\Support\SessionMessage;
@@ -48,8 +49,6 @@ class LatestFileVersionController extends Controller {
         FileVersionService $fileVersionService,
         File $file
     ): RedirectResponse {
-        // TODO: confirm password
-
         if ($file->latestVersion === null) {
             return $this->redirectNoLatestVersion($file);
         }

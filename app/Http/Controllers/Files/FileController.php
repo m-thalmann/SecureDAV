@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Files;
 
+use App\Http\Controllers\Controller;
 use App\Models\Directory;
 use App\Models\File;
 use App\Rules\NotStringContains;
@@ -196,8 +197,6 @@ class FileController extends Controller {
     }
 
     public function destroy(File $file): RedirectResponse {
-        // TODO: confirm password
-
         $directory = $file->directory;
 
         $deleteSuccessful = $file->delete();

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Files;
 
 use App\Exceptions\NoVersionFoundException;
+use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\FileVersion;
 use App\Services\FileVersionService;
@@ -33,7 +34,6 @@ class FileVersionController extends Controller {
         FileVersionService $fileVersionService,
         File $file
     ): RedirectResponse {
-        // TODO: confirm password
         $this->authorize('update', $file);
 
         $data = $request->validate([

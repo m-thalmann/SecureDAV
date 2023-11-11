@@ -1,14 +1,14 @@
 <?php
 
-use App\Http\Controllers\AccessGroupController;
-use App\Http\Controllers\AccessGroupFileController;
-use App\Http\Controllers\AccessGroupUserController;
+use App\Http\Controllers\AccessGroups\AccessGroupController;
+use App\Http\Controllers\AccessGroups\AccessGroupFileController;
+use App\Http\Controllers\AccessGroups\AccessGroupUserController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
-use App\Http\Controllers\FileController;
-use App\Http\Controllers\FileVersionController;
-use App\Http\Controllers\LatestFileVersionController;
-use App\Http\Controllers\SearchFileController;
+use App\Http\Controllers\Files\FileController;
+use App\Http\Controllers\Files\FileVersionController;
+use App\Http\Controllers\Files\LatestFileVersionController;
+use App\Http\Controllers\Files\SearchFileController;
 use App\Http\Controllers\Settings\LogoutBrowserSessionsController;
 use App\Http\Controllers\Settings\ProfileSettingsController;
 use App\Http\Controllers\Settings\WebDavSuspensionController;

@@ -9,7 +9,7 @@
             @csrf
 
             <x-form-field name="label" class="md:w-2/3">
-                <x-slot name="label" optional>{{ __('Label') }}</x-slot>
+                <x-slot name="label">{{ __('Label') }}</x-slot>
 
                 <x-input name="label" :value="$accessGroup->label" autofocus required />
             </x-form-field>

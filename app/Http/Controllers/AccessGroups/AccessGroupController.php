@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\AccessGroups;
 
+use App\Http\Controllers\Controller;
 use App\Models\AccessGroup;
 use App\Support\SessionMessage;
 use Illuminate\Http\RedirectResponse;
