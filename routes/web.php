@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccessGroups\AccessGroupController;
 use App\Http\Controllers\AccessGroups\AccessGroupFileController;
 use App\Http\Controllers\AccessGroups\AccessGroupUserController;
+use App\Http\Controllers\AccessGroups\JumpToAccessGroupUserController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\Files\FileController;
@@ -191,6 +192,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('access-groups', AccessGroupController::class)->scoped([
         'access_group' => 'uuid',
     ]);
+
+    Route::post(
+        'access-group-users/jump-to',
+        JumpToAccessGroupUserController::class
+    )->name('access-group-users.jump-to');
 
     Route::post(
         'access-group-users/{access_group_user:username}/reset-password',

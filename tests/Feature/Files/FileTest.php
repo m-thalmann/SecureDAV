@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Files;
 
 use App\Models\Directory;
 use App\Models\File;

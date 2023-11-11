@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\AccessGroups;
 
 use App\Models\AccessGroup;
 use App\Models\Directory;

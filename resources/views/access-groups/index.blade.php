@@ -4,11 +4,27 @@
             {{ __('Access groups') }}
         </x-slot>
 
-        <div class="actions my-4">
-            <a href="{{ route('access-groups.create') }}" class="btn btn-neutral btn-sm">
+        <div class="actions my-4 flex flex-col gap-4">
+            <a href="{{ route('access-groups.create') }}" class="btn btn-neutral btn-sm w-fit">
                 <i class="fa-solid fa-plus mr-2"></i>
                 {{ __('Create access group') }}
             </a>
+
+            <form action="{{ route('access-group-users.jump-to') }}" method="POST">
+                @csrf
+
+                <x-form-field name="username" class="w-96">
+                    <x-slot name="label"><i class="fa-solid fa-user"></i> {{ __('Find access group user') }}</x-slot>
+    
+                    <div class="flex items-center relative">
+                        <x-input name="username" placeholder="{{ __('Username') }}" required class="pr-16" />
+    
+                        <button class="btn btn-square btn-neutral rounded-l-none absolute right-0">
+                            <i class="fa-solid fa-search"></i>
+                        </button>
+                    </div>
+                </x-form-field>
+            </form>
         </div>
 
         <div class="overflow-auto w-full bg-base-100 rounded-md">
