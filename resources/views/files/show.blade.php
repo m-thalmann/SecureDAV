@@ -7,8 +7,8 @@
         <x-dropdown align="end">
             <li>
                 <a href="{{ route('files.edit', [$file]) }}">
-                    <i class="fas fa-edit mr-2"></i>
-                    {{ __('Edit file') }}
+                    <i class="fas fa-edit w-6"></i>
+                    {{ __('Edit') }}
                 </a>
             </li>
 
@@ -22,8 +22,8 @@
                 
                 <li>
                     <button class="hover:bg-error hover:text-error-content">
-                        <i class="fas fa-trash mr-2"></i>
-                        {{ __('Move file to trash') }}
+                        <i class="fas fa-trash w-6"></i>
+                        {{ __('Move to trash') }}
                     </button>
                 </li>
             </form>

@@ -55,7 +55,7 @@
                                         
                                         <li>
                                             <button class="hover:bg-error hover:text-error-content">
-                                                <i class="fa-solid fa-user-slash mr-2"></i>
+                                                <i class="fa-solid fa-user-slash w-6"></i>
                                                 {{ __('Revoke access') }}
                                             </button>
                                         </li>

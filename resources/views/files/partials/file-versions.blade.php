@@ -75,11 +75,11 @@
 
                                 <x-dropdown
                                     :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)"
-                                    width="w-56"
+                                    width="w-52"
                                 >
                                     <li>
                                         <a href="{{ route('files.versions.edit', [$file, $version]) }}">
-                                            <i class="fas fa-edit mr-2"></i>
+                                            <i class="fas fa-edit w-6"></i>
                                             {{ __('Edit label') }}
                                         </a>
                                     </li>
@@ -94,7 +94,7 @@
                                         
                                         <li>
                                             <button class="hover:bg-error hover:text-error-content">
-                                                <i class="fas fa-trash mr-2"></i>
+                                                <i class="fas fa-trash w-6"></i>
                                                 {{ __('Move to trash') }}
                                             </button>
                                         </li>

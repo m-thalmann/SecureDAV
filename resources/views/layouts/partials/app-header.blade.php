@@ -40,7 +40,7 @@
                 <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-300 rounded-box w-52">
                     <li>
                         <a href="{{ route('settings.index') }}">
-                            <i class="fa-solid fa-gear mr-2"></i>
+                            <i class="fa-solid fa-gear w-6"></i>
                             {{ __('Settings') }}
                         </a>
                     </li>
@@ -56,7 +56,7 @@
                                 'hover:bg-error hover:text-error-content' => !$user->is_webdav_suspended,
                                 'hover:bg-success hover:text-success-content' => $user->is_webdav_suspended,
                             ])>
-                                <i class="fa-solid fa-power-off mr-2"></i>
+                                <i class="fa-solid fa-power-off w-6"></i>
 
                                 @if (!$user->is_webdav_suspended)
                                     {{ __('Suspend WebDAV') }}
@@ -72,7 +72,7 @@
                         
                         <li>
                             <button class="hover:bg-error hover:text-error-content">
-                                <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i>
+                                <i class="fa-solid fa-arrow-right-from-bracket w-6"></i>
                                 {{ __('Log out') }}
                             </button>
                         </li>

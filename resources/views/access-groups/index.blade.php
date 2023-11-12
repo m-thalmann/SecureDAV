@@ -64,12 +64,12 @@
                             <td>
                                 <x-dropdown
                                     :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)"
-                                    width="w-56"
+                                    width="w-36"
                                 >
                                     <li>
                                         <a href="{{ route('access-groups.edit', [$accessGroup]) }}">
-                                            <i class="fas fa-edit mr-2"></i>
-                                            {{ __('Edit access group') }}
+                                            <i class="fas fa-edit w-6"></i>
+                                            {{ __('Edit') }}
                                         </a>
                                     </li>
 
@@ -83,8 +83,8 @@
                                         
                                         <li>
                                             <button class="hover:bg-error hover:text-error-content">
-                                                <i class="fas fa-trash mr-2"></i>
-                                                {{ __('Delete access group') }}
+                                                <i class="fas fa-trash w-6"></i>
+                                                {{ __('Delete') }}
                                             </button>
                                         </li>
                                     </form>

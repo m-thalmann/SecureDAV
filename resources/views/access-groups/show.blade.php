@@ -19,23 +19,25 @@
                 </span>
             @endif
 
-            @if ($accessGroup->readonly)
-                <span class="tooltip" data-tip="{{ __('Read-Only') }}">
-                    <i class="fa-solid fa-book-open text-secondary text-xl"></i>
+            <div class="flex gap-2">
+                <span class="tooltip" data-tip="{{ __('Read') }}">
+                    <i class="fa-solid fa-eye text-secondary text-xl"></i>
                 </span>
-            @else
-                <span class="tooltip" data-tip="{{ __('Read and write') }}">
-                    <i class="fa-solid fa-file-pen text-primary text-xl"></i>
-                </span>
-            @endif
+    
+                @if (!$accessGroup->readonly)
+                    <span class="tooltip" data-tip="{{ __('Write') }}">
+                        <i class="fa-solid fa-file-pen text-secondary text-xl"></i>
+                    </span>
+                @endif
+            </div>
 
             <span class="flex-1"></span>
 
-            <x-dropdown align="end" width="w-56">
+            <x-dropdown align="end" width="w-36">
                 <li>
                     <a href="{{ route('access-groups.edit', [$accessGroup]) }}">
-                        <i class="fas fa-edit mr-2"></i>
-                        {{ __('Edit access group') }}
+                        <i class="fas fa-edit w-6"></i>
+                        {{ __('Edit') }}
                     </a>
                 </li>
 
@@ -49,8 +51,8 @@
                     
                     <li>
                         <button class="hover:bg-error hover:text-error-content">
-                            <i class="fas fa-trash mr-2"></i>
-                            {{ __('Delete access group') }}
+                            <i class="fas fa-trash w-6"></i>
+                            {{ __('Delete') }}
                         </button>
                     </li>
                 </form>

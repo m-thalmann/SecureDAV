@@ -34,11 +34,11 @@
                             <span class="tooltip" data-tip="{{ $accessGroupUser->last_access ?? '-' }}">{{ $accessGroupUser->last_access?->diffForHumans() ?? '-' }}</span>
                         </td>
                         <td>
-                            <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 3)" width="w-52">
+                            <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 3)" width="w-48">
                                 <li>
                                     <a href="{{ route('access-group-users.edit', [$accessGroupUser]) }}">
-                                        <i class="fas fa-edit mr-2"></i>
-                                        {{ __('Edit group user') }}
+                                        <i class="fas fa-edit w-6"></i>
+                                        {{ __('Edit') }}
                                     </a>
                                 </li>
 
@@ -50,7 +50,7 @@
                                     
                                     <li>
                                         <button>
-                                            <i class="fa-solid fa-rotate-left mr-2"></i>
+                                            <i class="fa-solid fa-rotate-left w-6"></i>
                                             {{ __('Reset password') }}
                                         </button>
                                     </li>
@@ -66,8 +66,8 @@
                                     
                                     <li>
                                         <button class="hover:bg-error hover:text-error-content">
-                                            <i class="fas fa-trash mr-2"></i>
-                                            {{ __('Delete group user') }}
+                                            <i class="fas fa-trash w-6"></i>
+                                            {{ __('Delete') }}
                                         </button>
                                     </li>
                                 </form>

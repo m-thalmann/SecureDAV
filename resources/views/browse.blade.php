@@ -64,11 +64,11 @@
             @foreach ($directories as $directory)
                 <x-files-table.directory-row :directory="$directory">
                     <x-slot name="actions">
-                        <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, count($files) + $loop->count, 2)">
+                        <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, count($files) + $loop->count, 2)" width="w-44">
                             <li>
                                 <a href="{{ route('directories.edit', [$directory]) }}">
-                                    <i class="fas fa-edit mr-2"></i>
-                                    {{ __('Edit directory') }}
+                                    <i class="fas fa-edit w-6"></i>
+                                    {{ __('Edit') }}
                                 </a>
                             </li>
 
@@ -78,8 +78,8 @@
                                 
                                 <li>
                                     <button class="hover:bg-error hover:text-error-content">
-                                        <i class="fas fa-trash mr-2"></i>
-                                        {{ __('Delete directory') }}
+                                        <i class="fas fa-trash w-6"></i>
+                                        {{ __('Delete') }}
                                     </button>
                                 </li>
                             </form>
@@ -97,11 +97,11 @@
                             </a>
                         @endif
 
-                        <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned(count($directories) + $loop->index, count($directories) + $loop->count, 2)">
+                        <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned(count($directories) + $loop->index, count($directories) + $loop->count, 2)" width="w-44">
                             <li>
                                 <a href="{{ route('files.edit', [$file]) }}">
-                                    <i class="fas fa-edit mr-2"></i>
-                                    {{ __('Edit file') }}
+                                    <i class="fas fa-edit w-6"></i>
+                                    {{ __('Edit') }}
                                 </a>
                             </li>
 
@@ -115,8 +115,8 @@
                                 
                                 <li>
                                     <button class="hover:bg-error hover:text-error-content">
-                                        <i class="fas fa-trash mr-2"></i>
-                                        {{ __('Move file to trash') }}
+                                        <i class="fas fa-trash w-6"></i>
+                                        {{ __('Move to trash') }}
                                     </button>
                                 </li>
                             </form>
