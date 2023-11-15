@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class File extends Model {
     use HasFactory, HasUuids, SoftDeletes;
@@ -135,7 +136,13 @@ class File extends Model {
     protected function fileIcon(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
-                return getFileIconForExtension($this->extension);
+                $icon = getFileIconForExtension($this->extension);
+
+                if (Str::startsWith($attributes['name'], '.')) {
+                    $icon .= ' opacity-20';
+                }
+
+                return $icon;
             }
         );
     }

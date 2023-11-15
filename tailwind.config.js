@@ -19,6 +19,8 @@ export default {
     'text-blue-600',
     'text-green-600',
     'text-red-500',
+    // HiddenFileIcon
+    'opacity-20',
   ],
 
   theme: {
