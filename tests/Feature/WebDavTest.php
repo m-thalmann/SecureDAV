@@ -180,13 +180,15 @@ class WebDavTest extends TestCase {
 
         $files = File::factory(5)
             ->for($this->user->accessGroup->user)
+            ->for($directory)
             ->has(FileVersion::factory(), 'versions')
             ->hasAttached($this->user->accessGroup)
-            ->create(['directory_id' => $directory->id]);
+            ->create();
 
         $directories = Directory::factory(3)
             ->for($this->user->accessGroup->user)
-            ->create(['parent_directory_id' => $directory->id]);
+            ->for($directory, 'parentDirectory')
+            ->create();
 
         $response = $this->fetchWebDav(
             route('webdav.directories', [
@@ -361,3 +363,4 @@ XML;
         return [['webdav.files.base'], ['webdav.directories']];
     }
 }
+

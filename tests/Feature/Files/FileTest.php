@@ -200,7 +200,8 @@ class FileTest extends TestCase {
 
         $file = File::factory()
             ->for($this->user)
-            ->create(['directory_id' => $directory->id]);
+            ->for($directory)
+            ->create();
 
         $uploadFile = UploadedFile::fake()->create($file->name);
 
@@ -222,7 +223,8 @@ class FileTest extends TestCase {
 
         $childDirectory = Directory::factory()
             ->for($this->user)
-            ->create(['parent_directory_id' => $directory->id]);
+            ->for($directory, 'parentDirectory')
+            ->create();
 
         $uploadFile = UploadedFile::fake()->create($childDirectory->name);
 
@@ -370,15 +372,19 @@ class FileTest extends TestCase {
     }
 
     public function testFileCantBeRenamedIfNameAlreadyExistsInSameDirectoryForUser(): void {
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
         $file = File::factory()
             ->for($this->user)
+            ->for($directory)
             ->create();
 
         $otherFile = File::factory()
             ->for($this->user)
-            ->create([
-                'directory_id' => $file->directory_id,
-            ]);
+            ->for($directory)
+            ->create();
 
         $response = $this->put("/files/{$file->uuid}", [
             'name' => $otherFile->name,
@@ -389,15 +395,19 @@ class FileTest extends TestCase {
     }
 
     public function testFileCantBeRenamedIfDirectoryWithSameNameAlreadyExistsInSameDirectoryForUser(): void {
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
         $file = File::factory()
             ->for($this->user)
+            ->for($directory)
             ->create();
 
         $childDirectory = File::factory()
             ->for($this->user)
-            ->create([
-                'directory_id' => $file->directory_id,
-            ]);
+            ->for($directory)
+            ->create();
 
         $response = $this->put("/files/{$file->uuid}", [
             'name' => $childDirectory->name,
@@ -453,7 +463,8 @@ class FileTest extends TestCase {
 
         $file = File::factory()
             ->for($this->user)
-            ->create(['directory_id' => $directory->id]);
+            ->for($directory)
+            ->create();
 
         $response = $this->delete("/files/{$file->uuid}");
 

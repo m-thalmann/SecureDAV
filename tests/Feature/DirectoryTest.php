@@ -153,7 +153,8 @@ class DirectoryTest extends TestCase {
 
         $directory = Directory::factory()
             ->for($this->user)
-            ->create(['parent_directory_id' => $parentDirectory->id]);
+            ->for($parentDirectory, 'parentDirectory')
+            ->create();
 
         $response = $this->from('/directories/create')->post('/directories', [
             'name' => $directory->name,
@@ -172,7 +173,8 @@ class DirectoryTest extends TestCase {
 
         $file = File::factory()
             ->for($this->user)
-            ->create(['directory_id' => $parentDirectory->id]);
+            ->for($parentDirectory)
+            ->create();
 
         $response = $this->from('/directories/create')->post('/directories', [
             'name' => $file->name,
@@ -215,7 +217,8 @@ class DirectoryTest extends TestCase {
 
         $otherDirectory = Directory::factory()
             ->for($this->user)
-            ->create(['parent_directory_id' => $directory->id]);
+            ->for($directory, 'parentDirectory')
+            ->create();
 
         $newName = $otherDirectory->name;
 
@@ -239,15 +242,19 @@ class DirectoryTest extends TestCase {
     }
 
     public function testDirectoryCantBeRenamedIfNameAlreadyExistsInSameDirectoryForUser(): void {
+        $parentDirectory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
         $directory = Directory::factory()
             ->for($this->user)
+            ->for($parentDirectory, 'parentDirectory')
             ->create();
 
         $otherDirectory = Directory::factory()
             ->for($this->user)
-            ->create([
-                'parent_directory_id' => $directory->parent_directory_id,
-            ]);
+            ->for($parentDirectory, 'parentDirectory')
+            ->create();
 
         $response = $this->from("/directories/{$directory->uuid}/edit")->put(
             "/directories/{$directory->uuid}",
@@ -261,15 +268,19 @@ class DirectoryTest extends TestCase {
     }
 
     public function testDirectoryCantBeRenamedIfFileWithSameNameAlreadyExistsInSameDirectoryForUser(): void {
+        $parentDirectory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
         $directory = Directory::factory()
             ->for($this->user)
+            ->for($parentDirectory, 'parentDirectory')
             ->create();
 
         $file = File::factory()
             ->for($this->user)
-            ->create([
-                'directory_id' => $directory->parent_directory_id,
-            ]);
+            ->for($parentDirectory)
+            ->create();
 
         $response = $this->from("/directories/{$directory->uuid}/edit")->put(
             "/directories/{$directory->uuid}",
@@ -303,7 +314,8 @@ class DirectoryTest extends TestCase {
 
         $directory = Directory::factory()
             ->for($this->user)
-            ->create(['parent_directory_id' => $parentDirectory->id]);
+            ->for($parentDirectory, 'parentDirectory')
+            ->create();
 
         $response = $this->delete("/directories/{$directory->uuid}");
 
@@ -328,7 +340,8 @@ class DirectoryTest extends TestCase {
 
         Directory::factory()
             ->for($this->user)
-            ->create(['parent_directory_id' => $directory->id]);
+            ->for($directory, 'parentDirectory')
+            ->create();
 
         $response = $this->from("/browse/{$directory->uuid}")->delete(
             "/directories/{$directory->uuid}"
@@ -355,9 +368,8 @@ class DirectoryTest extends TestCase {
 
         $file = File::factory()
             ->for($this->user)
-            ->create([
-                'directory_id' => $directory->id,
-            ]);
+            ->for($directory)
+            ->create();
 
         $response = $this->from("/browse/{$directory->uuid}")->delete(
             "/directories/{$directory->uuid}"
@@ -389,3 +401,4 @@ class DirectoryTest extends TestCase {
         $response->assertForbidden();
     }
 }
+

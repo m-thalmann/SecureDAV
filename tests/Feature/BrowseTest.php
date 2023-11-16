@@ -116,16 +116,18 @@ class BrowseTest extends TestCase {
 
         $files = File::factory(5)
             ->for($this->user)
+            ->for($currentDirectory)
             ->sequence(
                 fn(Sequence $sequence) => [
                     'name' => 'FileName ' . $sequence->index,
                 ]
             )
-            ->create(['directory_id' => $currentDirectory->id]);
+            ->create();
 
         $directories = Directory::factory(5)
             ->for($this->user)
-            ->create(['parent_directory_id' => $currentDirectory->id]);
+            ->for($currentDirectory, 'parentDirectory')
+            ->create();
 
         $response = $this->get("/browse/{$currentDirectory->uuid}");
 
@@ -159,7 +161,8 @@ class BrowseTest extends TestCase {
 
         $currentDirectory = Directory::factory()
             ->for($this->user)
-            ->create(['parent_directory_id' => $parentDirectory->id]);
+            ->for($parentDirectory, 'parentDirectory')
+            ->create();
 
         $response = $this->get("/browse/{$currentDirectory->uuid}");
 
@@ -172,3 +175,4 @@ class BrowseTest extends TestCase {
         });
     }
 }
+

@@ -68,7 +68,8 @@ class AccessGroupFileTest extends TestCase {
 
         $files = File::factory(3)
             ->for($this->user)
-            ->for($directory);
+            ->for($directory)
+            ->create();
 
         $directories = Directory::factory(2)
             ->for($this->user)
@@ -390,3 +391,4 @@ class AccessGroupFileTest extends TestCase {
         $response->assertNotFound();
     }
 }
+
