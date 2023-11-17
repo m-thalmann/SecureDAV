@@ -14,6 +14,13 @@ use Illuminate\View\View;
 class AccessGroupUserController extends Controller {
     public function __construct() {
         $this->authorizeResource(AccessGroupUser::class, 'access_group_user');
+
+        $this->middleware('password.confirm')->only([
+            'create',
+            'store',
+            'destroy',
+            'resetPassword',
+        ]);
     }
 
     public function create(AccessGroup $accessGroup): View {

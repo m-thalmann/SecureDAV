@@ -13,6 +13,10 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AccessGroupFileController extends Controller {
+    public function __construct() {
+        $this->middleware('password.confirm');
+    }
+
     public function create(Request $request, AccessGroup $accessGroup): View {
         $this->authorize('update', $accessGroup);
 

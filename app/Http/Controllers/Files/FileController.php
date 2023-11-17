@@ -21,6 +21,13 @@ use Illuminate\View\View;
 class FileController extends Controller {
     public function __construct() {
         $this->authorizeResource(File::class);
+
+        $this->middleware('password.confirm')->only([
+            'edit',
+            'update',
+            'updateAutoVersionHours',
+            'destroy',
+        ]);
     }
 
     public function create(Request $request): View {

@@ -98,10 +98,8 @@ class LatestFileVersionTest extends TestCase {
     }
 
     public function testShowLatestFileVersionFailsIfFileDoesNotBelongToUser(): void {
-        $file = File::factory()->create();
-
-        $fileVersion = FileVersion::factory()
-            ->for($file)
+        $file = File::factory()
+            ->has(FileVersion::factory(), 'versions')
             ->create();
 
         $response = $this->get("/files/{$file->uuid}/versions/latest");
@@ -115,13 +113,26 @@ class LatestFileVersionTest extends TestCase {
         $response->assertNotFound();
     }
 
-    public function testEditLatestFileVersionViewCanBeRendered(): void {
+    public function testEditLatestFileVersionViewConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
         $file = File::factory()
             ->for($this->user)
+            ->has(FileVersion::factory(), 'versions')
             ->create();
 
-        $fileVersion = FileVersion::factory()
-            ->for($file)
+        $confirmResponse = $this->get(
+            "/files/{$file->uuid}/versions/latest/edit"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testEditLatestFileVersionViewCanBeRendered(): void {
+        $this->passwordConfirmed();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->has(FileVersion::factory(), 'versions')
             ->create();
 
         $response = $this->get("/files/{$file->uuid}/versions/latest/edit");
@@ -132,6 +143,8 @@ class LatestFileVersionTest extends TestCase {
     }
 
     public function testEditLatestFileVersionViewFailsIfFileHasNoVersions(): void {
+        $this->passwordConfirmed();
+
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -150,10 +163,8 @@ class LatestFileVersionTest extends TestCase {
     }
 
     public function testEditLatestFileVersionViewFailsIfFileDoesNotBelongToUser(): void {
-        $file = File::factory()->create();
-
-        $fileVersion = FileVersion::factory()
-            ->for($file)
+        $file = File::factory()
+            ->has(FileVersion::factory(), 'versions')
             ->create();
 
         $response = $this->get("/files/{$file->uuid}/versions/latest/edit");
@@ -167,7 +178,30 @@ class LatestFileVersionTest extends TestCase {
         $response->assertNotFound();
     }
 
+    public function testUpdateLatestFileVersionConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $uploadedFile = UploadedFile::fake()->create('new-version.txt');
+
+        $file = File::factory()
+            ->for($this->user)
+            ->has(
+                FileVersion::factory()->state([
+                    'mime_type' => 'application/json',
+                ]),
+                'versions'
+            )
+            ->create();
+
+        $confirmResponse = $this->put("/files/{$file->uuid}/versions/latest", [
+            'file' => $uploadedFile,
+        ]);
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testLatestFileVersionCanBeUpdated(): void {
+        $this->passwordConfirmed();
+
         $content = fake()->text();
 
         $uploadedFile = UploadedFile::fake()->createWithContent(
@@ -213,6 +247,8 @@ class LatestFileVersionTest extends TestCase {
     }
 
     public function testLatestFileVersionCantBeUpdatedIfFileHasNoLatestVersion(): void {
+        $this->passwordConfirmed();
+
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -233,6 +269,8 @@ class LatestFileVersionTest extends TestCase {
     }
 
     public function testLatestFileVersionCantBeUpdatedIfCreateCallFails(): void {
+        $this->passwordConfirmed();
+
         $this->mock(FileVersionService::class, function (MockInterface $mock) {
             $mock
                 ->shouldReceive('updateLatestVersion')
@@ -242,10 +280,7 @@ class LatestFileVersionTest extends TestCase {
 
         $file = File::factory()
             ->for($this->user)
-            ->create();
-
-        $fileVersion = FileVersion::factory()
-            ->for($file)
+            ->has(FileVersion::factory(), 'versions')
             ->create();
 
         $uploadedFile = UploadedFile::fake()->create('new-version.txt');
@@ -267,3 +302,4 @@ class LatestFileVersionTest extends TestCase {
         });
     }
 }
+

@@ -13,6 +13,12 @@ use Illuminate\View\View;
 class DirectoryController extends Controller {
     public function __construct() {
         $this->authorizeResource(Directory::class);
+
+        $this->middleware('password.confirm')->only([
+            'edit',
+            'update',
+            'destroy',
+        ]);
     }
 
     public function create(Request $request): View {

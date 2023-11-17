@@ -21,7 +21,7 @@ class FileFactory extends Factory {
             'uuid' => fake()->uuid(),
             'user_id' => User::factory(),
             'directory_id' => fake()->boolean(25) ? Directory::factory() : null,
-            'name' => fake()->word() . '.txt',
+            'name' => join('_', fake()->words(2)) . '.txt',
             'description' => null,
             'encryption_key' => null,
             'auto_version_hours' => null,

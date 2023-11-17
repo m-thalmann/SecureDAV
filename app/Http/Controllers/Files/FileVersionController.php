@@ -18,6 +18,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class FileVersionController extends Controller {
     public function __construct() {
         $this->authorizeResource(FileVersion::class, 'version');
+
+        $this->middleware('password.confirm')->only(['destroy']);
     }
 
     public function create(File $file): View {

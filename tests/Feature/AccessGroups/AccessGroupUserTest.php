@@ -23,7 +23,22 @@ class AccessGroupUserTest extends TestCase {
         $this->actingAs($this->user);
     }
 
+    public function testCreateAccessGroupUserViewConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $accessGroup = AccessGroup::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->get(
+            "/access-groups/{$accessGroup->uuid}/access-group-users/create"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testCreateAccessGroupUserViewCanBeRendered(): void {
+        $this->passwordConfirmed();
+
         $accessGroup = AccessGroup::factory()
             ->for($this->user)
             ->create();
@@ -46,6 +61,8 @@ class AccessGroupUserTest extends TestCase {
     }
 
     public function testCreateAccessGroupUserViewFailsIfUserCantUpdateAccessGroup(): void {
+        $this->passwordConfirmed();
+
         $otherUser = $this->createUser();
 
         $accessGroup = AccessGroup::factory()
@@ -59,7 +76,25 @@ class AccessGroupUserTest extends TestCase {
         $response->assertForbidden();
     }
 
+    public function testCreateAccessGroupUserConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $accessGroup = AccessGroup::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->post(
+            "/access-groups/{$accessGroup->uuid}/access-group-users",
+            [
+                'label' => 'Label',
+            ]
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testNewAccessGroupUserCanBeCreated(): void {
+        $this->passwordConfirmed();
+
         $accessGroup = AccessGroup::factory()
             ->for($this->user)
             ->create();
@@ -105,6 +140,8 @@ class AccessGroupUserTest extends TestCase {
     }
 
     public function testNewAccessGroupUserCantBeCreatedIfUserCantUpdateAccessGroup(): void {
+        $this->passwordConfirmed();
+
         $otherUser = $this->createUser();
 
         $accessGroup = AccessGroup::factory()
@@ -197,7 +234,22 @@ class AccessGroupUserTest extends TestCase {
         $response->assertForbidden();
     }
 
+    public function testDeleteAccessGroupUserConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $accessGroupUser = AccessGroupUser::factory()
+            ->for(AccessGroup::factory()->for($this->user))
+            ->create();
+
+        $confirmResponse = $this->delete(
+            "/access-group-users/{$accessGroupUser->username}"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testAccessGroupUserCanBeDeleted(): void {
+        $this->passwordConfirmed();
+
         $accessGroupUser = AccessGroupUser::factory()
             ->for(AccessGroup::factory()->for($this->user))
             ->create();
@@ -229,7 +281,22 @@ class AccessGroupUserTest extends TestCase {
         $response->assertForbidden();
     }
 
+    public function testResetAccessGroupUserPasswordConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $accessGroupUser = AccessGroupUser::factory()
+            ->for(AccessGroup::factory()->for($this->user))
+            ->create();
+
+        $confirmResponse = $this->post(
+            "/access-group-users/{$accessGroupUser->username}/reset-password"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testAccessGroupUserPasswordCanBeReset(): void {
+        $this->passwordConfirmed();
+
         $accessGroupUser = AccessGroupUser::factory()
             ->for(AccessGroup::factory()->for($this->user))
             ->create();
@@ -264,6 +331,8 @@ class AccessGroupUserTest extends TestCase {
     }
 
     public function testAccessGroupUserPasswordCantBeResetForOtherUser(): void {
+        $this->passwordConfirmed();
+
         $otherUser = $this->createUser();
 
         $accessGroupUser = AccessGroupUser::factory()
@@ -277,3 +346,4 @@ class AccessGroupUserTest extends TestCase {
         $response->assertForbidden();
     }
 }
+

@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class LatestFileVersionController extends Controller {
     public function __construct() {
         $this->authorizeResource(File::class);
+
+        $this->middleware('password.confirm')->only(['edit', 'update']);
     }
 
     public function show(

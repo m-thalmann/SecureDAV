@@ -13,6 +13,12 @@ use Illuminate\View\View;
 class AccessGroupController extends Controller {
     public function __construct() {
         $this->authorizeResource(AccessGroup::class);
+
+        $this->middleware('password.confirm')->only([
+            'edit',
+            'update',
+            'destroy',
+        ]);
     }
 
     public function index(): View {

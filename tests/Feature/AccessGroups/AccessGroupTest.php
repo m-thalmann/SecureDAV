@@ -136,7 +136,22 @@ class AccessGroupTest extends TestCase {
         $response->assertNotFound();
     }
 
+    public function testEditAccessGroupViewConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $accessGroup = AccessGroup::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->get(
+            "/access-groups/{$accessGroup->uuid}/edit"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testEditAccessGroupViewCanBeRendered(): void {
+        $this->passwordConfirmed();
+
         $accessGroup = AccessGroup::factory()
             ->for($this->user)
             ->create();
@@ -166,7 +181,24 @@ class AccessGroupTest extends TestCase {
         $response->assertNotFound();
     }
 
+    public function testUpdatedAccessGroupConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $accessGroup = AccessGroup::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->put("/access-groups/{$accessGroup->uuid}", [
+            'label' => 'Label',
+            'readonly' => true,
+            'active' => false,
+        ]);
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testAccessGroupCanBeUpdated(): void {
+        $this->passwordConfirmed();
+
         $accessGroup = AccessGroup::factory()
             ->for($this->user)
             ->create();
@@ -228,7 +260,20 @@ class AccessGroupTest extends TestCase {
         ]);
     }
 
+    public function testDeleteAccessGroupConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $accessGroup = AccessGroup::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->delete("/access-groups/{$accessGroup->uuid}");
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testAccessGroupCanBeDeleted(): void {
+        $this->passwordConfirmed();
+
         $accessGroup = AccessGroup::factory()
             ->for($this->user)
             ->has(File::factory(3)->for($this->user))
@@ -270,3 +315,4 @@ class AccessGroupTest extends TestCase {
         ]);
     }
 }
+

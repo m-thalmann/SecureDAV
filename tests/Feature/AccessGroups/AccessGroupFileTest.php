@@ -23,7 +23,22 @@ class AccessGroupFileTest extends TestCase {
         $this->actingAs($this->user);
     }
 
+    public function testCreateAccessGroupFileViewConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $accessGroup = AccessGroup::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->get(
+            "/access-groups/{$accessGroup->uuid}/files/create"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testCreateAccessGroupFileViewCanBeRendered(): void {
+        $this->passwordConfirmed();
+
         $files = File::factory(3)
             ->for($this->user)
             ->create(['directory_id' => null]);
@@ -54,6 +69,8 @@ class AccessGroupFileTest extends TestCase {
     }
 
     public function testCreateAccessGroupFileViewCanBeRenderedWithDirectory(): void {
+        $this->passwordConfirmed();
+
         $otherFiles = File::factory(3)
             ->for($this->user)
             ->create(['directory_id' => null]);
@@ -107,6 +124,8 @@ class AccessGroupFileTest extends TestCase {
     }
 
     public function testCreateAccessGroupFileViewOnlyShowsFilesNotYetInTheAccessGroup(): void {
+        $this->passwordConfirmed();
+
         $nonGroupFile = File::factory()
             ->for($this->user)
             ->create(['directory_id' => null]);
@@ -131,6 +150,8 @@ class AccessGroupFileTest extends TestCase {
     }
 
     public function testCreateAccessGroupFileViewDoesNotShowDirectoriesAndFilesOfOtherUser(): void {
+        $this->passwordConfirmed();
+
         $otherUser = $this->createUser();
 
         $otherFiles = File::factory(3)
@@ -163,6 +184,8 @@ class AccessGroupFileTest extends TestCase {
     }
 
     public function testCreateAccessGroupFileViewCantBeRenderedWithDirectoryOfOtherUser(): void {
+        $this->passwordConfirmed();
+
         $otherUser = $this->createUser();
 
         $directory = Directory::factory()
@@ -181,6 +204,8 @@ class AccessGroupFileTest extends TestCase {
     }
 
     public function testCreateAccessGroupFileViewCantBeRenderedWithDirectoryIfDirectoryDoesntExist(): void {
+        $this->passwordConfirmed();
+
         $accessGroup = AccessGroup::factory()
             ->for($this->user)
             ->create();
@@ -198,7 +223,29 @@ class AccessGroupFileTest extends TestCase {
         $response->assertNotFound();
     }
 
+    public function testCreateAccessGroupFileConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $accessGroup = AccessGroup::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->post(
+            "/access-groups/{$accessGroup->uuid}/files",
+            [
+                'file_uuid' => $file->uuid,
+            ]
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testAccessGroupFileCanBeCreated(): void {
+        $this->passwordConfirmed();
+
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -228,6 +275,8 @@ class AccessGroupFileTest extends TestCase {
     }
 
     public function testAccessGroupFileCantBeCreatedIfUserCantUpdateAccessGroup(): void {
+        $this->passwordConfirmed();
+
         $otherUser = $this->createUser();
 
         $file = File::factory()
@@ -251,6 +300,8 @@ class AccessGroupFileTest extends TestCase {
     }
 
     public function testAccessGroupFileCantBeCreatedIfUserCantUpdateFile(): void {
+        $this->passwordConfirmed();
+
         $otherUser = $this->createUser();
 
         $file = File::factory()
@@ -274,6 +325,8 @@ class AccessGroupFileTest extends TestCase {
     }
 
     public function testAccessGroupFileCantBeCreatedIfFileDoesNotExist(): void {
+        $this->passwordConfirmed();
+
         $accessGroup = AccessGroup::factory()
             ->for($this->user)
             ->create();
@@ -296,6 +349,8 @@ class AccessGroupFileTest extends TestCase {
     }
 
     public function testAccessGroupFileWillNotBeCreatedIfAlreadyPresent(): void {
+        $this->passwordConfirmed();
+
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -325,7 +380,27 @@ class AccessGroupFileTest extends TestCase {
         ]);
     }
 
+    public function testDeleteAccessGroupFileConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $accessGroup = AccessGroup::factory()
+            ->for($this->user)
+            ->hasAttached($file)
+            ->create();
+
+        $confirmResponse = $this->from(static::REDIRECT_TEST_ROUTE)->delete(
+            "/access-groups/{$accessGroup->uuid}/files/{$file->uuid}"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testAccessGroupFileCanBeDeleted(): void {
+        $this->passwordConfirmed();
+
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -356,6 +431,8 @@ class AccessGroupFileTest extends TestCase {
     }
 
     public function testAccessGroupFileCantBeDeletedIfUserCantUpdateAccessGroup(): void {
+        $this->passwordConfirmed();
+
         $otherUser = $this->createUser();
 
         $file = File::factory()

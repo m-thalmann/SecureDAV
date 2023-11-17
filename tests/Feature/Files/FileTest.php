@@ -305,7 +305,20 @@ class FileTest extends TestCase {
         $response->assertNotFound();
     }
 
+    public function testResetAccessGroupUserPasswordConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->get("/files/{$file->uuid}/edit");
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testEditFileViewCanBeRendered(): void {
+        $this->passwordConfirmed();
+
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -331,7 +344,22 @@ class FileTest extends TestCase {
         $response->assertNotFound();
     }
 
+    public function testEditFileConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->put("/files/{$file->uuid}", [
+            'name' => 'New name',
+        ]);
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testFileCanBeEdited(): void {
+        $this->passwordConfirmed();
+
         $newName = 'New Name.txt';
         $newDescription = 'New Description';
 
@@ -372,6 +400,8 @@ class FileTest extends TestCase {
     }
 
     public function testFileCantBeRenamedIfNameAlreadyExistsInSameDirectoryForUser(): void {
+        $this->passwordConfirmed();
+
         $directory = Directory::factory()
             ->for($this->user)
             ->create();
@@ -395,6 +425,8 @@ class FileTest extends TestCase {
     }
 
     public function testFileCantBeRenamedIfDirectoryWithSameNameAlreadyExistsInSameDirectoryForUser(): void {
+        $this->passwordConfirmed();
+
         $directory = Directory::factory()
             ->for($this->user)
             ->create();
@@ -417,7 +449,25 @@ class FileTest extends TestCase {
         $response->assertSessionHasErrors('name');
     }
 
+    public function testUpdateAutoVersionHoursConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->from(static::REDIRECT_TEST_ROUTE)->put(
+            "/files/{$file->uuid}/auto-version-hours",
+            [
+                'hours' => 2,
+            ]
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testAutoVersionHoursCanBeUpdated(): void {
+        $this->passwordConfirmed();
+
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -447,6 +497,8 @@ class FileTest extends TestCase {
     }
 
     public function testUpdateAutoVersionHoursFailsIfFileDoesNotBelongToUser(): void {
+        $this->passwordConfirmed();
+
         $file = File::factory()->create();
 
         $response = $this->put("/files/{$file->uuid}/auto-version-hours", [
@@ -456,7 +508,20 @@ class FileTest extends TestCase {
         $response->assertForbidden();
     }
 
+    public function testMoveFileToTrashConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->delete("/files/{$file->uuid}");
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testFileCanBeMovedToTrash(): void {
+        $this->passwordConfirmed();
+
         $directory = Directory::factory()
             ->for($this->user)
             ->create();

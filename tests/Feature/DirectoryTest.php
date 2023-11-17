@@ -186,7 +186,20 @@ class DirectoryTest extends TestCase {
         $response->assertSessionHasErrors('name');
     }
 
+    public function testEditDirectoryViewConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->get("/directories/{$directory->uuid}/edit");
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testEditDirectoryViewCanBeRendered(): void {
+        $this->passwordConfirmed();
+
         $directory = Directory::factory()
             ->for($this->user)
             ->create();
@@ -210,7 +223,22 @@ class DirectoryTest extends TestCase {
         $response->assertForbidden();
     }
 
+    public function testEditDirectoryNameConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->put("/directories/{$directory->uuid}", [
+            'name' => 'New name',
+        ]);
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testDirectoryNameCanBeEdited(): void {
+        $this->passwordConfirmed();
+
         $directory = Directory::factory()
             ->for($this->user)
             ->create();
@@ -242,6 +270,8 @@ class DirectoryTest extends TestCase {
     }
 
     public function testDirectoryCantBeRenamedIfNameAlreadyExistsInSameDirectoryForUser(): void {
+        $this->passwordConfirmed();
+
         $parentDirectory = Directory::factory()
             ->for($this->user)
             ->create();
@@ -268,6 +298,8 @@ class DirectoryTest extends TestCase {
     }
 
     public function testDirectoryCantBeRenamedIfFileWithSameNameAlreadyExistsInSameDirectoryForUser(): void {
+        $this->passwordConfirmed();
+
         $parentDirectory = Directory::factory()
             ->for($this->user)
             ->create();
@@ -307,7 +339,20 @@ class DirectoryTest extends TestCase {
         $response->assertForbidden();
     }
 
+    public function testDeleteDirectoryConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->delete("/directories/{$directory->uuid}");
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testDirectoryCanBeDeleted(): void {
+        $this->passwordConfirmed();
+
         $parentDirectory = Directory::factory()
             ->for($this->user)
             ->create();
@@ -334,6 +379,8 @@ class DirectoryTest extends TestCase {
     }
 
     public function testDirectoryCantBeDeletedIfContainsDirectory(): void {
+        $this->passwordConfirmed();
+
         $directory = Directory::factory()
             ->for($this->user)
             ->create();
@@ -362,6 +409,8 @@ class DirectoryTest extends TestCase {
     }
 
     public function testDirectoryCantBeDeletedIfContainsFile(): void {
+        $this->passwordConfirmed();
+
         $directory = Directory::factory()
             ->for($this->user)
             ->create();

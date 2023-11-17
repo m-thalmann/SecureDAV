@@ -430,7 +430,26 @@ class FileVersionTest extends TestCase {
         $response->assertForbidden();
     }
 
+    public function testMoveFileVersionToTrashConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $fileVersion = FileVersion::factory()
+            ->for($file)
+            ->create();
+
+        $confirmResponse = $this->delete(
+            "/files/{$file->uuid}/versions/{$fileVersion->version}"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
     public function testFileVersionCanBeMovedToTrash(): void {
+        $this->passwordConfirmed();
+
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -486,3 +505,4 @@ class FileVersionTest extends TestCase {
         $response->assertNotFound();
     }
 }
+
