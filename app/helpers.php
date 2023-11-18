@@ -225,3 +225,23 @@ if (!function_exists('processFile')) {
         return $returnValue;
     }
 }
+
+if (!function_exists('previousUrl')) {
+    /**
+     * Returns the previous url or the fallback url, if the previous url is not set or is the same as the current.
+     *
+     * @param string|null $fallback The fallback url to use if no previous url is set.
+     *
+     * @return string
+     */
+    function previousUrl(?string $fallback = null): string {
+        $url = url()->previous($fallback);
+
+        if ($url === url()->current() && $fallback) {
+            $url = $fallback;
+        }
+
+        return $url;
+    }
+}
+

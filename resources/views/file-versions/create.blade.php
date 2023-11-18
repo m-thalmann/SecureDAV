@@ -40,7 +40,7 @@
         </form>
 
         <x-slot name="actions">
-            <a href="{{ route('files.show', [$file]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ previousUrl(fallback: route('files.show', [$file])) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Save') }}" form="create-form" class="btn btn-primary">
         </x-slot>
     </x-card>

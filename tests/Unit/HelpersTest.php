@@ -272,6 +272,30 @@ class HelpersTest extends TestCase {
         }
     }
 
+    public function testPreviousUrlReturnsThePreviousUrl(): void {
+        $url = 'http://localhost/foo';
+
+        $this->from($url);
+
+        $this->assertEquals($url, previousUrl($url));
+    }
+
+    public function testPreviousUrlReturnsFallbackUrlIfPreviousUrlIsNotSet(): void {
+        $fallback = 'http://localhost/foo';
+
+        $this->assertEquals($fallback, previousUrl($fallback));
+    }
+
+    public function testPreviousUrlReturnsFallbackUrlIfPreviousUrlIsCurrentUrl(): void {
+        $fallback = 'http://localhost/foo';
+        $current = route('browse.index');
+
+        $this->from($current);
+        $this->get($current);
+
+        $this->assertEquals($fallback, previousUrl($fallback));
+    }
+
     public static function formatBytesProvider(): array {
         return [
             [1, '1 B'],

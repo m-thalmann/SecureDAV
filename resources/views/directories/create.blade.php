@@ -21,7 +21,7 @@
         </form>
 
         <x-slot name="actions">
-            <a href="{{ route('browse.index', [$parentDirectory]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ previousUrl(fallback: route('browse.index', [$parentDirectory])) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Create') }}" form="create-form" class="btn btn-primary">
         </x-slot>
     </x-card>

@@ -22,7 +22,7 @@
         </form>
 
         <x-slot name="actions">
-            <a href="{{ route('access-groups.index') }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ previousUrl(fallback: route('access-groups.index')) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
             <input type="submit" value="{{ __('Create') }}" form="create-form" class="btn btn-primary">
         </x-slot>
     </x-card>

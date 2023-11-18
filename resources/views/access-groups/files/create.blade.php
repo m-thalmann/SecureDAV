@@ -39,7 +39,7 @@
         </form>
 
         <x-slot name="actions" class="mt-4">
-            <a href="{{ route('access-groups.show', [$accessGroup]) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
+            <a href="{{ previousUrl(fallback: route('access-groups.show', [$accessGroup])) }}" class="btn btn-neutral">{{ __('Cancel') }}</a>
         </x-slot>
     </x-card>
 
