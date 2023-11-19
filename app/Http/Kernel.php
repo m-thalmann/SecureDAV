@@ -58,6 +58,7 @@ class Kernel extends HttpKernel {
             \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
+        'conditional' => \App\Http\Middleware\Conditional::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' =>
             \Illuminate\Auth\Middleware\RequirePassword::class,
@@ -66,3 +67,4 @@ class Kernel extends HttpKernel {
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];
 }
+
