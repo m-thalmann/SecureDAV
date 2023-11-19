@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Auth\Fortify\Actions\ConfirmTwoFactorAuthentication;
+use App\Auth\Fortify\Actions\CreatesNewUsers;
 use App\Auth\Fortify\Actions\ResetsUserPasswords;
 use App\Auth\Fortify\Actions\UpdatesUserPasswords;
 use App\Auth\Fortify\Actions\UpdatesUserProfileInformation;
@@ -14,6 +15,7 @@ use App\Auth\Fortify\Responses\PasswordResetResponse;
 use App\Auth\Fortify\Responses\PasswordUpdateResponse;
 use App\Auth\Fortify\Responses\ProfileInformationUpdatedResponse;
 use App\Auth\Fortify\Responses\RecoveryCodesGeneratedResponse;
+use App\Auth\Fortify\Responses\RegisterResponse;
 use App\Auth\Fortify\Responses\SuccessfulPasswordResetLinkRequestResponse;
 use App\Auth\Fortify\Responses\TwoFactorDisabledResponse;
 use App\Auth\Fortify\Responses\TwoFactorConfirmedResponse;
@@ -32,6 +34,7 @@ use Laravel\Fortify\Contracts\PasswordResetResponse as PasswordResetResponseCont
 use Laravel\Fortify\Contracts\PasswordUpdateResponse as PasswordUpdateResponseContract;
 use Laravel\Fortify\Contracts\ProfileInformationUpdatedResponse as ProfileInformationUpdatedResponseContract;
 use Laravel\Fortify\Contracts\RecoveryCodesGeneratedResponse as RecoveryCodesGeneratedResponseContract;
+use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse as SuccessfulPasswordResetLinkRequestResponseContract;
 use Laravel\Fortify\Contracts\TwoFactorConfirmedResponse as TwoFactorConfirmedResponseContract;
 use Laravel\Fortify\Contracts\TwoFactorDisabledResponse as TwoFactorDisabledResponseContract;
@@ -47,6 +50,7 @@ class FortifyServiceProvider extends ServiceProvider {
         Fortify::ignoreRoutes();
 
         $this->registerLoginResponses();
+        $this->registerRegistrationResponses();
         $this->registerPasswordResetResponses();
         $this->registerUpdateProfileInformationResponses();
         $this->registerUpdatePasswordResponses();
@@ -59,6 +63,7 @@ class FortifyServiceProvider extends ServiceProvider {
      */
     public function boot(): void {
         $this->configureLogin();
+        $this->configureRegistration();
         $this->configureConfirmPassword();
         $this->configurePasswordReset();
         $this->configureUpdateProfileInformation();
@@ -78,6 +83,19 @@ class FortifyServiceProvider extends ServiceProvider {
 
     protected function configureLogin(): void {
         Fortify::loginView('auth.login');
+    }
+
+    protected function configureRegistration(): void {
+        Fortify::createUsersUsing(CreatesNewUsers::class);
+
+        Fortify::registerView('auth.register');
+    }
+
+    protected function registerRegistrationResponses(): void {
+        $this->app->singleton(
+            RegisterResponseContract::class,
+            RegisterResponse::class
+        );
     }
 
     protected function configureConfirmPassword(): void {

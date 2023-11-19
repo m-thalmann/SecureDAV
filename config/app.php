@@ -52,6 +52,7 @@ return [
     |
     */
 
+    'registration_enabled' => env('APP_REGISTRATION_ENABLED', false),
     'email_verification_enabled' => env('APP_EMAIL_VERIFICATION_ENABLED', true),
 
     /*
@@ -204,3 +205,4 @@ return [
         ->merge([])
         ->toArray(),
 ];
+

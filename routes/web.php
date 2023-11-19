@@ -26,6 +26,7 @@ use Laravel\Fortify\Http\Controllers\PasswordController;
 use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
 use Laravel\Fortify\Http\Controllers\ProfileInformationController;
 use Laravel\Fortify\Http\Controllers\RecoveryCodeController;
+use Laravel\Fortify\Http\Controllers\RegisteredUserController;
 use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
 use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticationController;
 use Laravel\Fortify\Http\Controllers\VerifyEmailController;
@@ -48,6 +49,14 @@ Route::controller(AuthenticatedSessionController::class)->group(function () {
 
     Route::post('logout', 'destroy')->name('logout');
 });
+
+Route::controller(RegisteredUserController::class)
+    ->prefix('register')
+    ->middleware(['guest', 'conditional:app.registration_enabled'])
+    ->group(function () {
+        Route::get('/', 'create')->name('register');
+        Route::post('/', 'store');
+    });
 
 Route::as('password.')->group(function () {
     Route::controller(PasswordResetLinkController::class)

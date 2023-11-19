@@ -1,5 +1,5 @@
 <x-guest-layout :title="__('Login')">
-    <x-auth-card>
+    <x-auth-card :subtitle="__('Login')">
         <x-session-message :message="session('session-message')" class="mb-3"></x-session-message>
 
         <form method="POST" action="{{ route('login') }}" class="w-full">
@@ -31,4 +31,8 @@
             </div>
         </form>
     </x-auth-card>
+
+    @if (config('app.registration_enabled'))
+        <a class="link mt-4" href="{{ route('register') }}">{{ __('Don\'t have an account?') }}</a>
+    @endif
 </x-guest-layout>
