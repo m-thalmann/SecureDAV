@@ -59,7 +59,7 @@ class DirectoryTest extends TestCase {
             "/directories/create?directory={$parentDirectory->uuid}"
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testDirectoryCanBeCreated(): void {
@@ -143,7 +143,7 @@ class DirectoryTest extends TestCase {
             'parent_directory_uuid' => $parentDirectory->uuid,
         ]);
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testDirectoryCantBeCreatedIfNameIsNotUniqueInParentDirectory(): void {
@@ -220,7 +220,7 @@ class DirectoryTest extends TestCase {
 
         $response = $this->get("/directories/{$directory->uuid}/edit");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testEditDirectoryNameConfirmsPassword(): void {
@@ -336,7 +336,7 @@ class DirectoryTest extends TestCase {
             'name' => 'NewName',
         ]);
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testDeleteDirectoryConfirmsPassword(): void {
@@ -447,7 +447,7 @@ class DirectoryTest extends TestCase {
 
         $response = $this->delete("/directories/{$directory->uuid}");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 }
 

@@ -200,7 +200,7 @@ class AccessGroupFileTest extends TestCase {
             "/access-groups/{$accessGroup->uuid}/files/create?directory={$directory->uuid}"
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testCreateAccessGroupFileViewCantBeRenderedWithDirectoryIfDirectoryDoesntExist(): void {
@@ -291,7 +291,7 @@ class AccessGroupFileTest extends TestCase {
             'file_uuid' => $file->uuid,
         ]);
 
-        $response->assertForbidden();
+        $response->assertNotFound();
 
         $this->assertDatabaseMissing('access_group_files', [
             'access_group_id' => $accessGroup->id,
@@ -316,7 +316,7 @@ class AccessGroupFileTest extends TestCase {
             'file_uuid' => $file->uuid,
         ]);
 
-        $response->assertForbidden();
+        $response->assertNotFound();
 
         $this->assertDatabaseMissing('access_group_files', [
             'access_group_id' => $accessGroup->id,
@@ -448,7 +448,7 @@ class AccessGroupFileTest extends TestCase {
             "/access-groups/{$accessGroup->uuid}/files/{$file->uuid}"
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
 
         $this->assertDatabaseHas('access_group_files', [
             'access_group_id' => $accessGroup->id,

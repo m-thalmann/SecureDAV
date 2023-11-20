@@ -151,7 +151,7 @@ class BrowseTest extends TestCase {
 
         $response = $this->get("/browse/{$currentDirectory->uuid}");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testViewReceivesBreadcrumbs(): void {

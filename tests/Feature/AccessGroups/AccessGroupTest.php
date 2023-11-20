@@ -127,7 +127,7 @@ class AccessGroupTest extends TestCase {
 
         $response = $this->get("/access-groups/{$accessGroup->uuid}");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testShowAccessGroupViewFailsIfAccessGroupDoesNotExist(): void {
@@ -172,7 +172,7 @@ class AccessGroupTest extends TestCase {
 
         $response = $this->get("/access-groups/{$accessGroup->uuid}/edit");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testEditAccessGroupViewFailsIfAccessGroupDoesNotExist(): void {
@@ -249,7 +249,7 @@ class AccessGroupTest extends TestCase {
             'active' => $active,
         ]);
 
-        $response->assertForbidden();
+        $response->assertNotFound();
 
         $this->assertDatabaseHas('access_groups', [
             'id' => $accessGroup->id,
@@ -308,7 +308,7 @@ class AccessGroupTest extends TestCase {
 
         $response = $this->delete("/access-groups/{$accessGroup->uuid}");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
 
         $this->assertDatabaseHas('access_group_files', [
             'access_group_id' => $accessGroup->id,

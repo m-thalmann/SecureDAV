@@ -63,7 +63,7 @@ class FileTest extends TestCase {
 
         $response = $this->get("/files/create?directory={$directory->uuid}");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testFileCanBeCreated(): void {
@@ -190,7 +190,7 @@ class FileTest extends TestCase {
             'directory_uuid' => $directory->uuid,
         ]);
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testFileCantBeCreatedIfNameIsNotUniqueInDirectory(): void {
@@ -296,7 +296,7 @@ class FileTest extends TestCase {
 
         $response = $this->get("/files/{$file->uuid}");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testShowFileViewFailsIfFileDoesNotExist(): void {
@@ -335,7 +335,7 @@ class FileTest extends TestCase {
 
         $response = $this->get("/files/{$file->uuid}/edit");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testEditFileViewFailsIfFileDoesNotExist(): void {
@@ -396,7 +396,7 @@ class FileTest extends TestCase {
             'description' => 'New Description',
         ]);
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testFileCantBeRenamedIfNameAlreadyExistsInSameDirectoryForUser(): void {
@@ -505,7 +505,7 @@ class FileTest extends TestCase {
             'hours' => 23.5,
         ]);
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testMoveFileToTrashConfirmsPassword(): void {
@@ -557,7 +557,7 @@ class FileTest extends TestCase {
 
         $response = $this->delete("/files/{$file->uuid}");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testFileCannotBeMovedToTrashIfItDoesNotExist(): void {

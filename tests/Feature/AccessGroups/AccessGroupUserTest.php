@@ -73,7 +73,7 @@ class AccessGroupUserTest extends TestCase {
             "/access-groups/{$accessGroup->uuid}/access-group-users/create"
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testCreateAccessGroupUserConfirmsPassword(): void {
@@ -155,7 +155,7 @@ class AccessGroupUserTest extends TestCase {
             ]
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testEditAccessGroupUserViewCanBeRendered(): void {
@@ -190,7 +190,7 @@ class AccessGroupUserTest extends TestCase {
             "/access-group-users/{$accessGroupUser->username}/edit"
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testAccessGroupUserCanBeUpdated(): void {
@@ -231,7 +231,7 @@ class AccessGroupUserTest extends TestCase {
             ]
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testDeleteAccessGroupUserConfirmsPassword(): void {
@@ -278,7 +278,7 @@ class AccessGroupUserTest extends TestCase {
             "/access-group-users/{$accessGroupUser->username}"
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testResetAccessGroupUserPasswordConfirmsPassword(): void {
@@ -343,7 +343,7 @@ class AccessGroupUserTest extends TestCase {
             "/access-group-users/{$accessGroupUser->username}/reset-password"
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 }
 

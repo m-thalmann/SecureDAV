@@ -90,7 +90,7 @@ class FileVersionTest extends TestCase {
 
         $response = $this->get("/files/{$file->uuid}/versions/create");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testNewFileVersionCanBeCreatedWithUploadFile(): void {
@@ -217,7 +217,7 @@ class FileVersionTest extends TestCase {
 
         $response = $this->post("/files/{$file->uuid}/versions");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testNewFileVersionCantBeCreatedWithoutAnUploadFileIfFileDoesntHaveAnyVersions(): void {
@@ -332,7 +332,7 @@ class FileVersionTest extends TestCase {
             "/files/{$file->uuid}/versions/{$fileVersion->version}"
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testEditFileVersionViewCanBeRendered(): void {
@@ -367,7 +367,7 @@ class FileVersionTest extends TestCase {
             "/files/{$file->uuid}/versions/{$fileVersion->version}/edit"
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testEditFileVersionViewFailsIfFileDoesNotExist(): void {
@@ -427,7 +427,7 @@ class FileVersionTest extends TestCase {
             ]
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testMoveFileVersionToTrashConfirmsPassword(): void {
@@ -492,7 +492,7 @@ class FileVersionTest extends TestCase {
             "/files/{$file->uuid}/versions/{$fileVersion->version}"
         );
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testFileVersionCannotBeMovedToTrashIfItDoesNotExist(): void {

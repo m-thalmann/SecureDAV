@@ -104,7 +104,7 @@ class LatestFileVersionTest extends TestCase {
 
         $response = $this->get("/files/{$file->uuid}/versions/latest");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testShowLatestFileVersionViewFailsIfFileDoesNotExist(): void {
@@ -169,7 +169,7 @@ class LatestFileVersionTest extends TestCase {
 
         $response = $this->get("/files/{$file->uuid}/versions/latest/edit");
 
-        $response->assertForbidden();
+        $response->assertNotFound();
     }
 
     public function testEditLatestFileVersionViewFailsIfFileDoesNotExist(): void {
