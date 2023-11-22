@@ -7,6 +7,7 @@ use App\Http\Controllers\AccessGroups\JumpToAccessGroupUserController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\Files\FileController;
+use App\Http\Controllers\Files\FileMoveController;
 use App\Http\Controllers\Files\FileVersionController;
 use App\Http\Controllers\Files\LatestFileVersionController;
 use App\Http\Controllers\Files\SearchFileController;
@@ -179,6 +180,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         FileController::class,
         'updateAutoVersionHours',
     ])->name('files.auto-version-hours.update');
+
+    Route::controller(FileMoveController::class)
+        ->prefix('files/{file:uuid}/move')
+        ->as('files.move')
+        ->group(function () {
+            Route::get('/', 'edit')->name('.edit');
+            Route::put('/', 'update');
+        });
 
     Route::resource('files', FileController::class)
         ->scoped(['file' => 'uuid'])

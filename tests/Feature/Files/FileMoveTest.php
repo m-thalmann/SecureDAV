@@ -1,0 +1,195 @@
+<?php
+
+namespace Tests\Feature\Files;
+
+use App\Models\Directory;
+use App\Models\File;
+use App\Models\User;
+use App\Support\SessionMessage;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Tests\TestCase;
+
+class FileMoveTest extends TestCase {
+    use LazilyRefreshDatabase;
+
+    protected User $user;
+
+    protected function setUp(): void {
+        parent::setUp();
+
+        $this->user = $this->createUser();
+
+        $this->actingAs($this->user);
+    }
+
+    public function testMoveFileViewCanBeRendered(): void {
+        $this->passwordConfirmed();
+
+        $directories = Directory::factory(4)
+            ->for($this->user)
+            ->create();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get("/files/{$file->uuid}/move");
+
+        $response->assertOk();
+
+        foreach ($directories as $directory) {
+            $response->assertSee($directory->name);
+        }
+    }
+
+    public function testMoveFileViewCanBeRenderedWithDirectory(): void {
+        $this->passwordConfirmed();
+
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get(
+            "/files/{$file->uuid}/move?directory={$directory->uuid}"
+        );
+
+        $response->assertOk();
+
+        $response->assertSee($directory->name);
+        $response->assertSee('Empty directory');
+    }
+
+    public function testMoveFileViewConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->get("/files/{$file->uuid}/move");
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testMoveFileViewCantBeRenderedIfUserCantEditFile(): void {
+        $file = File::factory()->create();
+
+        $response = $this->get("/files/{$file->uuid}/move");
+
+        $response->assertNotFound();
+    }
+
+    public function testMoveFileViewCantBeRenderedIfUserCantEditDirectory(): void {
+        $this->passwordConfirmed();
+
+        $directory = Directory::factory()->create();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get(
+            "/files/{$file->uuid}/move?directory={$directory->uuid}"
+        );
+
+        $response->assertNotFound();
+    }
+
+    public function testFileCanBeMoved(): void {
+        $this->passwordConfirmed();
+
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->put("/files/{$file->uuid}/move", [
+            'directory_uuid' => $directory->uuid,
+        ]);
+
+        $response->assertRedirectToRoute('files.show', ['file' => $file]);
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $file->refresh();
+
+        $this->assertEquals($directory->id, $file->directory_id);
+    }
+
+    public function testFileCanBeMovedToRootDirectory(): void {
+        $this->passwordConfirmed();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->put("/files/{$file->uuid}/move", [
+            'directory_uuid' => null,
+        ]);
+
+        $response->assertRedirectToRoute('files.show', ['file' => $file]);
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $file->refresh();
+
+        $this->assertNull($file->directory_id);
+    }
+
+    public function testMoveFileConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->put("/files/{$file->uuid}/move", [
+            'directory_uuid' => null,
+        ]);
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testFileCantBeMovedIfUserCantEditFile(): void {
+        $file = File::factory()->create();
+
+        $response = $this->put("/files/{$file->uuid}/move", [
+            'directory_uuid' => null,
+        ]);
+
+        $response->assertNotFound();
+    }
+
+    public function testFileCantBeMovedIfUserCantEditDirectory(): void {
+        $this->passwordConfirmed();
+
+        $directory = Directory::factory()->create();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->put("/files/{$file->uuid}/move", [
+            'directory_uuid' => $directory->uuid,
+        ]);
+
+        $response->assertNotFound();
+    }
+}

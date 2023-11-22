@@ -12,6 +12,13 @@
                 </a>
             </li>
 
+            <li>
+                <a href="{{ route('files.move.edit', [$file]) . ($file->directory ? "?directory={$file->directory->uuid}" : '') }}">
+                    <i class="fa-solid fa-share-from-square w-6"></i>
+                    {{ __('Move') }}
+                </a>
+            </li>
+
             <form
                 method="POST"
                 action="{{ route('files.destroy', [$file]) }}"
