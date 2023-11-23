@@ -43,7 +43,7 @@
     </td>
     <td class="max-sm:hidden text-right">
         @if ($file->latestVersion)
-            {{ formatBytes($file->latestVersion->bytes) }}
+            {{ Illuminate\Support\Number::fileSize($file->latestVersion->bytes, maxPrecision: 2) }}
         @else
             -
         @endif

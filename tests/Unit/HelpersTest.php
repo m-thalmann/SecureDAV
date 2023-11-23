@@ -13,25 +13,6 @@ class HelpersTest extends TestCase {
     use LazilyRefreshDatabase;
 
     /**
-     * @dataProvider formatBytesProvider
-     */
-    public function testFormatBytesReturnsTheExpectedFormat(
-        int $size,
-        string $expectedFormat
-    ): void {
-        $this->assertEquals($expectedFormat, formatBytes($size));
-    }
-
-    public function testFormatBytesReturnsTheExpectedPrecision(): void {
-        $this->assertEquals('1.001 KB', formatBytes(1025, precision: 3));
-    }
-
-    public function testFormatBytesReturnsTheBytesIfSizeIsLessThanOrEqualZero(): void {
-        $this->assertEquals('0 B', formatBytes(0));
-        $this->assertEquals('-1 B', formatBytes(-1));
-    }
-
-    /**
      * @dataProvider formatHoursProvider
      */
     public function testFormatHoursReturnsTheExpectedFormat(
@@ -294,16 +275,6 @@ class HelpersTest extends TestCase {
         $this->get($current);
 
         $this->assertEquals($fallback, previousUrl($fallback));
-    }
-
-    public static function formatBytesProvider(): array {
-        return [
-            [1, '1 B'],
-            [1030, '1.01 KB'],
-            [1055770, '1.01 MB'],
-            [1083741825, '1.01 GB'],
-            [1109511627777, '1.01 TB'],
-        ];
     }
 
     public static function formatHoursProvider(): array {

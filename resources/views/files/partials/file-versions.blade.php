@@ -59,7 +59,7 @@
                         <tr>
                             <td class="text-center">{{ $version->version }}</td>
                             <td>{{ $version->label ?? '-' }}</td>
-                            <td>{{ formatBytes($version->bytes) }}</td>
+                            <td>{{ Illuminate\Support\Number::fileSize($version->bytes, maxPrecision: 2) }}</td>
                             <td>{{ $version->mime_type ?? '-' }}</td>
                             <td>
                                 <span class="tooltip" data-tip="{{ $version->created_at }}">{{ $version->created_at->diffForHumans() }}</span>
