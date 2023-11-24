@@ -8,6 +8,7 @@ use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\Files\FileController;
 use App\Http\Controllers\Files\FileMoveController;
+use App\Http\Controllers\Files\FileTrashController;
 use App\Http\Controllers\Files\FileVersionController;
 use App\Http\Controllers\Files\LatestFileVersionController;
 use App\Http\Controllers\Files\SearchFileController;
@@ -175,6 +176,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('files/search', SearchFileController::class)->name(
         'files.search'
     );
+
+    Route::controller(FileTrashController::class)
+        ->prefix('files/trash')
+        ->as('files.trash.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+        });
 
     Route::put('files/{file:uuid}/auto-version-hours', [
         FileController::class,

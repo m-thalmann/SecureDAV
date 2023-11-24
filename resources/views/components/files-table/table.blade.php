@@ -2,6 +2,7 @@
     'directoriesCount' => 0,
     'filesCount' => 0,
     'showCountSummary' => true,
+    'deletedAtColumn' => false,
 ])
 
 <table class="table">
@@ -12,6 +13,9 @@
             <th class="max-sm:hidden">{{ __('Size') }}</th>
             <th>{{ __('Current version') }}</th>
             <th>{{ __('Last updated') }}</th>
+            @if ($deletedAtColumn)
+                <th>{{ __('Deleted') }}</th>
+            @endif
             <th class="w-0"></th>
         </tr>
     </thead>

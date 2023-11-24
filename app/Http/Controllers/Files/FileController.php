@@ -148,8 +148,6 @@ class FileController extends Controller {
     }
 
     public function update(Request $request, File $file): RedirectResponse {
-        // TODO: make directory_id editable
-
         $data = $request->validate([
             'name' => [
                 'required',

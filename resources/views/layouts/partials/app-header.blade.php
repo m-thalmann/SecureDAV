@@ -39,6 +39,13 @@
                 </label>
                 <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-300 rounded-box w-52">
                     <li>
+                        <a href="{{ route('files.trash.index') }}">
+                            <i class="fa-solid fa-trash w-6"></i>
+                            {{ __('File trash') }}
+                        </a>
+                    </li>
+
+                    <li>
                         <a href="{{ route('settings.index') }}">
                             <i class="fa-solid fa-gear w-6"></i>
                             {{ __('Settings') }}

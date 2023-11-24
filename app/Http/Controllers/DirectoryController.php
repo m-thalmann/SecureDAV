@@ -89,7 +89,6 @@ class DirectoryController extends Controller {
         Request $request,
         Directory $directory
     ): RedirectResponse {
-        // TODO: make parent_directory_id editable
         $data = $request->validate([
             'name' => [
                 'required',

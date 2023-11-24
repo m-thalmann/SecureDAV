@@ -2,6 +2,8 @@
     'file' => null,
     'hover' => true,
     'includeParentDirectory' => false,
+    'deletedAtColumn' => false,
+    'link' => true,
 ])
 
 <tr {{ $attributes->merge(['class' => $hover ? 'hover' : '']) }}>
@@ -25,12 +27,16 @@
                     </li> 
                 @endif
                 <li>
-                    <a
-                        href="{{ route('files.show', [$file]) }}"
-                        class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis"
-                    >
+                    @if ($link)
+                        <a
+                            href="{{ route('files.show', [$file]) }}"
+                            class="link link-hover max-w-[48ch] overflow-hidden text-ellipsis"
+                        >
+                            {{ $file->name }}
+                        </a>
+                    @else
                         {{ $file->name }}
-                    </a>
+                    @endif
                 </li>
             </ul>
         </div>
@@ -57,8 +63,13 @@
         @endif
     </td>
     <td>
-        <span class="tooltip" data-tip="{{ $file->fileLastUpdatedAt?->diffForHumans() ?? __('No versions yet') }}">{{ $file->fileLastUpdatedAt?->diffForHumans() ?? '-' }}</span>
+        <span class="tooltip" data-tip="{{ $file->fileLastUpdatedAt ?? __('No versions yet') }}">{{ $file->fileLastUpdatedAt?->diffForHumans() ?? '-' }}</span>
     </td>
+    @if ($deletedAtColumn)
+        <td>
+            <span class="tooltip" data-tip="{{ $file->deleted_at }}">{{ $file->deleted_at->diffForHumans() }}</span>
+        </td>
+    @endif
     <td class="flex justify-end gap-2 items-center">
         {{ $actions ?? '' }}
     </td>
