@@ -157,5 +157,13 @@ class File extends Model {
             }
         );
     }
+
+    protected static function booted(): void {
+        static::forceDeleting(function (File $file) {
+            foreach ($file->versions as $version) {
+                $version->forceDelete();
+            }
+        });
+    }
 }
 

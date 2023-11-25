@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Storage;
 
 class FileVersion extends Model {
     use HasFactory, SoftDeletes;
@@ -32,6 +33,12 @@ class FileVersion extends Model {
 
     public function file(): BelongsTo {
         return $this->belongsTo(File::class);
+    }
+
+    protected static function booted(): void {
+        static::forceDeleting(function (FileVersion $fileVersion) {
+            Storage::disk('files')->delete($fileVersion->storage_path);
+        });
     }
 }
 

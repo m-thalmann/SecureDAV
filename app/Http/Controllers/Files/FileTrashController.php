@@ -19,5 +19,20 @@ class FileTrashController extends Controller {
             'files' => $files,
         ]);
     }
+
+    public function destroy(File $file): RedirectResponse {
+        $this->authorize('forceDelete', $file);
+
+        $file->forceDelete();
+
+        return redirect()
+            ->route('files.trash.index')
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('File deleted permanently.')
+                )->forDuration()
+            );
+    }
 }
 

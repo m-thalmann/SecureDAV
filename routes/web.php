@@ -182,6 +182,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->as('files.trash.')
         ->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::delete('/{file:uuid}', 'destroy')
+                ->withTrashed()
+                ->name('destroy');
         });
 
     Route::put('files/{file:uuid}/auto-version-hours', [
