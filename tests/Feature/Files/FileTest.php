@@ -11,7 +11,6 @@ use App\Support\SessionMessage;
 use Exception;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Mockery\MockInterface;
 use Tests\TestCase;
 
@@ -26,8 +25,6 @@ class FileTest extends TestCase {
         $this->user = $this->createUser();
 
         $this->actingAs($this->user);
-
-        Storage::fake('files');
     }
 
     public function testCreateFileViewCanBeRendered(): void {

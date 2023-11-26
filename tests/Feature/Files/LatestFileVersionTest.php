@@ -9,10 +9,8 @@ use App\Services\FileEncryptionService;
 use App\Services\FileVersionService;
 use App\Support\SessionMessage;
 use Exception;
-use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\TestCase;
@@ -21,7 +19,6 @@ class LatestFileVersionTest extends TestCase {
     use LazilyRefreshDatabase;
 
     protected User $user;
-    protected FilesystemAdapter $storage;
 
     protected function setUp(): void {
         parent::setUp();
@@ -29,8 +26,6 @@ class LatestFileVersionTest extends TestCase {
         $this->user = $this->createUser();
 
         $this->actingAs($this->user);
-
-        $this->storage = Storage::fake('files');
     }
 
     public function testShowLatestFileVersionDownloadsFile(): void {
@@ -41,7 +36,7 @@ class LatestFileVersionTest extends TestCase {
             FileVersionService::class,
             Mockery::spy(FileVersionService::class, [
                 Mockery::mock(FileEncryptionService::class),
-                $this->storage,
+                $this->storageFake,
             ])
         )->makePartial();
 
@@ -64,7 +59,7 @@ class LatestFileVersionTest extends TestCase {
         $response->assertDownload($file->name);
 
         $this->assertEquals(
-            $this->storage->get($latestVersion->storage_path),
+            $this->storageFake->get($latestVersion->storage_path),
             $response->streamedContent()
         );
 
@@ -243,7 +238,7 @@ class LatestFileVersionTest extends TestCase {
             $fileVersion->mime_type
         );
 
-        $this->storage->assertExists($fileVersion->storage_path, $content);
+        $this->storageFake->assertExists($fileVersion->storage_path, $content);
     }
 
     public function testLatestFileVersionCantBeUpdatedIfFileHasNoLatestVersion(): void {

@@ -12,10 +12,8 @@ use App\Services\FileVersionService;
 use App\Support\FileInfo;
 use Closure;
 use Exception;
-use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Mockery;
@@ -28,7 +26,6 @@ class FileVersionServiceTest extends TestCase {
 
     protected FileVersionServiceTestClass|MockInterface $service;
 
-    protected FilesystemAdapter $storageFake;
     protected FileEncryptionService|MockInterface $fileEncryptionServiceMock;
 
     protected function setUp(): void {
@@ -37,8 +34,6 @@ class FileVersionServiceTest extends TestCase {
         $this->fileEncryptionServiceMock = Mockery::mock(
             FileEncryptionService::class
         );
-
-        $this->storageFake = Storage::fake('files');
 
         /**
          * @var FileVersionServiceTestClass|MockInterface

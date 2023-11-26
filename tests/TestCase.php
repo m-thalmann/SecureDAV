@@ -4,8 +4,10 @@ namespace Tests;
 
 use App\Models\User;
 use Illuminate\Cache\RateLimiter as CacheRateLimiter;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Mockery;
 use Mockery\MockInterface;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -14,6 +16,14 @@ abstract class TestCase extends BaseTestCase {
     use CreatesApplication;
 
     protected const REDIRECT_TEST_ROUTE = '/redirect-test-route';
+
+    protected FilesystemAdapter $storageFake;
+
+    protected function setUp(): void {
+        parent::setUp();
+
+        $this->storageFake = Storage::fake('files');
+    }
 
     protected function createUser(bool $emailVerified = true): User {
         $user = User::factory();

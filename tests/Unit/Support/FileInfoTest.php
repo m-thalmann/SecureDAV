@@ -3,18 +3,12 @@
 namespace Tests\Unit\Support;
 
 use App\Support\FileInfo;
-use Illuminate\Filesystem\FilesystemAdapter;
-use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 use Tests\TestCase;
 
 class FileInfoTest extends TestCase {
-    protected FilesystemAdapter $storageFake;
-
     protected function setUp(): void {
         parent::setUp();
-
-        $this->storageFake = Storage::fake('files');
     }
 
     public function testFromStorageCreatesNewInstance(): void {

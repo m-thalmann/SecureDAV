@@ -6,9 +6,7 @@ use App\Models\File;
 use App\Models\FileVersion;
 use App\Models\User;
 use App\Support\SessionMessage;
-use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class FileTrashTest extends TestCase {
@@ -68,11 +66,6 @@ class FileTrashTest extends TestCase {
     }
 
     public function testFileCanBeDeleted(): void {
-        /**
-         * @var FilesystemAdapter
-         */
-        $storageFake = Storage::fake('files');
-
         $file = File::factory()
             ->for($this->user)
             ->create();
@@ -100,7 +93,7 @@ class FileTrashTest extends TestCase {
         ]);
 
         foreach ($versions as $version) {
-            $storageFake->assertMissing($version->storage_path);
+            $this->storageFake->assertMissing($version->storage_path);
         }
     }
 

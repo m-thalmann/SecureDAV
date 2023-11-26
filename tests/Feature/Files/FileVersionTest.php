@@ -9,10 +9,8 @@ use App\Services\FileEncryptionService;
 use App\Services\FileVersionService;
 use App\Support\SessionMessage;
 use Exception;
-use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Mockery;
 use Mockery\MockInterface;
 use Tests\TestCase;
@@ -21,7 +19,6 @@ class FileVersionTest extends TestCase {
     use LazilyRefreshDatabase;
 
     protected User $user;
-    protected FilesystemAdapter $storage;
 
     protected function setUp(): void {
         parent::setUp();
@@ -29,8 +26,6 @@ class FileVersionTest extends TestCase {
         $this->user = $this->createUser();
 
         $this->actingAs($this->user);
-
-        $this->storage = Storage::fake('files');
     }
 
     public function testCreateFileVersionViewCanBeRendered(): void {
@@ -131,7 +126,7 @@ class FileVersionTest extends TestCase {
 
         $this->assertNotNull($newVersion->storage_path);
 
-        $this->storage->assertExists(
+        $this->storageFake->assertExists(
             $newVersion->storage_path,
             $uploadedFile->getContent()
         );
@@ -145,7 +140,9 @@ class FileVersionTest extends TestCase {
         $fileVersion = FileVersion::factory()
             ->for($file)
             ->create();
-        $fileVersionContent = $this->storage->get($fileVersion->storage_path);
+        $fileVersionContent = $this->storageFake->get(
+            $fileVersion->storage_path
+        );
 
         $response = $this->post("/files/{$file->uuid}/versions", [
             'label' => 'New version',
@@ -172,7 +169,7 @@ class FileVersionTest extends TestCase {
 
         $this->assertNotNull($newVersion->storage_path);
 
-        $this->storage->assertExists(
+        $this->storageFake->assertExists(
             $newVersion->storage_path,
             $fileVersionContent
         );
@@ -273,7 +270,7 @@ class FileVersionTest extends TestCase {
             FileVersionService::class,
             Mockery::spy(FileVersionService::class, [
                 Mockery::mock(FileEncryptionService::class),
-                $this->storage,
+                $this->storageFake,
             ])
         )->makePartial();
 
@@ -296,7 +293,7 @@ class FileVersionTest extends TestCase {
         $response->assertDownload($file->name);
 
         $this->assertEquals(
-            $this->storage->get($selectedVersion->storage_path),
+            $this->storageFake->get($selectedVersion->storage_path),
             $response->streamedContent()
         );
 
