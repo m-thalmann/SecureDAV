@@ -192,4 +192,81 @@ class FileMoveTest extends TestCase {
 
         $response->assertNotFound();
     }
+
+    public function testFileCantBeMovedToRootDirectoryIfNameIsNotUnique(): void {
+        $this->passwordConfirmed();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->has(Directory::factory()->for($this->user))
+            ->create();
+
+        $otherFile = File::factory()
+            ->for($this->user)
+            ->create(['directory_id' => null, 'name' => $file->name]);
+
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->put(
+            "/files/{$file->uuid}/move",
+            [
+                'directory_uuid' => null,
+            ]
+        );
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $response->assertSessionHas('session-message', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
+
+            return true;
+        });
+
+        $directoryId = $file->directory_id;
+
+        $file->refresh();
+
+        $this->assertEquals($directoryId, $file->directory_id);
+    }
+
+    public function testFileCantBeMovedToDirectoryIfNameIsNotUnique(): void {
+        $this->passwordConfirmed();
+
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $otherDirectory = Directory::factory()
+            ->for($this->user)
+            ->for($directory, 'parentDirectory')
+            ->create(['name' => $file->name]);
+
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->put(
+            "/files/{$file->uuid}/move",
+            [
+                'directory_uuid' => $directory->uuid,
+            ]
+        );
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $response->assertSessionHas('session-message', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
+
+            return true;
+        });
+
+        $directoryId = $file->directory_id;
+
+        $file->refresh();
+
+        $this->assertEquals($directoryId, $file->directory_id);
+    }
 }
+

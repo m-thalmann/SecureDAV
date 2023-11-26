@@ -32,12 +32,26 @@
 
         <div class="h-2"></div>
 
+        <x-session-message :message="session('session-message')" class="mb-3"></x-session-message>
+
         <x-file-browser.list :breadcrumbs="$breadcrumbs">
-            @foreach ($directories as $directory)
-                <x-file-browser.directory-entry :directory="$directory" />
+            @foreach ($directories as $directoryRow)
+                <x-file-browser.directory-entry :directory="$directoryRow" />
+            @endforeach
+
+            @foreach ($files as $fileRow)
+                <x-file-browser.file-entry :file="$fileRow">
+                    @if ($fileRow->id === $file->id)
+                        <x-slot name="suffix">
+                            <span class="tooltip tooltip-left ml-2" data-tip="{{ __('This file') }}">
+                                <i class="fa-solid fa-thumbtack text-primary"></i>
+                            </span>
+                        </x-slot>
+                    @endif
+                </x-file-browser.file-entry>
             @endforeach
         
-            @if (count($directories) === 0)
+            @if (count($directories) === 0 && count($files) === 0)
                 <li>
                     <a href="#" class="pointer-events-none italic text-base-content/70">
                         {{ __('Empty directory') }}
