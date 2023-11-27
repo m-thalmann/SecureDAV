@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Directory;
 use App\Models\File;
 use App\Rules\NotStringContains;
+use App\Rules\UniqueFileName;
 use App\Services\FileVersionService;
 use App\Support\SessionMessage;
 use Exception;
@@ -70,13 +71,10 @@ class FileController extends Controller {
                 'string',
                 'max:' . config('core.files.max_name_length'),
                 new NotStringContains(config('core.files.illegal_characters')),
-                Rule::unique('files', 'name')
-                    ->where('directory_id', $directory?->id)
-                    ->where('user_id', authUser()->id)
-                    ->withoutTrashed(),
-                Rule::unique('directories', 'name')
-                    ->where('parent_directory_id', $directory?->id)
-                    ->where('user_id', authUser()->id),
+                new UniqueFileName(
+                    authUser()->id,
+                    inDirectoryId: $directory?->id
+                ),
             ],
 
             'encrypt' => ['nullable'],
@@ -154,14 +152,11 @@ class FileController extends Controller {
                 'string',
                 'max:' . config('core.files.max_name_length'),
                 new NotStringContains(config('core.files.illegal_characters')),
-                Rule::unique('files', 'name')
-                    ->where('directory_id', $file->directory_id)
-                    ->where('user_id', $file->user_id)
-                    ->ignore($file)
-                    ->withoutTrashed(),
-                Rule::unique('directories', 'name')
-                    ->where('parent_directory_id', $file->directory_id)
-                    ->where('user_id', $file->user_id),
+                new UniqueFileName(
+                    $file->user_id,
+                    inDirectoryId: $file->directory_id,
+                    ignoreFile: $file
+                ),
             ],
 
             'description' => ['nullable', 'string', 'max:512'],

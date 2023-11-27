@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Directory;
 use App\Rules\NotStringContains;
+use App\Rules\UniqueFileName;
 use App\Support\SessionMessage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,13 +53,10 @@ class DirectoryController extends Controller {
                 'string',
                 'max:' . config('core.files.max_name_length'),
                 new NotStringContains(config('core.files.illegal_characters')),
-                Rule::unique('directories', 'name')
-                    ->where('parent_directory_id', $parentDirectory?->id)
-                    ->where('user_id', authUser()->id),
-                Rule::unique('files', 'name')
-                    ->where('directory_id', $parentDirectory?->id)
-                    ->where('user_id', authUser()->id)
-                    ->withoutTrashed(),
+                new UniqueFileName(
+                    authUser()->id,
+                    inDirectoryId: $parentDirectory?->id
+                ),
             ],
         ]);
 
@@ -95,17 +93,11 @@ class DirectoryController extends Controller {
                 'string',
                 'max:' . config('core.files.max_name_length'),
                 new NotStringContains(config('core.files.illegal_characters')),
-                Rule::unique('directories', 'name')
-                    ->where(
-                        'parent_directory_id',
-                        $directory->parent_directory_id
-                    )
-                    ->where('user_id', $directory->user_id)
-                    ->ignore($directory),
-                Rule::unique('files', 'name')
-                    ->where('directory_id', $directory->parent_directory_id)
-                    ->where('user_id', $directory->user_id)
-                    ->withoutTrashed(),
+                new UniqueFileName(
+                    $directory->user_id,
+                    inDirectoryId: $directory->parent_directory_id,
+                    ignoreDirectory: $directory
+                ),
             ],
         ]);
 

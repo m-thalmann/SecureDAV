@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Files;
 use App\Http\Controllers\Controller;
 use App\Models\Directory;
 use App\Models\File;
+use App\Rules\UniqueFileName;
 use App\Support\SessionMessage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -72,14 +73,11 @@ class FileMoveController extends Controller {
             ],
             [
                 'name' => [
-                    Rule::unique('files', 'name')
-                        ->where('directory_id', $directory?->id)
-                        ->where('user_id', $file->user_id)
-                        ->ignore($file)
-                        ->withoutTrashed(),
-                    Rule::unique('directories', 'name')
-                        ->where('parent_directory_id', $directory?->id)
-                        ->where('user_id', $file->user_id),
+                    new UniqueFileName(
+                        $file->user_id,
+                        inDirectoryId: $directory?->id,
+                        ignoreFile: $file
+                    ),
                 ],
             ]
         );
