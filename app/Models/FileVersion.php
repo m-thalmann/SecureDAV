@@ -6,12 +6,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Storage;
 
 class FileVersion extends Model {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $hidden = ['storage_path'];
 
@@ -26,8 +25,7 @@ class FileVersion extends Model {
             $query
                 ->selectRaw('max("fv"."version")')
                 ->from('file_versions as fv')
-                ->whereColumn('fv.file_id', 'file_versions.file_id')
-                ->whereNull('fv.deleted_at');
+                ->whereColumn('fv.file_id', 'file_versions.file_id');
         });
     }
 
@@ -36,7 +34,7 @@ class FileVersion extends Model {
     }
 
     protected static function booted(): void {
-        static::forceDeleting(function (FileVersion $fileVersion) {
+        static::deleting(function (FileVersion $fileVersion) {
             Storage::disk('files')->delete($fileVersion->storage_path);
         });
     }

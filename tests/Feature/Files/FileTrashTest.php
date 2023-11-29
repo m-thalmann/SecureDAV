@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Files;
 
+use App\Models\Directory;
 use App\Models\File;
 use App\Models\FileVersion;
 use App\Models\User;
@@ -65,6 +66,133 @@ class FileTrashTest extends TestCase {
         }
     }
 
+    public function testFileCanBeRestored(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->trashed()
+            ->create();
+
+        $response = $this->put("/files/trash/{$file->uuid}");
+
+        $response->assertRedirect('/files/trash');
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
+
+            return true;
+        });
+
+        $this->assertDatabaseHas('files', [
+            'id' => $file->id,
+            'deleted_at' => null,
+        ]);
+    }
+
+    public function testFileCanBeRenamedWhenRestored(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->trashed()
+            ->create();
+
+        $response = $this->put("/files/trash/{$file->uuid}", [
+            'rename' => 'new name',
+        ]);
+
+        $response->assertRedirect('/files/trash');
+
+        $this->assertDatabaseHas('files', [
+            'id' => $file->id,
+            'name' => 'new name',
+            'deleted_at' => null,
+        ]);
+    }
+
+    public function testFileCantBeRestoredIfUserDoesNotOwnIt(): void {
+        $file = File::factory()
+            ->trashed()
+            ->create();
+
+        $response = $this->put("/files/trash/{$file->uuid}");
+
+        $response->assertNotFound();
+
+        $this->assertDatabaseHas('files', [
+            'id' => $file->id,
+            'deleted_at' => $file->deleted_at,
+        ]);
+    }
+
+    public function testFileCantBeRestoredIfNameIsNotUniqueInDirectory(): void {
+        $directory = Directory::factory()
+            ->for($this->user)
+            ->create();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->for($directory)
+            ->trashed()
+            ->create();
+
+        $otherFile = File::factory()
+            ->for($this->user)
+            ->for($directory)
+            ->create(['name' => $file->name]);
+
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->put(
+            "/files/trash/{$file->uuid}"
+        );
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
+
+            return true;
+        });
+
+        $this->assertDatabaseHas('files', [
+            'id' => $file->id,
+            'deleted_at' => $file->deleted_at,
+        ]);
+    }
+
+    public function testFileCantBeRestoredIfIsRenamedAndNameIsNotUniqueInDirectory(): void {
+        $file = File::factory()
+            ->for($this->user)
+            ->trashed()
+            ->create(['directory_id' => null]);
+
+        $otherFile = File::factory()
+            ->for($this->user)
+            ->create(['directory_id' => null]);
+
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->put(
+            "/files/trash/{$file->uuid}",
+            [
+                'rename' => $otherFile->name,
+            ]
+        );
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $response->assertSessionHas('snackbar', function (
+            SessionMessage $message
+        ) {
+            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
+
+            return true;
+        });
+
+        $this->assertDatabaseHas('files', [
+            'id' => $file->id,
+            'deleted_at' => $file->deleted_at,
+        ]);
+    }
+
     public function testFileCanBeDeleted(): void {
         $file = File::factory()
             ->for($this->user)
@@ -76,9 +204,11 @@ class FileTrashTest extends TestCase {
 
         $file->delete();
 
-        $response = $this->delete("/files/trash/{$file->uuid}");
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->delete(
+            "/files/trash/{$file->uuid}"
+        );
 
-        $response->assertRedirect('/files/trash');
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
         $response->assertSessionHas('snackbar', function (
             SessionMessage $message

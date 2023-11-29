@@ -17,7 +17,6 @@ class FileVersionPolicy {
             : Response::denyAsNotFound();
     }
 
-    // TODO: check what happens if file is soft-deleted. If does not fail if deleted -> check that file is not deleted! otherwise handle exception
     public function update(User $user, FileVersion $fileVersion): Response {
         return $fileVersion->file->user_id === $user->id
             ? Response::allow()
@@ -25,21 +24,6 @@ class FileVersionPolicy {
     }
 
     public function delete(User $user, FileVersion $fileVersion): Response {
-        return $fileVersion->file->user_id === $user->id
-            ? Response::allow()
-            : Response::denyAsNotFound();
-    }
-
-    public function restore(User $user, FileVersion $fileVersion): Response {
-        return $fileVersion->file->user_id === $user->id
-            ? Response::allow()
-            : Response::denyAsNotFound();
-    }
-
-    public function forceDelete(
-        User $user,
-        FileVersion $fileVersion
-    ): Response {
         return $fileVersion->file->user_id === $user->id
             ? Response::allow()
             : Response::denyAsNotFound();

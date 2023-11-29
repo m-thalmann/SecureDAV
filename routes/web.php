@@ -182,6 +182,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->as('files.trash.')
         ->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::put('/{file:uuid}', 'restore')
+                ->withTrashed()
+                ->name('restore');
             Route::delete('/{file:uuid}', 'destroy')
                 ->withTrashed()
                 ->name('destroy');

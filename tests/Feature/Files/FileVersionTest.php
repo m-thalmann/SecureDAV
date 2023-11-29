@@ -184,10 +184,11 @@ class FileVersionTest extends TestCase {
             ->for($file)
             ->create();
 
-        $trashedFileVersion = FileVersion::factory()
+        $deletedFileVersion = FileVersion::factory()
             ->for($file)
-            ->trashed()
             ->create(['version' => $fileVersion->version + 1]);
+
+        $deletedFileVersion->delete();
 
         $response = $this->post("/files/{$file->uuid}/versions");
 
@@ -195,7 +196,7 @@ class FileVersionTest extends TestCase {
 
         $this->assertDatabaseHas('file_versions', [
             'file_id' => $file->id,
-            'version' => $trashedFileVersion->version + 1,
+            'version' => $deletedFileVersion->version + 1,
         ]);
     }
 
@@ -469,7 +470,7 @@ class FileVersionTest extends TestCase {
             return true;
         });
 
-        $this->assertSoftDeleted('file_versions', [
+        $this->assertDatabaseMissing('file_versions', [
             'id' => $fileVersion->id,
         ]);
     }

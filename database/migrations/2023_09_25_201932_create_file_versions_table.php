@@ -21,7 +21,6 @@ return new class extends Migration {
             $table->unsignedBigInteger('bytes');
             $table->timestamp('file_updated_at');
             $table->timestamps();
-            $table->softDeletes();
 
             $table->unique(['file_id', 'version']);
         });

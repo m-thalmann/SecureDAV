@@ -18,7 +18,7 @@ return new class extends Migration {
                 ->foreignId('directory_id')
                 ->nullable()
                 ->constrained('directories')
-                ->restrictOnDelete()
+                ->nullOnDelete()
                 ->cascadeOnUpdate();
             $table->string('name');
             $table->string('description')->nullable();

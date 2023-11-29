@@ -541,12 +541,6 @@ class FileTest extends TestCase {
         });
 
         $this->assertSoftDeleted($file);
-
-        $trashedFile = File::withTrashed()
-            ->where('id', $file->id)
-            ->first();
-
-        $this->assertNull($trashedFile->directory_id);
     }
 
     public function testFileCannotBeMovedToTrashIfItDoesNotBelongToUser(): void {

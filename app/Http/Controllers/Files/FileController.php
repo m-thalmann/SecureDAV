@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File as FileRule;
 use Illuminate\View\View;
 
@@ -199,13 +198,7 @@ class FileController extends Controller {
     public function destroy(File $file): RedirectResponse {
         $directory = $file->directory;
 
-        $deleteSuccessful = $file->delete();
-
-        if ($deleteSuccessful && $directory !== null) {
-            File::withTrashed()
-                ->find($file->id)
-                ->update(['directory_id' => null]);
-        }
+        $file->delete();
 
         return redirect()
             ->route('browse.index', $directory?->uuid)

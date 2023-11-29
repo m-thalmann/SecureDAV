@@ -59,7 +59,7 @@
         </x-dropdown>
     </div>
 
-    <div class="overflow-auto w-full">
+    <div class="overflow-auto w-full min-h-[12em]">
         <x-files-table.table :directoriesCount="count($directories)" :filesCount="count($files)">
             @foreach ($directories as $directory)
                 <x-files-table.directory-row :directory="$directory">
@@ -97,7 +97,7 @@
                             </a>
                         @endif
 
-                        <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned(count($directories) + $loop->index, count($directories) + $loop->count, 2)" width="w-44">
+                        <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned(count($directories) + $loop->index, count($directories) + $loop->count, 3)" width="w-44">
                             <li>
                                 <a href="{{ route('files.edit', [$file]) }}">
                                     <i class="fas fa-edit w-6"></i>

@@ -5,12 +5,9 @@ namespace App\Http\Controllers\Files;
 use App\Http\Controllers\Controller;
 use App\Models\Directory;
 use App\Models\File;
-use App\Rules\UniqueFileName;
 use App\Support\SessionMessage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -67,22 +64,10 @@ class FileMoveController extends Controller {
             $this->authorize('update', $directory);
         }
 
-        $validator = Validator::make(
-            [
-                'name' => $file->name,
-            ],
-            [
-                'name' => [
-                    new UniqueFileName(
-                        $file->user_id,
-                        inDirectoryId: $directory?->id,
-                        ignoreFile: $file
-                    ),
-                ],
-            ]
-        );
-
-        if ($validator->fails()) {
+        try {
+            $file->move($directory);
+            $file->save();
+        } catch (ValidationException $e) {
             return back()->with(
                 'session-message',
                 SessionMessage::error(
@@ -90,9 +75,6 @@ class FileMoveController extends Controller {
                 )
             );
         }
-
-        $file->directory_id = $directory?->id;
-        $file->save();
 
         return redirect()
             ->route('files.show', ['file' => $file])

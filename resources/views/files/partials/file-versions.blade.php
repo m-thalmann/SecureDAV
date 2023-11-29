@@ -87,7 +87,7 @@
                                     <form
                                         method="POST"
                                         action="{{ route('files.versions.destroy', [$file, $version]) }}"
-                                        onsubmit="return confirm(`{{ __('Are you sure you want to move this version to trash?') }}`)"
+                                        onsubmit="return confirm(`{{ __('Are you sure you want to permanently delete this version?') }}`)"
                                     >
                                         @method('DELETE')
                                         @csrf
@@ -95,7 +95,7 @@
                                         <li>
                                             <button class="hover:bg-error hover:text-error-content">
                                                 <i class="fas fa-trash w-6"></i>
-                                                {{ __('Move to trash') }}
+                                                {{ __('Permanently delete') }}
                                             </button>
                                         </li>
                                     </form>

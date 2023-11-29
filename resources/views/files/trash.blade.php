@@ -7,13 +7,13 @@
         </x:slot>
     </x-header-title>
 
-    <div class="overflow-auto w-full">
+    <div class="overflow-auto w-full min-h-[12em]">
         <x-files-table.table :filesCount="count($files)" :showCountSummary="false" :deletedAtColumn="true">
             @foreach ($files as $file)
-                <x-files-table.file-row :file="$file" :deletedAtColumn="true" :link="false">
+                <x-files-table.file-row :file="$file" :deletedAtColumn="true" :link="false" :includeParentDirectory="true">
                     <x-slot name="actions">
-                        <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)" width="w-52">
-                            <form method="POST" action="{{ route('files.trash.restore', [$file]) }}">
+                        <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 3)" width="w-52">
+                            <form method="POST" action="{{ route('files.trash.restore', [$file]) }}" id="restore-file-form-{{ $file->id }}">
                                 @method('PUT')
                                 @csrf
                                 
@@ -23,7 +23,16 @@
                                         {{ __('Restore') }}
                                     </button>
                                 </li>
+
+                                <input type="hidden" value="" name="rename" id="restore-rename-file-{{ $file->id }}" />
                             </form>
+
+                            <li>
+                                <button class="hover:bg-success hover:text-success-content" onclick="renameAndRestoreFile({{ $file->id }}, '{{ e($file->name) }}')">
+                                    <i class="fa-solid fa-trash-arrow-up w-6"></i>
+                                    {{ __('Rename and restore') }}
+                                </button>
+                            </li>
 
                             <form
                                 method="POST"
@@ -52,4 +61,19 @@
     </div>
 
     {{ $files->links() }}
+
+    @push('scripts')
+        <script>
+            function renameAndRestoreFile(fileId, currentFileName) {
+                var name = prompt('{{ __('New file name') }}', currentFileName);
+
+                if(!name) {
+                    return;
+                }
+
+                document.getElementById('restore-rename-file-' + fileId).value = name;
+                document.getElementById('restore-file-form-' + fileId).submit();
+            }
+        </script>
+    @endpush
 </x-app-layout>

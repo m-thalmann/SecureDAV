@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Rules\UniqueFileName;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class File extends Model {
@@ -158,10 +160,39 @@ class File extends Model {
         );
     }
 
+    /**
+     * Moves the file to the given directory.
+     * Does **not** save the changes automatically.
+     *
+     * @param Directory|null $directory The directory to move the file to.
+     *
+     * @throws \Illuminate\Validation\ValidationException If the file name already exists in the directory.
+     */
+    public function move(?Directory $directory): void {
+        $validator = Validator::make(
+            [
+                'name' => $this->name,
+            ],
+            [
+                'name' => [
+                    new UniqueFileName(
+                        $this->user_id,
+                        inDirectoryId: $directory?->id,
+                        ignoreFile: $this
+                    ),
+                ],
+            ]
+        );
+
+        $validator->validate();
+
+        $this->directory_id = $directory?->id;
+    }
+
     protected static function booted(): void {
         static::forceDeleting(function (File $file) {
             foreach ($file->versions as $version) {
-                $version->forceDelete();
+                $version->delete();
             }
         });
     }
