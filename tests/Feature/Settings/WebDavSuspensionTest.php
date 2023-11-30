@@ -38,13 +38,10 @@ class WebDavSuspensionTest extends TestCase {
         );
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertTrue($this->user->refresh()->is_webdav_suspended);
     }
@@ -61,13 +58,10 @@ class WebDavSuspensionTest extends TestCase {
         );
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertFalse($this->user->fresh()->is_webdav_suspended);
     }

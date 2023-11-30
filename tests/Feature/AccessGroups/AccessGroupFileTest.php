@@ -260,13 +260,10 @@ class AccessGroupFileTest extends TestCase {
 
         $response->assertRedirect("/access-groups/{$accessGroup->uuid}#files");
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertDatabaseHas('access_group_files', [
             'access_group_id' => $accessGroup->id,
@@ -366,13 +363,10 @@ class AccessGroupFileTest extends TestCase {
 
         $response->assertRedirect("/access-groups/{$accessGroup->uuid}#files");
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_WARNING, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_WARNING
+        );
 
         $this->assertDatabaseHas('access_group_files', [
             'access_group_id' => $accessGroup->id,
@@ -416,13 +410,10 @@ class AccessGroupFileTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertDatabaseMissing('access_group_files', [
             'access_group_id' => $accessGroup->id,

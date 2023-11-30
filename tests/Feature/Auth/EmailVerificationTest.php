@@ -65,13 +65,12 @@ class EmailVerificationTest extends TestCase {
         );
 
         $response->assertRedirect('/email/verify');
-        $response->assertSessionHas('session-message', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
 
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS,
+            key: 'session-message'
+        );
 
         Notification::assertSentTo($user, VerifyEmail::class);
     }
@@ -97,13 +96,10 @@ class EmailVerificationTest extends TestCase {
 
         $response->assertRedirect(RouteServiceProvider::HOME);
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
     }
 }
 

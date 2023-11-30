@@ -118,13 +118,10 @@ class FileTest extends TestCase {
 
         $response->assertRedirect("/files/{$createdFile->uuid}");
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
     }
 
     public function testFileCanBeCreatedWithDirectory(): void {
@@ -153,13 +150,10 @@ class FileTest extends TestCase {
 
         $response->assertRedirect("/files/{$createdFile->uuid}");
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
     }
 
     public function testFileCantBeCreatedIfDirectoryDoesntExist(): void {
@@ -260,13 +254,11 @@ class FileTest extends TestCase {
 
         $response->assertRedirect('/files/create');
 
-        $response->assertSessionHas('session-message', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR,
+            key: 'session-message'
+        );
     }
 
     public function testShowFileViewCanBeRendered(): void {
@@ -371,13 +363,10 @@ class FileTest extends TestCase {
 
         $response->assertRedirect("/files/{$file->uuid}");
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $file->refresh();
 
@@ -480,13 +469,10 @@ class FileTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $file->refresh();
 
@@ -532,13 +518,10 @@ class FileTest extends TestCase {
 
         $response->assertRedirect("/browse/{$directory->uuid}");
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertSoftDeleted($file);
     }

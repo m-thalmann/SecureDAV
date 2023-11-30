@@ -48,31 +48,31 @@ class PasswordResetTest extends TestCase {
 
         $request1 = $this->post('/forgot-password', ['email' => $user->email]);
 
-        $request1->assertSessionHas('session-message', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-            $this->assertEquals(
-                __(Password::RESET_LINK_SENT),
-                $message->message
-            );
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $request1,
+            SessionMessage::TYPE_SUCCESS,
+            key: 'session-message',
+            additionalChecks: function (SessionMessage $message) {
+                $this->assertEquals(
+                    __(Password::RESET_LINK_SENT),
+                    $message->message
+                );
+            }
+        );
 
         $request2 = $this->post('/forgot-password', ['email' => $user->email]);
 
-        $request2->assertSessionHas('session-message', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-            $this->assertEquals(
-                __(Password::RESET_THROTTLED),
-                $message->message
-            );
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $request2,
+            SessionMessage::TYPE_ERROR,
+            key: 'session-message',
+            additionalChecks: function (SessionMessage $message) {
+                $this->assertEquals(
+                    __(Password::RESET_THROTTLED),
+                    $message->message
+                );
+            }
+        );
 
         Notification::assertSentTo($user, ResetPassword::class, 1);
     }
@@ -159,17 +159,17 @@ class PasswordResetTest extends TestCase {
                 'password_confirmation' => 'password',
             ]);
 
-            $response->assertSessionHas('session-message', function (
-                SessionMessage $message
-            ) {
-                $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-                $this->assertEquals(
-                    __(Password::INVALID_TOKEN),
-                    $message->message
-                );
-
-                return true;
-            });
+            $this->assertRequestHasSessionMessage(
+                $response,
+                SessionMessage::TYPE_ERROR,
+                key: 'session-message',
+                additionalChecks: function (SessionMessage $message) {
+                    $this->assertEquals(
+                        __(Password::INVALID_TOKEN),
+                        $message->message
+                    );
+                }
+            );
 
             return true;
         });

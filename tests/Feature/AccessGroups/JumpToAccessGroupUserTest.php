@@ -46,13 +46,10 @@ class JumpToAccessGroupUserTest extends TestCase {
             ]
         );
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR
+        );
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
     }
@@ -71,13 +68,10 @@ class JumpToAccessGroupUserTest extends TestCase {
             ]
         );
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR
+        );
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
     }

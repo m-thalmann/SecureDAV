@@ -115,13 +115,10 @@ class FileMoveTest extends TestCase {
 
         $response->assertRedirectToRoute('files.show', ['file' => $file]);
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $file->refresh();
 
@@ -141,13 +138,10 @@ class FileMoveTest extends TestCase {
 
         $response->assertRedirectToRoute('files.show', ['file' => $file]);
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $file->refresh();
 
@@ -214,13 +208,11 @@ class FileMoveTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $response->assertSessionHas('session-message', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR,
+            key: 'session-message'
+        );
 
         $directoryId = $file->directory_id;
 
@@ -254,13 +246,11 @@ class FileMoveTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $response->assertSessionHas('session-message', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR,
+            key: 'session-message'
+        );
 
         $directoryId = $file->directory_id;
 

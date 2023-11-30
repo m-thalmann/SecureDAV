@@ -60,13 +60,10 @@ class RegisterTest extends TestCase {
 
         $this->assertTrue(Hash::check('password', $user->password));
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
     }
 
     public function testRegisterRedirectsToEmailVerificationIfIsEnabled(): void {
@@ -81,13 +78,10 @@ class RegisterTest extends TestCase {
 
         $response->assertRedirect('/email/verify');
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
     }
 
     public function testUserRegistrationFailsIfEmailAlreadyInUse(): void {
@@ -103,3 +97,4 @@ class RegisterTest extends TestCase {
         $response->assertSessionHasErrors(['email']);
     }
 }
+

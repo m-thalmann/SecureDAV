@@ -52,13 +52,10 @@ class TwoFactorAuthenticationTest extends TestCase {
         );
 
         $confirmResponse->assertSessionHas('two-factor-confirmed', true);
-        $confirmResponse->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $confirmResponse,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertTrue($this->user->hasEnabledTwoFactorAuthentication());
     }

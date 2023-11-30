@@ -114,13 +114,10 @@ class AccessGroupUserTest extends TestCase {
 
         $response->assertRedirect("/access-groups/{$accessGroup->uuid}#users");
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $response->assertSessionHas('generated-password', function (
             string $password
@@ -309,13 +306,10 @@ class AccessGroupUserTest extends TestCase {
             "/access-groups/{$accessGroupUser->accessGroup->uuid}#users"
         );
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $accessGroupUser->refresh();
 

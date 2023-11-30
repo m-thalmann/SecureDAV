@@ -63,20 +63,22 @@ class LoginTest extends TestCase {
             'password' => 'wrong-password',
         ]);
 
-        $response->assertSessionHas('session-message', function (
-            SessionMessage $message
-        ) use ($availableIn) {
-            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-            $this->assertEquals(
-                __('auth.throttle', [
-                    'seconds' => $availableIn,
-                    'minutes' => ceil($availableIn / 60),
-                ]),
-                $message->message
-            );
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR,
+            key: 'session-message',
+            additionalChecks: function (SessionMessage $message) use (
+                $availableIn
+            ) {
+                $this->assertEquals(
+                    __('auth.throttle', [
+                        'seconds' => $availableIn,
+                        'minutes' => ceil($availableIn / 60),
+                    ]),
+                    $message->message
+                );
+            }
+        );
     }
 
     public function testRedirectsToHomeRouteIfIsAuthenticated(): void {

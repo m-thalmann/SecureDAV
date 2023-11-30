@@ -3,11 +3,13 @@
 namespace Tests;
 
 use App\Models\User;
+use App\Support\SessionMessage;
 use Illuminate\Cache\RateLimiter as CacheRateLimiter;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\TestResponse;
 use Mockery;
 use Mockery\MockInterface;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -75,6 +77,25 @@ abstract class TestCase extends BaseTestCase {
             $this->assertArrayHasKey($key, $array);
             $this->assertEquals($value, $array[$key]);
         }
+    }
+
+    protected function assertRequestHasSessionMessage(
+        TestResponse $response,
+        string $expectedType,
+        string $key = 'snackbar',
+        callable $additionalChecks = null
+    ): void {
+        $response->assertSessionHas($key, function (
+            SessionMessage $message
+        ) use ($expectedType, $additionalChecks) {
+            $this->assertEquals($expectedType, $message->type);
+
+            if ($additionalChecks) {
+                $additionalChecks($message);
+            }
+
+            return true;
+        });
     }
 }
 

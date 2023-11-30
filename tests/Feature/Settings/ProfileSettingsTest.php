@@ -46,13 +46,10 @@ class ProfileSettingsTest extends TestCase {
         ]);
 
         $response->assertRedirect('/settings/profile#update-information');
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
     }
 
     public function testProfileInformationCantBeUpdatedWithDuplicateEmail(): void {
@@ -93,13 +90,10 @@ class ProfileSettingsTest extends TestCase {
         ]);
 
         $response->assertRedirect('/settings/profile#update-password');
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
     }
 
     public function testPasswordUpdateFailsIfCurrentPasswordIsIncorrect(): void {
@@ -147,13 +141,10 @@ class ProfileSettingsTest extends TestCase {
         $response = $this->delete('/settings/profile/sessions');
 
         $response->assertRedirectToRoute('login');
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertDatabaseMissing(
             config('session.table', 'sessions'),
@@ -167,13 +158,10 @@ class ProfileSettingsTest extends TestCase {
         $response = $this->delete('/settings/profile/sessions');
 
         $response->assertRedirect('/settings/profile#browser-sessions');
-        $response->assertSessionHas(
-            'session-message[browser-sessions]',
-            function (SessionMessage $message) {
-                $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-
-                return true;
-            }
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR,
+            key: 'session-message[browser-sessions]'
         );
     }
 
@@ -181,13 +169,10 @@ class ProfileSettingsTest extends TestCase {
         $response = $this->delete('/settings/profile');
 
         $response->assertRedirect('/login');
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertGuest();
         $this->assertDatabaseMissing('users', [
@@ -201,13 +186,10 @@ class ProfileSettingsTest extends TestCase {
         $response = $this->delete('/settings/profile');
 
         $response->assertRedirect('/settings/profile#delete-account');
-        $response->assertSessionHas(
-            'session-message[delete-account]',
-            function (SessionMessage $message) {
-                $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-
-                return true;
-            }
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR,
+            'session-message[delete-account]'
         );
 
         $this->assertDatabaseHas('users', [

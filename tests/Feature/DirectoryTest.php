@@ -80,13 +80,10 @@ class DirectoryTest extends TestCase {
 
         $response->assertRedirect("/browse/{$createdDirectory->uuid}");
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
     }
 
     public function testDirectoryCanBeCreatedWithParentDirectory(): void {
@@ -113,13 +110,10 @@ class DirectoryTest extends TestCase {
 
         $response->assertRedirect("/browse/{$createdDirectory->uuid}");
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
     }
 
     public function testDirectoryCantBeCreatedIfParentDirectoryDoesntExist(): void {
@@ -255,13 +249,10 @@ class DirectoryTest extends TestCase {
         ]);
 
         $response->assertRedirect("/browse/{$directory->uuid}");
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertDatabaseHas('directories', [
             'id' => $directory->id,
@@ -365,13 +356,10 @@ class DirectoryTest extends TestCase {
         $response = $this->delete("/directories/{$directory->uuid}");
 
         $response->assertRedirect("/browse/{$parentDirectory->uuid}");
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertDatabaseMissing('directories', [
             'id' => $directory->id,
@@ -395,13 +383,10 @@ class DirectoryTest extends TestCase {
         );
 
         $response->assertRedirect("/browse/{$directory->uuid}");
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR
+        );
 
         $this->assertDatabaseHas('directories', [
             'id' => $directory->id,
@@ -425,13 +410,10 @@ class DirectoryTest extends TestCase {
         );
 
         $response->assertRedirect("/browse/{$directory->uuid}");
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_ERROR, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR
+        );
 
         $this->assertDatabaseHas('directories', [
             'id' => $directory->id,

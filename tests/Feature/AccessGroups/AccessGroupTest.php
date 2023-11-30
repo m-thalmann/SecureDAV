@@ -82,13 +82,10 @@ class AccessGroupTest extends TestCase {
 
         $response->assertRedirect("/access-groups/{$createdAccessGroup->uuid}");
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertDatabaseHas('access_groups', [
             'id' => $createdAccessGroup->id,
@@ -215,13 +212,10 @@ class AccessGroupTest extends TestCase {
 
         $response->assertRedirect("/access-groups/{$accessGroup->uuid}");
 
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
-
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertDatabaseHas('access_groups', [
             'id' => $accessGroup->id,
@@ -282,13 +276,11 @@ class AccessGroupTest extends TestCase {
         $response = $this->delete("/access-groups/{$accessGroup->uuid}");
 
         $response->assertRedirect('/access-groups');
-        $response->assertSessionHas('snackbar', function (
-            SessionMessage $message
-        ) {
-            $this->assertEquals(SessionMessage::TYPE_SUCCESS, $message->type);
 
-            return true;
-        });
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
 
         $this->assertDatabaseMissing('access_groups', [
             'id' => $accessGroup->id,
