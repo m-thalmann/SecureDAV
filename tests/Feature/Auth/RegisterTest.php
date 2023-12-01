@@ -35,7 +35,7 @@ class RegisterTest extends TestCase {
     }
 
     public function testUserCanRegister(): void {
-        Event::fake();
+        Event::fake([Registered::class]);
 
         $email = 'jane.doe@example.com';
 

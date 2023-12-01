@@ -4,8 +4,10 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use App\Support\SessionMessage;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
@@ -105,6 +107,8 @@ class PasswordResetTest extends TestCase {
         Notification::assertSentTo($user, ResetPassword::class, function (
             ResetPassword $notification
         ) use ($user) {
+            Event::fake([PasswordReset::class]);
+
             $response = $this->post('/reset-password', [
                 'token' => $notification->token,
                 'email' => $user->email,
@@ -113,6 +117,16 @@ class PasswordResetTest extends TestCase {
             ]);
 
             $response->assertSessionHasNoErrors();
+
+            $response->assertRedirect('/login');
+
+            Event::assertDispatched(PasswordReset::class, function (
+                PasswordReset $event
+            ) use ($user) {
+                $this->assertEquals($user->id, $event->user->id);
+
+                return true;
+            });
 
             return true;
         });
@@ -128,6 +142,8 @@ class PasswordResetTest extends TestCase {
         Notification::assertSentTo($user, ResetPassword::class, function (
             ResetPassword $notification
         ) {
+            Event::fake([PasswordReset::class]);
+
             $response = $this->post('/reset-password', [
                 'token' => $notification->token,
                 'email' => 'invalid-email@example.com',
@@ -136,6 +152,8 @@ class PasswordResetTest extends TestCase {
             ]);
 
             $response->assertInvalid(['email']);
+
+            Event::assertNothingDispatched();
 
             return true;
         });
@@ -152,6 +170,8 @@ class PasswordResetTest extends TestCase {
         Notification::assertSentTo($user, ResetPassword::class, function (
             ResetPassword $notification
         ) use ($otherUser) {
+            Event::fake([PasswordReset::class]);
+
             $response = $this->post('/reset-password', [
                 'token' => $notification->token,
                 'email' => $otherUser->email,
@@ -170,6 +190,8 @@ class PasswordResetTest extends TestCase {
                     );
                 }
             );
+
+            Event::assertNothingDispatched();
 
             return true;
         });

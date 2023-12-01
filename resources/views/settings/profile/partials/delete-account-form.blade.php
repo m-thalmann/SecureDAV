@@ -7,8 +7,6 @@
         {{ __('Permanently delete your account.') }}
     </x-slot>
 
-    <x-session-message :message="session('session-message[delete-account]')" class="mb-3"></x-session-message>
-
     {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
 
     <x-slot name="actions" class="mt-6">

@@ -59,5 +59,13 @@ class User extends Authenticatable implements MustVerifyEmail {
             parent::sendEmailVerificationNotification();
         }
     }
+
+    protected static function booted(): void {
+        static::deleting(function (User $user) {
+            foreach ($user->files as $file) {
+                $file->forceDelete();
+            }
+        });
+    }
 }
 

@@ -2,10 +2,16 @@
 
 namespace Tests\Feature\Settings;
 
+use App\Events\EmailUpdated;
+use App\Events\PasswordUpdated;
+use App\Events\UserDeleted;
+use App\Models\File;
+use App\Models\FileVersion;
 use App\Models\User;
 use App\Support\SessionMessage;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
@@ -40,9 +46,11 @@ class ProfileSettingsTest extends TestCase {
     }
 
     public function testProfileInformationCanBeUpdated(): void {
+        Event::fake([EmailUpdated::class]);
+
         $response = $this->put('/user/profile-information', [
             'name' => 'Test User',
-            'email' => 'j.d@example.com',
+            'email' => $this->user->email,
         ]);
 
         $response->assertRedirect('/settings/profile#update-information');
@@ -50,6 +58,45 @@ class ProfileSettingsTest extends TestCase {
             $response,
             SessionMessage::TYPE_SUCCESS
         );
+
+        $this->assertDatabaseHas('users', [
+            'id' => $this->user->id,
+            'name' => 'Test User',
+            'email' => $this->user->email,
+        ]);
+
+        Event::assertNothingDispatched();
+    }
+
+    public function testProfileEmailCanBeUpdated(): void {
+        $newEmail = 'new-email@test.example.com';
+
+        Event::fake([EmailUpdated::class]);
+
+        $response = $this->put('/user/profile-information', [
+            'name' => 'Test User',
+            'email' => $newEmail,
+        ]);
+
+        $response->assertRedirect('/settings/profile#update-information');
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $this->assertDatabaseHas('users', [
+            'id' => $this->user->id,
+            'name' => 'Test User',
+            'email' => $newEmail,
+        ]);
+
+        Event::assertDispatched(EmailUpdated::class, function (
+            EmailUpdated $event
+        ) {
+            $this->assertEquals($this->user->id, $event->user->id);
+
+            return true;
+        });
     }
 
     public function testProfileInformationCantBeUpdatedWithDuplicateEmail(): void {
@@ -69,6 +116,7 @@ class ProfileSettingsTest extends TestCase {
 
     public function testUpdateProfileInformationSendsEmailVerification(): void {
         Notification::fake();
+        Event::fake([EmailUpdated::class]);
 
         config(['app.email_verification_enabled' => true]);
 
@@ -80,9 +128,19 @@ class ProfileSettingsTest extends TestCase {
         $response->assertRedirect('/settings/profile#update-information');
 
         Notification::assertSentTo($this->user, VerifyEmail::class);
+
+        Event::assertDispatched(EmailUpdated::class, function (
+            EmailUpdated $event
+        ) {
+            $this->assertEquals($this->user->id, $event->user->id);
+
+            return true;
+        });
     }
 
     public function testPasswordCanBeUpdated(): void {
+        Event::fake([PasswordUpdated::class]);
+
         $response = $this->put('/user/password', [
             'current_password' => 'password',
             'password' => 'new-password',
@@ -94,9 +152,19 @@ class ProfileSettingsTest extends TestCase {
             $response,
             SessionMessage::TYPE_SUCCESS
         );
+
+        Event::assertDispatched(PasswordUpdated::class, function (
+            PasswordUpdated $event
+        ) {
+            $this->assertEquals($this->user->id, $event->user->id);
+
+            return true;
+        });
     }
 
     public function testPasswordUpdateFailsIfCurrentPasswordIsIncorrect(): void {
+        Event::fake([PasswordUpdated::class]);
+
         $response = $this->put('/user/password', [
             'current_password' => 'wrong-password',
             'password' => 'new-password',
@@ -108,6 +176,8 @@ class ProfileSettingsTest extends TestCase {
             'current_password',
             errorBag: 'updatePassword'
         );
+
+        Event::assertNothingDispatched();
     }
 
     public function testManageBrowserSessionsShowsAllSessionsForUser(): void {
@@ -166,6 +236,8 @@ class ProfileSettingsTest extends TestCase {
     }
 
     public function testAccountCanBeDeleted(): void {
+        Event::fake([UserDeleted::class]);
+
         $response = $this->delete('/settings/profile');
 
         $response->assertRedirect('/login');
@@ -178,22 +250,38 @@ class ProfileSettingsTest extends TestCase {
         $this->assertDatabaseMissing('users', [
             'id' => $this->user->id,
         ]);
+
+        Event::assertDispatched(UserDeleted::class, function (
+            UserDeleted $event
+        ) {
+            $this->assertEquals($this->user->id, $event->user->id);
+
+            return true;
+        });
     }
 
-    public function testAccountCantBeDeletedIfDeleteFails(): void {
-        User::deleting(fn() => false);
+    public function testDeletingAccountDeletesAllUserFiles(): void {
+        $files = File::factory(4)
+            ->for($this->user)
+            ->has(FileVersion::factory(), 'versions')
+            ->create();
+        $files->load('latestVersion');
 
         $response = $this->delete('/settings/profile');
 
-        $response->assertRedirect('/settings/profile#delete-account');
-        $this->assertRequestHasSessionMessage(
-            $response,
-            SessionMessage::TYPE_ERROR,
-            'session-message[delete-account]'
-        );
+        $response->assertRedirect('/login');
 
-        $this->assertDatabaseHas('users', [
+        $this->assertDatabaseMissing('users', [
             'id' => $this->user->id,
         ]);
+        $this->assertDatabaseMissing('files', [
+            'user_id' => $this->user->id,
+        ]);
+
+        foreach ($files as $file) {
+            $this->storageFake->assertMissing(
+                $file->latestVersion->storage_path
+            );
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Auth\Fortify\Actions;
 
+use App\Events\EmailUpdated;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -33,31 +34,28 @@ class UpdatesUserProfileInformation implements
             throw $e;
         }
 
-        if (
-            config('app.email_verification_enabled') &&
-            $input['email'] !== $user->email
-        ) {
-            $this->updateVerifiedUser($user, $input);
-        } else {
-            $user
-                ->forceFill([
-                    'name' => $input['name'],
-                    'email' => $input['email'],
-                ])
-                ->save();
-        }
-    }
+        $newEmail = $input['email'] !== $user->email;
 
-    protected function updateVerifiedUser(User $user, array $input): void {
-        $user
-            ->forceFill([
-                'name' => $input['name'],
-                'email' => $input['email'],
+        $user->forceFill([
+            'name' => $input['name'],
+            'email' => $input['email'],
+        ]);
+
+        if (config('app.email_verification_enabled') && $newEmail) {
+            $user->forceFill([
                 'email_verified_at' => null,
-            ])
-            ->save();
+            ]);
+        }
 
-        $user->sendEmailVerificationNotification();
+        $user->save();
+
+        if ($newEmail) {
+            event(new EmailUpdated($user));
+
+            if (config('app.email_verification_enabled')) {
+                $user->sendEmailVerificationNotification();
+            }
+        }
     }
 }
 

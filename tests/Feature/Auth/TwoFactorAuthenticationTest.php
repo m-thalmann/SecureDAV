@@ -6,6 +6,11 @@ use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use App\Support\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Event;
+use Laravel\Fortify\Events\RecoveryCodeReplaced;
+use Laravel\Fortify\Events\RecoveryCodesGenerated;
+use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
+use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
 use PragmaRX\Google2FA\Google2FA;
 use Tests\TestCase;
 
@@ -23,6 +28,8 @@ class TwoFactorAuthenticationTest extends TestCase {
     }
 
     public function testTwoFactorAuthenticationCanBeEnabledAndConfirmedForUser(): void {
+        Event::fake([TwoFactorAuthenticationConfirmed::class]);
+
         $this->actingAs($this->user);
 
         $this->assertFalse($this->user->hasEnabledTwoFactorAuthentication());
@@ -58,9 +65,20 @@ class TwoFactorAuthenticationTest extends TestCase {
         );
 
         $this->assertTrue($this->user->hasEnabledTwoFactorAuthentication());
+
+        Event::assertDispatched(
+            TwoFactorAuthenticationConfirmed::class,
+            function (TwoFactorAuthenticationConfirmed $event) {
+                $this->assertEquals($this->user->id, $event->user->id);
+
+                return true;
+            }
+        );
     }
 
     public function testConfirmingTwoFactorAuthenticationFailsWithInvalidCode(): void {
+        Event::fake([TwoFactorAuthenticationConfirmed::class]);
+
         $this->actingAs($this->user);
 
         $this->enableTwoFactorForUser(confirmed: false);
@@ -82,9 +100,13 @@ class TwoFactorAuthenticationTest extends TestCase {
         );
 
         $this->assertFalse($this->user->hasEnabledTwoFactorAuthentication());
+
+        Event::assertNothingDispatched();
     }
 
     public function testTwoFactorAuthenticationCanBeDisabledForUser(): void {
+        Event::fake([TwoFactorAuthenticationDisabled::class]);
+
         $this->actingAs($this->user);
 
         $this->enableTwoFactorForUser();
@@ -100,6 +122,15 @@ class TwoFactorAuthenticationTest extends TestCase {
         );
 
         $this->assertFalse($this->user->hasEnabledTwoFactorAuthentication());
+
+        Event::assertDispatched(
+            TwoFactorAuthenticationDisabled::class,
+            function (TwoFactorAuthenticationDisabled $event) {
+                $this->assertEquals($this->user->id, $event->user->id);
+
+                return true;
+            }
+        );
     }
 
     public function testRecoveryCodesCanBeRegenerated(): void {
@@ -157,6 +188,37 @@ class TwoFactorAuthenticationTest extends TestCase {
         ]);
 
         $response->assertRedirect(RouteServiceProvider::HOME);
+    }
+
+    public function testTwoFactorAuthenticationSucceedsWithValidRecoveryCode(): void {
+        Event::fake([RecoveryCodeReplaced::class]);
+
+        $this->enableTwoFactorForUser();
+
+        $this->post('/login', [
+            'email' => $this->user->email,
+            'password' => 'password',
+        ]);
+
+        $recoveryCode = $this->user->recoveryCodes()[0];
+
+        $response = $this->post('/two-factor-challenge', [
+            'recovery_code' => $recoveryCode,
+        ]);
+
+        $response->assertRedirect(RouteServiceProvider::HOME);
+
+        $this->user->refresh();
+
+        $this->assertNotContains($recoveryCode, $this->user->recoveryCodes());
+
+        Event::assertDispatched(RecoveryCodeReplaced::class, function (
+            RecoveryCodeReplaced $event
+        ) {
+            $this->assertEquals($this->user->id, $event->user->id);
+
+            return true;
+        });
     }
 
     public function testTwoFactorAuthenticationIsRateLimited(): void {

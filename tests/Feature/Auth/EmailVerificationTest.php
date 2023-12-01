@@ -76,7 +76,7 @@ class EmailVerificationTest extends TestCase {
     }
 
     public function testEmailVerificationSucceeds(): void {
-        Event::fake();
+        Event::fake([Verified::class]);
 
         $user = $this->createUser(emailVerified: false);
 

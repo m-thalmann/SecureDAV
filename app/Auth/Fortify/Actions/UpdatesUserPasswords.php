@@ -3,6 +3,7 @@
 namespace App\Auth\Fortify\Actions;
 
 use App\Auth\Fortify\Concerns\PasswordValidationRules;
+use App\Events\PasswordUpdated;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -45,6 +46,8 @@ class UpdatesUserPasswords implements UpdatesUserPasswordsContract {
                 'password' => Hash::make($input['password']),
             ])
             ->save();
+
+        event(new PasswordUpdated($user));
     }
 }
 

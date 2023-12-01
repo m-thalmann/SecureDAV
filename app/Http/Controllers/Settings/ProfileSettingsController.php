@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\Events\UserDeleted;
 use App\Http\Controllers\Controller;
 use App\Support\SessionMessage;
 use Carbon\Carbon;
@@ -28,14 +29,8 @@ class ProfileSettingsController extends Controller {
     }
 
     public function destroy(): RedirectResponse {
-        if (!authUser()->delete()) {
-            return back()
-                ->withFragment('delete-account')
-                ->with(
-                    'session-message[delete-account]',
-                    SessionMessage::error(__('Failed to delete your account.'))
-                );
-        }
+        $user = authUser();
+        $user->delete();
 
         /**
          * @var SessionGuard
@@ -45,6 +40,8 @@ class ProfileSettingsController extends Controller {
 
         session()->invalidate();
         session()->regenerateToken();
+
+        event(new UserDeleted($user));
 
         return redirect()
             ->route('login')
