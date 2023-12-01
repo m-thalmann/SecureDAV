@@ -33,5 +33,9 @@ return [
             '|',
             '=',
         ],
+
+        'trash' => [
+            'auto_delete_days' => 30,
+        ],
     ],
 ];

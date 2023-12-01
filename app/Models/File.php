@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class File extends Model {
-    use HasFactory, HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, SoftDeletes, Prunable;
 
     /**
      * Possible options for the auto version hours.
@@ -187,6 +188,14 @@ class File extends Model {
         $validator->validate();
 
         $this->directory_id = $directory?->id;
+    }
+
+    public function prunable(): Builder {
+        return static::query()->where(
+            'deleted_at',
+            '<=',
+            now()->subDays(config('core.files.trash.auto_delete_days'))
+        );
     }
 
     protected static function booted(): void {

@@ -539,5 +539,41 @@ class FileTest extends TestCase {
 
         $response->assertNotFound();
     }
+
+    public function testTrashedFileIsPrunedAfterAutoDeleteDays(): void {
+        $amountDays = 2;
+
+        config(['core.files.trash.auto_delete_days' => $amountDays]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create([
+                'deleted_at' => now()->subDays($amountDays),
+            ]);
+
+        $file->pruneAll();
+
+        $this->assertDatabaseMissing('files', [
+            'id' => $file->id,
+        ]);
+    }
+
+    public function testTrashedFileIsNotPrunedBeforeAutoDeleteDays(): void {
+        $amountDays = 2;
+
+        config(['core.files.trash.auto_delete_days' => $amountDays]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create([
+                'deleted_at' => now()->subDays($amountDays - 1),
+            ]);
+
+        $file->pruneAll();
+
+        $this->assertDatabaseHas('files', [
+            'id' => $file->id,
+        ]);
+    }
 }
 

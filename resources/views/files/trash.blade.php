@@ -7,6 +7,11 @@
         </x:slot>
     </x-header-title>
 
+    <div class="alert bg-base-300 my-3 w-fit">
+        <i class="fa-solid fa-circle-info text-info"></i>
+        <span>{{ __('Trashed files will be automatically deleted after :days days', ['days' => config('core.files.trash.auto_delete_days')]) }}</span>
+    </div>
+
     <div class="overflow-auto w-full min-h-[12em]">
         <x-files-table.table :filesCount="count($files)" :showCountSummary="false" :deletedAtColumn="true">
             @foreach ($files as $file)
