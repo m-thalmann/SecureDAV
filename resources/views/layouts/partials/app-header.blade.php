@@ -25,12 +25,9 @@
             <a href="{{ route('files.search') }}" class="btn btn-ghost btn-circle">
                 <i class="fa-solid fa-search"></i>
             </a>
-            <a href="#" class="btn btn-ghost btn-circle">
-                <div class="indicator">
-                    <i class="fa-solid fa-bell"></i>
-                    <span class="badge badge-xs badge-primary indicator-item"></span>
-                </div>
-            </a>
+
+            @include('layouts.partials.notification-item')
+
             <div class="dropdown dropdown-end">
                 <label tabindex="0" class="btn btn-ghost btn-circle avatar placeholder">
                     <div class="bg-neutral-focus text-neutral-content rounded-full w-full">

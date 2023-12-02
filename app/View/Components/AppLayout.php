@@ -10,6 +10,20 @@ class AppLayout extends Component {
     }
 
     public function render(): View {
-        return view('layouts.app', ['user' => authUser()]);
+        return view('layouts.app', [
+            'user' => authUser(),
+            'notifications' => [
+                'latestUnread' => authUser()
+                    ->unreadNotifications()
+                    ->limit(5)
+                    ->get(),
+                'totalUnread' => authUser()
+                    ->unreadNotifications()
+                    ->count(),
+                'total' => authUser()
+                    ->notifications()
+                    ->count(),
+            ],
+        ]);
     }
 }
