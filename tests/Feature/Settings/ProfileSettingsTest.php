@@ -254,13 +254,15 @@ class ProfileSettingsTest extends TestCase {
         Event::assertDispatched(UserDeleted::class, function (
             UserDeleted $event
         ) {
-            $this->assertEquals($this->user->id, $event->user->id);
+            $this->assertEquals($this->user->id, $event->userData['id']);
 
             return true;
         });
     }
 
     public function testDeletingAccountDeletesAllUserFiles(): void {
+        Event::fake([UserDeleted::class]);
+
         $files = File::factory(4)
             ->for($this->user)
             ->has(FileVersion::factory(), 'versions')

@@ -67,6 +67,8 @@ class RegisterTest extends TestCase {
     }
 
     public function testRegisterRedirectsToEmailVerificationIfIsEnabled(): void {
+        Event::fake([Registered::class]);
+
         config(['app.email_verification_enabled' => true]);
 
         $response = $this->post('/register', [
