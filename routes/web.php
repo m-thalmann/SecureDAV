@@ -256,6 +256,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('notifications', NotificationController::class)->only([
         'index',
+        'show',
         'update',
         'destroy',
     ]);

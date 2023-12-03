@@ -11,6 +11,15 @@ class NotificationPolicy {
         return Response::allow();
     }
 
+    public function view(
+        User $user,
+        DatabaseNotification $notification
+    ): Response {
+        return $this->isSameUser($user, $notification)
+            ? Response::allow()
+            : Response::denyAsNotFound();
+    }
+
     public function update(
         User $user,
         DatabaseNotification $notification

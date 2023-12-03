@@ -24,6 +24,28 @@ class NotificationController extends Controller {
         ]);
     }
 
+    public function show(DatabaseNotification $notification): RedirectResponse {
+        $amountBefore = authUser()
+            ->notifications()
+            ->getQuery()
+            ->where(function (Builder $query) use ($notification) {
+                $query
+                    ->where('created_at', '>', $notification->created_at)
+                    ->orWhere(function (Builder $query) use ($notification) {
+                        $query
+                            ->where('created_at', $notification->created_at)
+                            ->where('id', '<', $notification->id);
+                    });
+            })
+            ->count();
+
+        $page = (int) ceil(($amountBefore + 1) / static::ITEMS_PER_PAGE);
+
+        return redirect()
+            ->route('notifications.index', ['page' => $page])
+            ->withFragment("notification-{$notification->id}");
+    }
+
     public function update(
         Request $request,
         DatabaseNotification $notification

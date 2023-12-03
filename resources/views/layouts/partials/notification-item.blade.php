@@ -7,12 +7,13 @@
             @endif
         </div>
     </label>
-    <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-300 rounded-box w-64">
+    <ul tabindex="0" class="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-300 rounded-box w-72">
         @foreach ($notifications['latestUnread'] as $notification)
             <li>
-                <a href="#">
+                <a href="{{ route('notifications.show', $notification) }}">
                     <div>
                         <p class="mb-1">
+                            <i class="fa-solid fa-circle text-xs text-primary mr-1"></i>
                             {{ $notification->data['title'] }}
                             <span>&sdot;</span>
                             <small class="text-xs text-base-content/75">{{ $notification->created_at->diffForHumans() }}</small>
@@ -25,7 +26,8 @@
 
         @if ($notifications['totalUnread'] > count($notifications['latestUnread']))
             <span class="px-4 py-1 text-xs">
-                {{ trans_choice('{1} +1 more notification|[2,*] +:count more unread notifications', $notifications['total'] - count($notifications['latestUnread'])) }}</span>
+                {{ trans_choice('{1} +1 more notification|[2,*] +:count more unread notifications', $notifications['totalUnread'] - count($notifications['latestUnread'])) }}
+            </span>
         @endif
 
         @if ($notifications['totalUnread'] === 0)

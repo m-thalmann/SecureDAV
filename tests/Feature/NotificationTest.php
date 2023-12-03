@@ -75,6 +75,37 @@ class NotificationTest extends TestCase {
         }
     }
 
+    public function testShowNotificationRedirectsToCorrectIndexPage(): void {
+        // 3 pages
+        $this->sendTestNotifications(
+            NotificationController::ITEMS_PER_PAGE * 2 + 1
+        );
+
+        $notification = $this->user->notifications()->first();
+
+        // move to last page
+        $notification->created_at = now()->subDays(1);
+        $notification->save();
+
+        $response = $this->get("/notifications/{$notification->id}");
+
+        $response->assertRedirect(
+            '/notifications?page=3#notification-' . $notification->id
+        );
+    }
+
+    public function testShowNotificationFailsIfNotificationIsNotOwnedByUser(): void {
+        $otherUser = $this->createUser();
+
+        $this->sendTestNotifications(1, user: $otherUser);
+
+        $notification = $otherUser->notifications()->first();
+
+        $response = $this->get("/notifications/{$notification->id}");
+
+        $response->assertNotFound();
+    }
+
     public function testNotificationCanBeMarkedAsRead(): void {
         $this->sendTestNotifications();
 
