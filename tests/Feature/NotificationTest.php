@@ -173,6 +173,37 @@ class NotificationTest extends TestCase {
         $this->assertFalse($notification->read());
     }
 
+    public function testAllNotificationsCanBeMarkedAsReadForUser(): void {
+        $amountNotifications = 3;
+        $amountNotificationsOtherUser = 2;
+
+        $this->sendTestNotifications($amountNotifications);
+
+        $otherUser = $this->createUser();
+
+        $this->sendTestNotifications(
+            $amountNotificationsOtherUser,
+            user: $otherUser
+        );
+
+        $this->assertEquals(
+            $amountNotifications,
+            $this->user->unreadNotifications()->count()
+        );
+
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->put(
+            '/notifications'
+        );
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $this->assertEquals(0, $this->user->unreadNotifications()->count());
+        $this->assertEquals(
+            $amountNotificationsOtherUser,
+            $otherUser->unreadNotifications()->count()
+        );
+    }
+
     public function testNotificationCanBeDeleted(): void {
         $this->sendTestNotifications();
 
@@ -205,6 +236,37 @@ class NotificationTest extends TestCase {
         $this->assertDatabaseHas('notifications', [
             'id' => $notification->id,
         ]);
+    }
+
+    public function testAllNotificationsCanBeDeletedForUser(): void {
+        $amountNotifications = 3;
+        $amountNotificationsOtherUser = 2;
+
+        $this->sendTestNotifications($amountNotifications);
+
+        $otherUser = $this->createUser();
+
+        $this->sendTestNotifications(
+            $amountNotificationsOtherUser,
+            user: $otherUser
+        );
+
+        $this->assertEquals(
+            $amountNotifications,
+            $this->user->notifications()->count()
+        );
+
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->delete(
+            '/notifications'
+        );
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $this->assertEquals(0, $this->user->notifications()->count());
+        $this->assertEquals(
+            $amountNotificationsOtherUser,
+            $otherUser->notifications()->count()
+        );
     }
 
     protected function sendTestNotifications(

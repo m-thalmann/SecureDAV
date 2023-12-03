@@ -61,10 +61,24 @@ class NotificationController extends Controller {
         return back();
     }
 
+    public function markAllAsRead(): RedirectResponse {
+        authUser()->unreadNotifications->markAsRead();
+
+        return back();
+    }
+
     public function destroy(
         DatabaseNotification $notification
     ): RedirectResponse {
         $notification->delete();
+
+        return back();
+    }
+
+    public function destroyAll(): RedirectResponse {
+        authUser()
+            ->notifications()
+            ->delete();
 
         return back();
     }

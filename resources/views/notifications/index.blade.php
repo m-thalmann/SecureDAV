@@ -8,6 +8,28 @@
             </x:slot>
         </x-header-title>
 
+        <div class="actions flex gap-2">
+            <form action="{{ route('notifications.mark-all-as-read') }}" method="POST">
+                @method('PUT')
+                @csrf
+
+                <button type="submit" class="btn btn-sm btn-secondary">
+                    <i class="fa-solid fa-envelope-open"></i>
+                    {{ __('Mark all as read') }}
+                </button>
+            </form>
+
+            <form action="{{ route('notifications.destroy-all') }}" method="POST">
+                @method('DELETE')
+                @csrf
+
+                <button type="submit" class="btn btn-sm btn-error">
+                    <i class="fa-solid fa-trash"></i>
+                    {{ __('Delete all') }}
+                </button>
+            </form>
+        </div>
+
         <div class="flex flex-col gap-4">
             @foreach ($notifications as $notification)
                 <x-card id="notification-{{ $notification->id }}" class="target:ring-2">

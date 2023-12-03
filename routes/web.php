@@ -254,6 +254,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // TODO: replace with resource controllers
     Route::view('backups', 'backups.index')->name('backups.index');
 
+    Route::controller(NotificationController::class)
+        ->prefix('notifications')
+        ->as('notifications.')
+        ->group(function () {
+            Route::put('/', 'markAllAsRead')->name('mark-all-as-read');
+            Route::delete('/', 'destroyAll')->name('destroy-all');
+        });
+
     Route::resource('notifications', NotificationController::class)->only([
         'index',
         'show',
