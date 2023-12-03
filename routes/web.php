@@ -12,6 +12,7 @@ use App\Http\Controllers\Files\FileTrashController;
 use App\Http\Controllers\Files\FileVersionController;
 use App\Http\Controllers\Files\LatestFileVersionController;
 use App\Http\Controllers\Files\SearchFileController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Settings\LogoutBrowserSessionsController;
 use App\Http\Controllers\Settings\ProfileSettingsController;
 use App\Http\Controllers\Settings\WebDavSuspensionController;
@@ -252,6 +253,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // TODO: replace with resource controllers
     Route::view('backups', 'backups.index')->name('backups.index');
+
+    Route::resource('notifications', NotificationController::class)->only([
+        'index',
+        'update',
+        'destroy',
+    ]);
 });
 
 Route::prefix('settings')

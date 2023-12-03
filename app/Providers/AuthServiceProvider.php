@@ -19,6 +19,8 @@ class AuthServiceProvider extends ServiceProvider {
             \App\Policies\AccessGroupPolicy::class,
         \App\Models\AccessGroupUser::class =>
             \App\Policies\AccessGroupUserPolicy::class,
+        \Illuminate\Notifications\DatabaseNotification::class =>
+            \App\Policies\NotificationPolicy::class,
     ];
 
     /**

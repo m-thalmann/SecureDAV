@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\View\View;
+
+class NotificationController extends Controller {
+    public const ITEMS_PER_PAGE = 4;
+
+    public function __construct() {
+        $this->authorizeResource(DatabaseNotification::class, 'notification');
+    }
+
+    public function index(Request $request): View {
+        return view('notifications.index', [
+            'notifications' => authUser()
+                ->notifications() // already sorted by latest
+                ->orderBy('id', 'asc')
+                ->paginate(perPage: static::ITEMS_PER_PAGE),
+        ]);
+    }
+
+    public function update(
+        Request $request,
+        DatabaseNotification $notification
+    ): RedirectResponse {
+        $read = $request->boolean('read');
+
+        if ($read) {
+            $notification->markAsRead();
+        } else {
+            $notification->markAsUnread();
+        }
+
+        return back();
+    }
+
+    public function destroy(
+        DatabaseNotification $notification
+    ): RedirectResponse {
+        $notification->delete();
+
+        return back();
+    }
+}
+

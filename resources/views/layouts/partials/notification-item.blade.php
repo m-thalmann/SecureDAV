@@ -40,7 +40,7 @@
         <span class="divider my-2"></span>
 
         <li>
-            <a href="#">
+            <a href="{{ route('notifications.index') }}">
                 {{ __('View all notifications') }}
                 <span class="text-xs">({{ $notifications['total'] }})</span>
                 <i class="fas fa-arrow-right"></i>
