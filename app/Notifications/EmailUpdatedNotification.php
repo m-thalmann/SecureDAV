@@ -18,6 +18,12 @@ class EmailUpdatedNotification extends Notification implements ShouldQueue {
         return ['mail', 'database'];
     }
 
+    public function viaConnections(): array {
+        return [
+            'database' => 'sync',
+        ];
+    }
+
     public function toMail(object $notifiable): MailMessage {
         $data = $this->toArray($notifiable);
 

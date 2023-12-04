@@ -19,6 +19,12 @@ class TwoFactorAuthenticationEnabledNotification extends Notification implements
         return ['mail', 'database'];
     }
 
+    public function viaConnections(): array {
+        return [
+            'database' => 'sync',
+        ];
+    }
+
     public function toMail(object $notifiable): MailMessage {
         $data = $this->toArray($notifiable);
 
