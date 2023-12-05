@@ -23,17 +23,19 @@ class File extends Model {
     /**
      * Possible options for the auto version hours.
      *
+     * **Important:** Numbers must be floats
+     *
      * @var float[]
      */
     const AUTO_VERSION_HOURS = [
         0.5, // 30 min
-        1, // 1 hour
-        2, // 2 hours
-        12, // 12 hours
-        24, // 1 day
-        48, // 2 days
-        168, // 1 week
-        720, // 30 days
+        1.0, // 1 hour
+        2.0, // 2 hours
+        12.0, // 12 hours
+        24.0, // 1 day
+        48.0, // 2 days
+        168.0, // 1 week
+        720.0, // 30 days
     ];
 
     protected $hidden = ['next_version'];

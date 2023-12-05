@@ -17,12 +17,26 @@
                 </x-card-dropdown>
             </span>
 
+            @php
+                $selectedAutoVersionHoursFound = false;
+            @endphp
+
             <select name="hours" class="select select-sm" onchange="this.form.submit()">
                 <option value="" @selected($file->auto_version_hours === null)>{{ __('Disabled') }}</option>
 
                 @foreach (\App\Models\File::AUTO_VERSION_HOURS as $hours)
                     <option value="{{ $hours }}" @selected($file->auto_version_hours === $hours)>{{ formatHours($hours) }}</option>
+
+                    @if ($file->auto_version_hours === $hours)
+                        @php
+                            $selectedAutoVersionHoursFound = true;
+                        @endphp
+                    @endif
                 @endforeach
+
+                @if (!$selectedAutoVersionHoursFound && $file->auto_version_hours !== null)
+                    <option value="{{ $file->auto_version_hours }}" selected>{{ formatHours($file->auto_version_hours) }}</option>
+                @endif
             </select>
         </form>
     </x-slot>

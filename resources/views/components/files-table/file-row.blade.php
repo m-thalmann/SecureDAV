@@ -10,7 +10,7 @@
     <td class="text-center pr-0">
         <i class="{{ $file->fileIcon }} text-xl align-middle"></i>
     </td>
-    <td class="pl-2">
+    <td class="pl-2 flex items-center gap-2">
         <div class="text-sm breadcrumbs">
             <ul>
                 @if ($includeParentDirectory)
@@ -42,7 +42,7 @@
         </div>
 
         @if ($file->isEncrypted)
-            <span class="tooltip ml-2" data-tip="{{ __('Encrypted') }}">
+            <span class="tooltip" data-tip="{{ __('Encrypted') }}">
                 <i class="fa-solid fa-lock text-primary text-xs"></i>
             </span>
         @endif
