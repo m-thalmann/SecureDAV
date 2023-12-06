@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('access_group_files', function (Blueprint $table) {
+        Schema::create('web_dav_user_files', function (Blueprint $table) {
             $table
-                ->foreignId('access_group_id')
-                ->constrained('access_groups')
+                ->foreignId('web_dav_user_id')
+                ->constrained('web_dav_users')
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
             $table
@@ -18,12 +18,12 @@ return new class extends Migration {
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
 
-            $table->primary(['access_group_id', 'file_id']);
+            $table->primary(['web_dav_user_id', 'file_id']);
         });
     }
 
     public function down(): void {
-        Schema::dropIfExists('access_group_files');
+        Schema::dropIfExists('web_dav_user_files');
     }
 };
 

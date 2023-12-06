@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\AccessGroupUser;
 use App\Models\Directory;
 use App\Models\File;
 use App\Models\FileVersion;
+use App\Models\WebDavUser;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
@@ -17,12 +17,12 @@ use function Sabre\HTTP\encodePath as sabreEncodePath;
 class WebDavTest extends TestCase {
     use LazilyRefreshDatabase;
 
-    protected AccessGroupUser $user;
+    protected WebDavUser $webDavUser;
 
     protected function setUp(): void {
         parent::setUp();
 
-        $this->user = AccessGroupUser::factory()->create();
+        $this->webDavUser = WebDavUser::factory()->create();
     }
 
     public function testCorsRequestIsHandledIfCorsIsEnabled(): void {
@@ -82,8 +82,10 @@ class WebDavTest extends TestCase {
     /**
      * @dataProvider webdavRouteProvider
      */
-    public function testAccessFailsWhenGroupNotActive(string $routeName): void {
-        $this->user->accessGroup->update(['active' => false]);
+    public function testAccessFailsWhenWebDavUserNotActive(
+        string $routeName
+    ): void {
+        $this->webDavUser->update(['active' => false]);
 
         $response = $this->fetchWebDav(route($routeName));
 
@@ -94,9 +96,9 @@ class WebDavTest extends TestCase {
 
     public function testFilesContainsAccessibleFileWithVersionForUser(): void {
         $file = File::factory()
-            ->for($this->user->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->has(FileVersion::factory(), 'versions')
-            ->hasAttached($this->user->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->create();
 
         $response = $this->fetchWebDav(
@@ -121,8 +123,8 @@ class WebDavTest extends TestCase {
 
     public function testFilesDoesNotContainAccessibleFileWithNoVersionForUser(): void {
         $file = File::factory()
-            ->for($this->user->accessGroup->user)
-            ->hasAttached($this->user->accessGroup)
+            ->for($this->webDavUser->user)
+            ->hasAttached($this->webDavUser)
             ->create();
 
         $response = $this->fetchWebDav(
@@ -136,7 +138,7 @@ class WebDavTest extends TestCase {
 
     public function testFilesDoesNotContainNonAccessibleFileForUser(): void {
         $file = File::factory()
-            ->for($this->user->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->has(FileVersion::factory(), 'versions')
             ->create();
 
@@ -151,13 +153,13 @@ class WebDavTest extends TestCase {
 
     public function testDirectoriesShowsAccessibleFilesWithVersionsAndDirectoriesInBaseDirectory(): void {
         $files = File::factory(5)
-            ->for($this->user->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->has(FileVersion::factory(), 'versions')
-            ->hasAttached($this->user->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->create(['directory_id' => null]);
 
         $directories = Directory::factory(3)
-            ->for($this->user->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->create(['parent_directory_id' => null]);
 
         $response = $this->fetchWebDav(route('webdav.directories'), 'PROPFIND');
@@ -175,18 +177,18 @@ class WebDavTest extends TestCase {
 
     public function testDirectoriesShowsAccessibleFilesWithVersionsAndDirectoriesInDirectory(): void {
         $directory = Directory::factory()
-            ->for($this->user->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->create();
 
         $files = File::factory(5)
-            ->for($this->user->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->for($directory)
             ->has(FileVersion::factory(), 'versions')
-            ->hasAttached($this->user->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->create();
 
         $directories = Directory::factory(3)
-            ->for($this->user->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->for($directory, 'parentDirectory')
             ->create();
 
@@ -224,8 +226,8 @@ class WebDavTest extends TestCase {
 
     public function testDirectoriesDoesNotContainFilesWithoutVersions(): void {
         $file = File::factory()
-            ->for($this->user->accessGroup->user)
-            ->hasAttached($this->user->accessGroup)
+            ->for($this->webDavUser->user)
+            ->hasAttached($this->webDavUser)
             ->create(['directory_id' => null]);
 
         $response = $this->fetchWebDav(route('webdav.directories'), 'PROPFIND');
@@ -235,7 +237,7 @@ class WebDavTest extends TestCase {
 
     public function testDirectoriesDoesNotContainNonAccessibleFiles(): void {
         $file = File::factory()
-            ->for($this->user->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->has(FileVersion::factory(), 'versions')
             ->create(['directory_id' => null]);
 
@@ -246,9 +248,9 @@ class WebDavTest extends TestCase {
 
     public function testDirectoriesShowsFile(): void {
         $file = File::factory()
-            ->for($this->user->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->has(FileVersion::factory(), 'versions')
-            ->hasAttached($this->user->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->create(['directory_id' => null]);
 
         $response = $this->fetchWebDav(
@@ -273,9 +275,9 @@ class WebDavTest extends TestCase {
 
     public function testFileCanBeLockedAndUnlocked(): void {
         $file = File::factory()
-            ->for($this->user->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->has(FileVersion::factory(), 'versions')
-            ->hasAttached($this->user->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->create(['directory_id' => null]);
 
         $lockRequest = <<<XML
@@ -352,7 +354,8 @@ XML;
     ): TestResponse {
         $server = $this->transformHeadersToServerVars([
             'Authorization' =>
-                'Basic ' . base64_encode($this->user->username . ':password'),
+                'Basic ' .
+                base64_encode($this->webDavUser->username . ':password'),
             ...$headers,
         ]);
 

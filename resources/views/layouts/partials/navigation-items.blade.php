@@ -9,14 +9,7 @@
                 "files.*"
             ],
         ],
-        [
-            "route" => "access-groups.index",
-            "name" => __("Access"),
-            "icon" => "fa-solid fa-shield-alt",
-            "activeRoutes" => [
-                "access-groups.*",
-            ],
-        ],
+        // TODO: add entry for webdav users
         [
             "route" => "backups.index",
             "name" => __("Backups"),

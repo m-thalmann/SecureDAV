@@ -37,8 +37,8 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasMany(Directory::class)->ordered();
     }
 
-    public function accessGroups(): HasMany {
-        return $this->hasMany(AccessGroup::class);
+    public function webDavUsers(): HasMany {
+        return $this->hasMany(WebDavUser::class);
     }
 
     protected function initials(): Attribute {

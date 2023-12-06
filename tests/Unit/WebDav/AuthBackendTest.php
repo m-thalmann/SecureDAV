@@ -2,9 +2,8 @@
 
 namespace Tests\Unit\WebDav;
 
-use App\Models\AccessGroup;
-use App\Models\AccessGroupUser;
 use App\Models\User;
+use App\Models\WebDavUser;
 use App\WebDav;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\Response;
@@ -28,50 +27,52 @@ class AuthBackendTest extends TestCase {
     }
 
     public function testValidateUserPassReturnsFalseIfPasswordIsIncorrect(): void {
-        $user = AccessGroupUser::factory()->create();
+        $webDavUser = WebDavUser::factory()->create();
 
         $this->assertFalse(
-            $this->authBackend->validateUserPass($user->username, 'test')
+            $this->authBackend->validateUserPass($webDavUser->username, 'test')
         );
     }
 
-    public function testValidateUserPassReturnsFalseIfAccessGroupIsNotActive(): void {
-        $accessGroup = AccessGroup::factory()->create(['active' => false]);
-
-        $user = AccessGroupUser::factory()
-            ->for($accessGroup)
-            ->create();
+    public function testValidateUserPassReturnsFalseIfWebDavUserIsNotActive(): void {
+        $webDavUser = WebDavUser::factory()->create(['active' => false]);
 
         $this->assertFalse(
-            $this->authBackend->validateUserPass($user->username, 'password')
+            $this->authBackend->validateUserPass(
+                $webDavUser->username,
+                'password'
+            )
         );
     }
 
     public function testValidateUserPassReturnsFalseIfUserHasSuspendedWebDav(): void {
         $user = User::factory()->create(['is_webdav_suspended' => true]);
 
-        $accessUser = AccessGroupUser::factory()
-            ->for(AccessGroup::factory()->for($user))
+        $webDavUser = WebDavUser::factory()
+            ->for($user)
             ->create();
 
         $this->assertFalse(
             $this->authBackend->validateUserPass(
-                $accessUser->username,
+                $webDavUser->username,
                 'password'
             )
         );
     }
 
     public function testValidateUserPassReturnsTrueAndSetsAuthUserIfLoginSucceeds(): void {
-        $user = AccessGroupUser::factory()->create();
+        $webDavUser = WebDavUser::factory()->create();
 
         $this->assertTrue(
-            $this->authBackend->validateUserPass($user->username, 'password')
+            $this->authBackend->validateUserPass(
+                $webDavUser->username,
+                'password'
+            )
         );
 
         $this->assertEquals(
-            $user->id,
-            $this->authBackend->getAuthenticatedAccessGroupUser()->id
+            $webDavUser->id,
+            $this->authBackend->getAuthenticatedWebDavUser()->id
         );
     }
 
@@ -140,7 +141,7 @@ class AuthBackendTest extends TestCase {
     }
 
     public function testValidateUserPassRateLimitingIsResetAfterSuccessfulLogin(): void {
-        $user = AccessGroupUser::factory()->create();
+        $webDavUser = WebDavUser::factory()->create();
 
         for (
             $i = 0;
@@ -148,51 +149,37 @@ class AuthBackendTest extends TestCase {
             $i++
         ) {
             $this->authBackend->validateUserPass(
-                $user->username,
+                $webDavUser->username,
                 'wrong-password'
             );
         }
 
         $this->assertTrue(
-            $this->authBackend->validateUserPass($user->username, 'password')
+            $this->authBackend->validateUserPass(
+                $webDavUser->username,
+                'password'
+            )
         );
 
         $this->assertFalse(
             $this->authBackend->validateUserPass(
-                $user->username,
+                $webDavUser->username,
                 'wrong-password'
             )
         );
     }
 
-    public function testGetAuthenticatedAccessGroupUserReturnsNullIfNoUserIsAuthenticated(): void {
-        $this->assertNull(
-            $this->authBackend->getAuthenticatedAccessGroupUser()
-        );
-    }
-
-    public function testGetAuthenticatedAccessGroupReturnsGroupIfUserIsAuthenticated(): void {
-        $user = AccessGroupUser::factory()->create();
-
-        $this->authBackend->validateUserPass($user->username, 'password');
-
-        $this->assertEquals(
-            $user->accessGroup->id,
-            $this->authBackend->getAuthenticatedAccessGroup()->id
-        );
-    }
-
-    public function testGetAuthenticatedAccessGroupReturnsNullIfNoUserIsAuthenticated(): void {
-        $this->assertNull($this->authBackend->getAuthenticatedAccessGroup());
+    public function testGetAuthenticatedWebDavUserReturnsNullIfNoUserIsAuthenticated(): void {
+        $this->assertNull($this->authBackend->getAuthenticatedWebDavUser());
     }
 
     public function testGetAuthenticatedUserReturnsUserIfUserIsAuthenticated(): void {
-        $user = AccessGroupUser::factory()->create();
+        $webDavUser = WebDavUser::factory()->create();
 
-        $this->authBackend->validateUserPass($user->username, 'password');
+        $this->authBackend->validateUserPass($webDavUser->username, 'password');
 
         $this->assertEquals(
-            $user->accessGroup->user->id,
+            $webDavUser->user->id,
             $this->authBackend->getAuthenticatedUser()->id
         );
     }

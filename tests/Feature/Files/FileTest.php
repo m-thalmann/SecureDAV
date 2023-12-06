@@ -294,7 +294,7 @@ class FileTest extends TestCase {
         $response->assertNotFound();
     }
 
-    public function testResetAccessGroupUserPasswordConfirmsPassword(): void {
+    public function testEditFileViewConfirmsPassword(): void {
         $this->session(['auth.password_confirmed_at' => null]);
 
         $file = File::factory()

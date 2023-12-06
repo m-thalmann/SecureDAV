@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\WebDav\Filesystem;
 
-use App\Models\AccessGroup;
 use App\Models\Directory;
 use App\Models\File;
 use App\Models\FileVersion;
+use App\Models\WebDavUser;
 use App\Services\FileVersionService;
 use App\WebDav\AuthBackend;
 use App\WebDav\Filesystem\VirtualAllFilesDirectory;
@@ -23,7 +23,7 @@ class VirtualAllFilesDirectoryTest extends TestCase {
     protected AuthBackend|MockInterface $authBackend;
     protected FileVersionService|MockInterface $fileVersionService;
 
-    protected AccessGroup $accessGroup;
+    protected WebDavUser $webDavUser;
 
     protected function setUp(): void {
         parent::setUp();
@@ -39,11 +39,11 @@ class VirtualAllFilesDirectoryTest extends TestCase {
             $this->fileVersionService
         );
 
-        $this->accessGroup = AccessGroup::factory()->create();
+        $this->webDavUser = WebDavUser::factory()->create();
 
         $this->authBackend
-            ->shouldReceive('getAuthenticatedAccessGroup')
-            ->andReturn($this->accessGroup);
+            ->shouldReceive('getAuthenticatedWebDavUser')
+            ->andReturn($this->webDavUser);
     }
 
     public function testGetNameReturnsTheBaseName(): void {
@@ -55,14 +55,14 @@ class VirtualAllFilesDirectoryTest extends TestCase {
 
     public function testLoadChildrenReturnsTheFilesOfTheAuthenticatedUserIgnoringAnyDirectoryStructure(): void {
         $directory = Directory::factory()
-            ->for($this->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->create();
 
         $files = collect();
 
         $files->push(
             ...File::factory(5)
-                ->hasAttached($this->accessGroup)
+                ->hasAttached($this->webDavUser)
                 ->has(FileVersion::factory(), 'versions')
                 ->create()
                 ->all()
@@ -70,7 +70,7 @@ class VirtualAllFilesDirectoryTest extends TestCase {
 
         $files->push(
             ...File::factory(5)
-                ->hasAttached($this->accessGroup)
+                ->hasAttached($this->webDavUser)
                 ->for($directory)
                 ->has(FileVersion::factory(), 'versions')
                 ->create()
@@ -92,7 +92,7 @@ class VirtualAllFilesDirectoryTest extends TestCase {
 
     public function testLoadChildrenReturnsOnlyFilesWithVersions(): void {
         $noVersionFiles = File::factory(5)
-            ->hasAttached($this->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->create();
 
         $children = $this->virtualDirectory->loadChildren();
@@ -100,13 +100,13 @@ class VirtualAllFilesDirectoryTest extends TestCase {
         $this->assertCount(0, $children);
     }
 
-    public function testLoadChildrenReturnsOnlyFilesWhichTheAccessGroupCanSee(): void {
-        $otherAccessGroup = AccessGroup::factory()
-            ->for($this->accessGroup->user)
+    public function testLoadChildrenReturnsOnlyFilesWhichTheWebDavUserCanSee(): void {
+        $otherWebDavUser = WebDavUser::factory()
+            ->for($this->webDavUser->user)
             ->create();
 
         $otherFiles = File::factory(5)
-            ->hasAttached($otherAccessGroup)
+            ->hasAttached($otherWebDavUser)
             ->has(FileVersion::factory(), 'versions')
             ->create();
 

@@ -1,9 +1,5 @@
 <?php
 
-use App\Http\Controllers\AccessGroups\AccessGroupController;
-use App\Http\Controllers\AccessGroups\AccessGroupFileController;
-use App\Http\Controllers\AccessGroups\AccessGroupUserController;
-use App\Http\Controllers\AccessGroups\JumpToAccessGroupUserController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\Files\FileController;
@@ -222,34 +218,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->scoped(['file' => 'uuid', 'version' => 'version'])
         ->except(['index']);
 
-    Route::resource('access-groups', AccessGroupController::class)->scoped([
-        'access_group' => 'uuid',
-    ]);
-
-    Route::post(
-        'access-group-users/jump-to',
-        JumpToAccessGroupUserController::class
-    )->name('access-group-users.jump-to');
-
-    Route::post(
-        'access-group-users/{access_group_user:username}/reset-password',
-        [AccessGroupUserController::class, 'resetPassword']
-    )->name('access-group-users.reset-password');
-
-    Route::resource(
-        'access-groups.access-group-users',
-        AccessGroupUserController::class
-    )
-        ->scoped(['access_group' => 'uuid', 'access_group_user' => 'username'])
-        ->except(['index', 'show'])
-        ->shallow();
-
-    Route::resource('access-groups.files', AccessGroupFileController::class)
-        ->scoped([
-            'access_group' => 'uuid',
-            'file' => 'uuid',
-        ])
-        ->only(['create', 'store', 'destroy']);
 
     // TODO: replace with resource controllers
     Route::view('backups', 'backups.index')->name('backups.index');

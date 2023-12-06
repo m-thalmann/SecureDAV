@@ -9,7 +9,7 @@ use App\WebDav\AuthBackend;
 
 /**
  * Virtual directory which contains all files and directories inside of the given directory for the authenticated user.
- * Only files that are accessible by the access group and which have a version will be included.
+ * Only files that are accessible by the webdav user and which have a version will be included.
  * All directories for the user will be included.
  */
 class VirtualDirectory extends AbstractVirtualDirectory {
@@ -49,7 +49,7 @@ class VirtualDirectory extends AbstractVirtualDirectory {
 
     protected function loadFiles(): array {
         return $this->authBackend
-            ->getAuthenticatedAccessGroup()
+            ->getAuthenticatedWebDavUser()
             ->files()
             ->inDirectory($this->directory, filterUser: false)
             ->has('latestVersion')

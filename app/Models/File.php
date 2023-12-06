@@ -88,8 +88,8 @@ class File extends Model {
         return $this->belongsTo(User::class);
     }
 
-    public function accessGroups(): BelongsToMany {
-        return $this->belongsToMany(AccessGroup::class, 'access_group_files');
+    public function webDavUsers(): BelongsToMany {
+        return $this->belongsToMany(WebDavUser::class, 'web_dav_user_files');
     }
 
     public function directory(): BelongsTo {

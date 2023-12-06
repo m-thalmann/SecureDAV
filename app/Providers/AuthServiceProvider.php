@@ -15,10 +15,7 @@ class AuthServiceProvider extends ServiceProvider {
         \App\Models\Directory::class => \App\Policies\DirectoryPolicy::class,
         \App\Models\FileVersion::class =>
             \App\Policies\FileVersionPolicy::class,
-        \App\Models\AccessGroup::class =>
-            \App\Policies\AccessGroupPolicy::class,
-        \App\Models\AccessGroupUser::class =>
-            \App\Policies\AccessGroupUserPolicy::class,
+        \App\Models\WebDavUser::class => \App\Policies\WebDavUserPolicy::class,
         \Illuminate\Notifications\DatabaseNotification::class =>
             \App\Policies\NotificationPolicy::class,
     ];
@@ -29,3 +26,4 @@ class AuthServiceProvider extends ServiceProvider {
     public function boot(): void {
     }
 }
+

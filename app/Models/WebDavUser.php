@@ -8,20 +8,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class AccessGroup extends Model {
+class WebDavUser extends Model {
     use HasFactory, HasUuids;
 
     protected $fillable = ['label', 'active', 'readonly'];
 
+    protected $hidden = ['password'];
+
     protected $casts = [
+        'password' => 'hashed',
         'active' => 'boolean',
         'readonly' => 'boolean',
     ];
 
     public function uniqueIds(): array {
-        return ['uuid'];
+        return ['username'];
     }
 
     public function scopeForUser(Builder $query, User $user): Builder {
@@ -35,12 +37,8 @@ class AccessGroup extends Model {
     public function files(): BelongsToMany {
         return $this->belongsToMany(
             File::class,
-            'access_group_files'
+            'web_dav_user_files'
         )->ordered();
-    }
-
-    public function users(): HasMany {
-        return $this->hasMany(AccessGroupUser::class);
     }
 }
 

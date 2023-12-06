@@ -129,11 +129,7 @@ class FileController extends Controller {
     }
 
     public function show(File $file): View {
-        $file
-            ->load('latestVersion')
-            ->load('versions')
-            ->load('accessGroups');
-        $file->accessGroups->loadCount('users');
+        $file->load('latestVersion')->load('versions');
 
         return view('files.show', [
             'file' => $file,

@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\WebDav\Filesystem;
 
-use App\Models\AccessGroup;
 use App\Models\File;
 use App\Models\FileVersion;
+use App\Models\WebDavUser;
 use App\Services\FileVersionService;
 use App\WebDav\AuthBackend;
 use App\WebDav\Filesystem\VirtualFile;
@@ -91,14 +91,14 @@ class VirtualFileTest extends TestCase {
 
         $resource = $this->createStream($contents);
 
-        $group = AccessGroup::factory()->create([
+        $webDavUser = WebDavUser::factory()->create([
             'readonly' => false,
         ]);
 
         $this->authBackend
-            ->shouldReceive('getAuthenticatedAccessGroup')
+            ->shouldReceive('getAuthenticatedWebDavUser')
             ->once()
-            ->andReturn($group);
+            ->andReturn($webDavUser);
 
         $this->fileVersionService
             ->shouldReceive('updateLatestVersion')
@@ -110,19 +110,19 @@ class VirtualFileTest extends TestCase {
         fclose($resource);
     }
 
-    public function testPutFailsIfTheAccessGroupIsReadonly(): void {
+    public function testPutFailsIfTheWebDavUserIsReadonly(): void {
         $contents = 'test contents';
 
         $resource = $this->createStream($contents);
 
-        $group = AccessGroup::factory()->create([
+        $webDavUser = WebDavUser::factory()->create([
             'readonly' => true,
         ]);
 
         $this->authBackend
-            ->shouldReceive('getAuthenticatedAccessGroup')
+            ->shouldReceive('getAuthenticatedWebDavUser')
             ->once()
-            ->andReturn($group);
+            ->andReturn($webDavUser);
 
         $this->fileVersionService
             ->shouldReceive('updateLatestVersion')

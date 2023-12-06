@@ -2,22 +2,21 @@
 
 namespace App\WebDav;
 
-use App\Models\AccessGroup;
-use App\Models\AccessGroupUser;
 use App\Models\User;
+use App\Models\WebDavUser;
 use App\WebDav\Exceptions\TooManyRequestsException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Sabre\DAV;
 
 /**
- * Authentication backend for WebDAV which uses the AccessGroupUser model to authenticate users
+ * Authentication backend for WebDAV which uses the WebDavUser model to authenticate users
  */
 class AuthBackend extends DAV\Auth\Backend\AbstractBasic {
     protected const RATE_LIMITER_KEY = 'webdav-auth';
     protected const RATE_LIMITER_ATTEMPTS = 5;
 
-    protected ?AccessGroupUser $authenticatedAccessGroupUser = null;
+    protected ?WebDavUser $authenticatedWebDavUser = null;
 
     public function validateUserPass(mixed $username, mixed $password): bool {
         $rateLimiterKey = static::RATE_LIMITER_KEY . ':' . $username;
@@ -33,16 +32,16 @@ class AuthBackend extends DAV\Auth\Backend\AbstractBasic {
             throw new TooManyRequestsException($availableIn);
         }
 
-        $accessGroupUser = AccessGroupUser::query()
+        $webDavUser = WebDavUser::query()
             ->where('username', $username)
-            ->with('accessGroup.user')
+            ->with('user')
             ->first();
 
         if (
-            $accessGroupUser === null ||
-            !Hash::check($password, $accessGroupUser->password) ||
-            !$accessGroupUser->accessGroup->active ||
-            $accessGroupUser->accessGroup->user->is_webdav_suspended
+            $webDavUser === null ||
+            !Hash::check($password, $webDavUser->password) ||
+            !$webDavUser->active ||
+            $webDavUser->user->is_webdav_suspended
         ) {
             RateLimiter::hit($rateLimiterKey);
 
@@ -51,20 +50,16 @@ class AuthBackend extends DAV\Auth\Backend\AbstractBasic {
 
         RateLimiter::clear($rateLimiterKey);
 
-        $this->authenticatedAccessGroupUser = $accessGroupUser;
+        $this->authenticatedWebDavUser = $webDavUser;
 
         return true;
     }
 
-    public function getAuthenticatedAccessGroupUser(): ?AccessGroupUser {
-        return $this->authenticatedAccessGroupUser;
-    }
-
-    public function getAuthenticatedAccessGroup(): ?AccessGroup {
-        return $this->authenticatedAccessGroupUser?->accessGroup;
+    public function getAuthenticatedWebDavUser(): ?WebDavUser {
+        return $this->authenticatedWebDavUser;
     }
 
     public function getAuthenticatedUser(): ?User {
-        return $this->authenticatedAccessGroupUser?->accessGroup->user;
+        return $this->authenticatedWebDavUser?->user;
     }
 }

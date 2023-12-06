@@ -2,14 +2,14 @@
 
 namespace Database\Factories;
 
-use App\Models\AccessGroup;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\AccessGroupUser>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\WebDavUser>
  */
-class AccessGroupUserFactory extends Factory {
+class WebDavUserFactory extends Factory {
     /**
      * Define the model's default state.
      *
@@ -18,9 +18,11 @@ class AccessGroupUserFactory extends Factory {
     public function definition(): array {
         return [
             'username' => fake()->uuid(),
-            'access_group_id' => AccessGroup::factory(),
             'password' => Hash::make('password'),
-            'label' => strtolower($this->faker->firstName()),
+            'label' => $this->faker->firstName(),
+            'user_id' => User::factory(),
+            'active' => true,
+            'readonly' => $this->faker->boolean(),
             'last_access' => null,
         ];
     }

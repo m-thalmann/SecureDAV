@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\WebDav\Filesystem;
 
-use App\Models\AccessGroup;
 use App\Models\Directory;
 use App\Models\File;
 use App\Models\FileVersion;
+use App\Models\WebDavUser;
 use App\Services\FileVersionService;
 use App\WebDav\AuthBackend;
 use App\WebDav\Filesystem\VirtualDirectory;
@@ -23,7 +23,7 @@ class VirtualDirectoryTest extends TestCase {
     protected AuthBackend|MockInterface $authBackend;
     protected FileVersionService|MockInterface $fileVersionService;
 
-    protected AccessGroup $accessGroup;
+    protected WebDavUser $webDavUser;
 
     protected function setUp(): void {
         parent::setUp();
@@ -34,15 +34,15 @@ class VirtualDirectoryTest extends TestCase {
         $this->authBackend = Mockery::mock(AuthBackend::class);
         $this->fileVersionService = Mockery::mock(FileVersionService::class);
 
-        $this->accessGroup = AccessGroup::factory()->create();
+        $this->webDavUser = WebDavUser::factory()->create();
 
         $this->authBackend
             ->shouldReceive('getAuthenticatedUser')
-            ->andReturn($this->accessGroup->user);
+            ->andReturn($this->webDavUser->user);
 
         $this->authBackend
-            ->shouldReceive('getAuthenticatedAccessGroup')
-            ->andReturn($this->accessGroup);
+            ->shouldReceive('getAuthenticatedWebDavUser')
+            ->andReturn($this->webDavUser);
     }
 
     public function testGetNameReturnsTheDirectoryName(): void {
@@ -87,12 +87,12 @@ class VirtualDirectoryTest extends TestCase {
         $this->createVirtualDirectory(null);
 
         $directories = Directory::factory(5)
-            ->for($this->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->create();
 
         // should not be included
         $otherDirectories = Directory::factory(5)
-            ->for($this->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->for($directories->first(), 'parentDirectory')
             ->create();
 
@@ -113,24 +113,24 @@ class VirtualDirectoryTest extends TestCase {
 
     public function testLoadDirectoriesReturnsDirectoriesInGivenDirectory(): void {
         $directory = Directory::factory()
-            ->for($this->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->create();
 
         $this->createVirtualDirectory($directory);
 
         $directories = Directory::factory(5)
-            ->for($this->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->for($directory, 'parentDirectory')
             ->create();
 
         // should not be included
         $otherDirectory = Directory::factory()
-            ->for($this->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->create();
 
         // should not be included
         $otherDirectories = Directory::factory(5)
-            ->for($this->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->for($otherDirectory, 'parentDirectory')
             ->create();
 
@@ -153,17 +153,17 @@ class VirtualDirectoryTest extends TestCase {
         $this->createVirtualDirectory(null);
 
         $files = File::factory(5)
-            ->hasAttached($this->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->has(FileVersion::factory(), 'versions')
             ->create(['directory_id' => null]);
 
         $otherDirectory = Directory::factory()
-            ->for($this->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->create();
 
         // should not be included
         $otherFiles = File::factory(5)
-            ->hasAttached($this->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->has(FileVersion::factory(), 'versions')
             ->for($otherDirectory)
             ->create();
@@ -183,24 +183,24 @@ class VirtualDirectoryTest extends TestCase {
 
     public function testLoadFilesReturnsFilesInGivenDirectory(): void {
         $directory = Directory::factory()
-            ->for($this->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->create();
 
         $this->createVirtualDirectory($directory);
 
         $files = File::factory(5)
-            ->hasAttached($this->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->has(FileVersion::factory(), 'versions')
             ->for($directory)
             ->create();
 
         $otherDirectory = Directory::factory()
-            ->for($this->accessGroup->user)
+            ->for($this->webDavUser->user)
             ->create();
 
         // should not be included
         $otherFiles = File::factory(5)
-            ->hasAttached($this->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->has(FileVersion::factory(), 'versions')
             ->for($otherDirectory)
             ->create();
@@ -222,13 +222,13 @@ class VirtualDirectoryTest extends TestCase {
         $this->createVirtualDirectory(null);
 
         $files = File::factory(5)
-            ->hasAttached($this->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->has(FileVersion::factory(), 'versions')
             ->create(['directory_id' => null]);
 
         // should not be included
         $noVersionFiles = File::factory(5)
-            ->hasAttached($this->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->create(['directory_id' => null]);
 
         $fileIds = $files->map(fn(File $file) => $file->id);
@@ -244,21 +244,21 @@ class VirtualDirectoryTest extends TestCase {
         }
     }
 
-    public function testLoadFilesReturnsOnlyFilesWhichTheAccessGroupCanSee(): void {
+    public function testLoadFilesReturnsOnlyFilesWhichTheWebDavUserCanSee(): void {
         $this->createVirtualDirectory(null);
 
         $files = File::factory(5)
-            ->hasAttached($this->accessGroup)
+            ->hasAttached($this->webDavUser)
             ->has(FileVersion::factory(), 'versions')
             ->create(['directory_id' => null]);
 
-        $otherAccessGroup = AccessGroup::factory()
-            ->for($this->accessGroup->user)
+        $otherWebDavUser = WebDavUser::factory()
+            ->for($this->webDavUser->user)
             ->create();
 
         // should not be included
         $otherFiles = File::factory(5)
-            ->hasAttached($otherAccessGroup)
+            ->hasAttached($otherWebDavUser)
             ->has(FileVersion::factory(), 'versions')
             ->create(['directory_id' => null]);
 
