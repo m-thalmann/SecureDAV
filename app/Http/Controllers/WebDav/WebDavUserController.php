@@ -10,6 +10,10 @@ use Illuminate\View\View;
 class WebDavUserController extends Controller {
     public function __construct() {
         $this->authorizeResource(WebDavUser::class);
+
+        $this->middleware('password.confirm')->only([
+            'destroy',
+        ]);
     }
 
     public function index(): View {
@@ -29,5 +33,17 @@ class WebDavUserController extends Controller {
         ]);
     }
 
+    public function destroy(WebDavUser $webDavUser): RedirectResponse {
+        $webDavUser->delete();
+
+        return redirect()
+            ->route('web-dav-users.index')
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('WebDav user successfully deleted.')
+                )->forDuration()
+            );
+    }
 }
 

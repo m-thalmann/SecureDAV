@@ -84,4 +84,59 @@ class WebDavUserTest extends TestCase {
 
         $response->assertNotFound();
     }
+
+    public function testDeleteWebDavUserConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $webDavUser = WebDavUser::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->delete(
+            "/web-dav-users/{$webDavUser->username}"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testWebDavUserCanBeDeleted(): void {
+        $this->passwordConfirmed();
+
+        $webDavUser = WebDavUser::factory()
+            ->for($this->user)
+            ->has(File::factory(3)->for($this->user))
+            ->create();
+
+        $response = $this->delete("/web-dav-users/{$webDavUser->username}");
+
+        $response->assertRedirect('/web-dav-users');
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $this->assertDatabaseMissing('web_dav_users', [
+            'id' => $webDavUser->id,
+        ]);
+        $this->assertDatabaseMissing('web_dav_user_files', [
+            'web_dav_user_id' => $webDavUser->id,
+        ]);
+    }
+
+    public function testWebDavUserCantBeDeletedForOtherUser(): void {
+        $otherUser = $this->createUser();
+
+        $webDavUser = WebDavUser::factory()
+            ->for($otherUser)
+            ->has(File::factory(3)->for($this->user))
+            ->create();
+
+        $response = $this->delete("/web-dav-users/{$webDavUser->username}");
+
+        $response->assertNotFound();
+
+        $this->assertDatabaseHas('web_dav_user_files', [
+            'web_dav_user_id' => $webDavUser->id,
+        ]);
+    }
 }
