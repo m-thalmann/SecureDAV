@@ -6,7 +6,7 @@
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\WebDavController;
+use App\Http\Controllers\WebDav\WebDavController;
 use App\WebDav;
 use Illuminate\Support\Facades\Route;
 

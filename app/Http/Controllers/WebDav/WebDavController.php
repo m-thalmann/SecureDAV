@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\WebDav;
 
+use App\Http\Controllers\Controller;
 use App\Services\FileVersionService;
 use App\WebDav;
 use Illuminate\Http\Request;

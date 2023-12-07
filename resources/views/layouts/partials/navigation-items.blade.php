@@ -9,7 +9,14 @@
                 "files.*"
             ],
         ],
-        // TODO: add entry for webdav users
+        [
+            "route" => "web-dav-users.index",
+            "name" => __("WebDav Users"),
+            "icon" => "fa-solid fa-user-group",
+            "activeRoutes" => [
+                "web-dav-users.*",
+            ],
+        ],
         [
             "route" => "backups.index",
             "name" => __("Backups"),

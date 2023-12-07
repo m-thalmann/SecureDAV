@@ -73,7 +73,7 @@
                 <x-copy-button inputId="web-dav-url" plain class="btn btn-sm btn-neutral" />
 
                 <x-card-dropdown>
-                    {{ __('The file can only be access through WebDAV using a WebDav-User') }}
+                    {{ __('The file can only be access through WebDAV using a WebDav-User (see below).') }}
                 </x-card-dropdown>
             </div>
         </x-form-field>
@@ -94,4 +94,6 @@
     @endif
 
     @include('files.partials.file-versions')
+
+    @include('files.partials.file-web-dav-users')
 </x-app-layout>

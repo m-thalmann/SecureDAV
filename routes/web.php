@@ -12,6 +12,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Settings\LogoutBrowserSessionsController;
 use App\Http\Controllers\Settings\ProfileSettingsController;
 use App\Http\Controllers\Settings\WebDavSuspensionController;
+use App\Http\Controllers\WebDav\WebDavUserController;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
@@ -218,6 +219,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->scoped(['file' => 'uuid', 'version' => 'version'])
         ->except(['index']);
 
+    Route::resource('web-dav-users', WebDavUserController::class)->scoped([
+        'web_dav_user' => 'username',
+    ]);
 
     // TODO: replace with resource controllers
     Route::view('backups', 'backups.index')->name('backups.index');

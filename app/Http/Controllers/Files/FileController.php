@@ -129,7 +129,10 @@ class FileController extends Controller {
     }
 
     public function show(File $file): View {
-        $file->load('latestVersion')->load('versions');
+        $file
+            ->load('latestVersion')
+            ->load('versions')
+            ->load('webDavUsers');
 
         return view('files.show', [
             'file' => $file,
