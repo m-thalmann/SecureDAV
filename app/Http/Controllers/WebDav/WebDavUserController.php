@@ -4,7 +4,11 @@ namespace App\Http\Controllers\WebDav;
 
 use App\Http\Controllers\Controller;
 use App\Models\WebDavUser;
+use App\Support\SessionMessage;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class WebDavUserController extends Controller {
@@ -23,6 +27,39 @@ class WebDavUserController extends Controller {
                 ->forUser(authUser())
                 ->get(),
         ]);
+    }
+
+    public function create(): View {
+        return view('web-dav-users.create');
+    }
+
+    public function store(Request $request): RedirectResponse {
+        $data = $request->validate([
+            'label' => ['nullable', 'string', 'max:128'],
+            'readonly' => ['nullable'],
+        ]);
+
+        $password = Str::password();
+
+        $webDavUser = authUser()
+            ->webDavUsers()
+            ->forceCreate([
+                // username => uuid
+                'password' => $password,
+                'label' => $data['label'] ?? fake()->userName(),
+                'readonly' => !!Arr::get($data, 'readonly', false),
+                'active' => true,
+            ]);
+
+        return redirect()
+            ->route('web-dav-users.show', $webDavUser->username)
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('WebDav user created successfully')
+                )->forDuration()
+            )
+            ->with('generated-password', $password); // TODO:
     }
 
     public function show(WebDavUser $webDavUser): View {

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\WebDavUser;
 use App\Support\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class WebDavUserTest extends TestCase {
@@ -55,6 +56,53 @@ class WebDavUserTest extends TestCase {
 
         $response->assertSee($webDavUser->label);
         $response->assertDontSee($otherWebDavUser->label);
+    }
+
+    public function testCreateWebDavUserViewCanBeRendered(): void {
+        $response = $this->get('/web-dav-users/create');
+
+        $response->assertOk();
+    }
+
+    public function testNewWebDavUserCanBeCreated(): void {
+        $label = 'Test User';
+        $readonly = true;
+
+        $response = $this->post('/web-dav-users', [
+            'label' => $label,
+            'readonly' => $readonly,
+        ]);
+
+        $createdWebDavUser = WebDavUser::query()
+            ->where('label', $label)
+            ->first();
+
+        $response->assertRedirect(
+            "/web-dav-users/{$createdWebDavUser->username}"
+        );
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $response->assertSessionHas('generated-password', function (
+            string $password
+        ) use ($createdWebDavUser) {
+            $this->assertTrue(
+                Hash::check($password, $createdWebDavUser->password)
+            );
+
+            return true;
+        });
+
+        $this->assertDatabaseHas('web_dav_users', [
+            'id' => $createdWebDavUser->id,
+            'label' => $label,
+            'readonly' => $readonly,
+            'active' => true,
+            'user_id' => $this->user->id,
+        ]);
     }
 
     public function testShowWebDavUserViewCanBeRendered(): void {

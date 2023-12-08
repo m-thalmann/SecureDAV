@@ -70,5 +70,25 @@
         </div>
     </x-form-field>
 
+    @if (session('generated-password'))
+        <div class="alert max-sm:rounded-none md:w-fit !mt-1">
+            <i class="fa-solid fa-key text-success"></i>
+            <span>
+                {{ __('Generated password') }}: <span class="font-mono ml-2 inline-block blur" id="generated-password">{{ session('generated-password') }}</span>
+            </span>
+
+            <div>
+                <button
+                    class="btn btn-circle btn-sm"
+                    onclick="document.getElementById('generated-password').classList.toggle('blur')"
+                >
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+
+                <x-copy-button :data="session('generated-password')" />
+            </div>
+        </div>
+    @endif
+
     @include('web-dav-users.partials.web-dav-user-files')
 </x-app-layout>
