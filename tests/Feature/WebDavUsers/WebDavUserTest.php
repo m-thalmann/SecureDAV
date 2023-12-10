@@ -251,6 +251,64 @@ class WebDavUserTest extends TestCase {
         ]);
     }
 
+    public function testResetWebDavUserPasswordConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $webDavUser = WebDavUser::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->post(
+            "/web-dav-users/{$webDavUser->username}/reset-password"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testWebDavUserPasswordCanBeReset(): void {
+        $this->passwordConfirmed();
+
+        $webDavUser = WebDavUser::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->post(
+            "/web-dav-users/{$webDavUser->username}/reset-password"
+        );
+
+        $response->assertRedirect("/web-dav-users/{$webDavUser->username}");
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $webDavUser->refresh();
+
+        $response->assertSessionHas('generated-password', function (
+            string $password
+        ) use ($webDavUser) {
+            $this->assertTrue(Hash::check($password, $webDavUser->password));
+
+            return true;
+        });
+    }
+
+    public function testWebDavUserPasswordCantBeResetForOtherUser(): void {
+        $this->passwordConfirmed();
+
+        $otherUser = $this->createUser();
+
+        $webDavUser = WebDavUser::factory()
+            ->for($otherUser)
+            ->create();
+
+        $response = $this->post(
+            "/web-dav-users/{$webDavUser->username}/reset-password"
+        );
+
+        $response->assertNotFound();
+    }
+
     public function testDeleteWebDavUserConfirmsPassword(): void {
         $this->session(['auth.password_confirmed_at' => null]);
 

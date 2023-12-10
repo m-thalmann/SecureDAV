@@ -219,6 +219,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->scoped(['file' => 'uuid', 'version' => 'version'])
         ->except(['index']);
 
+    Route::post('web-dav-users/{web_dav_user:username}/reset-password', [
+        WebDavUserController::class,
+        'resetPassword',
+    ])->name('web-dav-users.reset-password');
+
     Route::resource('web-dav-users', WebDavUserController::class)->scoped([
         'web_dav_user' => 'username',
     ]);

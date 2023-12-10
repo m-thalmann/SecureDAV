@@ -18,6 +18,7 @@ class WebDavUserController extends Controller {
         $this->middleware('password.confirm')->only([
             'edit',
             'update',
+            'resetPassword',
             'destroy',
         ]);
     }
@@ -102,6 +103,28 @@ class WebDavUserController extends Controller {
                     __('WebDav user updated successfully')
                 )->forDuration()
             );
+    }
+
+    public function resetPassword(WebDavUser $webDavUser): RedirectResponse {
+        $this->authorize('update', $webDavUser);
+
+        $password = Str::password();
+
+        $webDavUser
+            ->forceFill([
+                'password' => $password,
+            ])
+            ->save();
+
+        return redirect()
+            ->route('web-dav-users.show', $webDavUser->username)
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('Password reset successfully')
+                )->forDuration()
+            )
+            ->with('generated-password', $password);
     }
 
     public function destroy(WebDavUser $webDavUser): RedirectResponse {

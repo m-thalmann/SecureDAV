@@ -68,6 +68,15 @@
     
             <x-copy-button inputId="username" plain class="btn btn-sm btn-neutral" />
         </div>
+
+        <form method="POST" action="{{ route('web-dav-users.reset-password', [$webDavUser]) }}" class="mt-4">
+            @csrf
+            
+            <button class="btn btn-sm">
+                <i class="fa-solid fa-rotate-left w-6"></i>
+                {{ __('Reset password') }}
+            </button>
+        </form>
     </x-form-field>
 
     @if (session('generated-password'))
