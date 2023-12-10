@@ -16,6 +16,8 @@ class WebDavUserController extends Controller {
         $this->authorizeResource(WebDavUser::class);
 
         $this->middleware('password.confirm')->only([
+            'edit',
+            'update',
             'destroy',
         ]);
     }
@@ -59,7 +61,7 @@ class WebDavUserController extends Controller {
                     __('WebDav user created successfully')
                 )->forDuration()
             )
-            ->with('generated-password', $password); // TODO:
+            ->with('generated-password', $password);
     }
 
     public function show(WebDavUser $webDavUser): View {
@@ -68,6 +70,38 @@ class WebDavUserController extends Controller {
         return view('web-dav-users.show', [
             'webDavUser' => $webDavUser,
         ]);
+    }
+
+    public function edit(WebDavUser $webDavUser): View {
+        return view('web-dav-users.edit', [
+            'webDavUser' => $webDavUser,
+        ]);
+    }
+
+    public function update(
+        Request $request,
+        WebDavUser $webDavUser
+    ): RedirectResponse {
+        $data = $request->validate([
+            'label' => ['string', 'max:128'],
+            'readonly' => ['nullable'],
+            'active' => ['nullable'],
+        ]);
+
+        $webDavUser->update([
+            'label' => $data['label'],
+            'readonly' => !!Arr::get($data, 'readonly', false),
+            'active' => !!Arr::get($data, 'active', false),
+        ]);
+
+        return redirect()
+            ->route('web-dav-users.show', $webDavUser->username)
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('WebDav user updated successfully')
+                )->forDuration()
+            );
     }
 
     public function destroy(WebDavUser $webDavUser): RedirectResponse {

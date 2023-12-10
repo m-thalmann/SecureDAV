@@ -75,7 +75,7 @@ class WebDavUserTest extends TestCase {
 
         $createdWebDavUser = WebDavUser::query()
             ->where('label', $label)
-            ->first();
+            ->firstOrFail();
 
         $response->assertRedirect(
             "/web-dav-users/{$createdWebDavUser->username}"
@@ -131,6 +131,124 @@ class WebDavUserTest extends TestCase {
         $response = $this->get("/web-dav-users/{$webDavUser->username}");
 
         $response->assertNotFound();
+    }
+
+    public function testEditWebDavUserViewConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $webDavUser = WebDavUser::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->get(
+            "/web-dav-users/{$webDavUser->username}/edit"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testEditWebDavUserViewCanBeRendered(): void {
+        $this->passwordConfirmed();
+
+        $webDavUser = WebDavUser::factory()
+            ->for($this->user)
+            ->create();
+
+        $response = $this->get("/web-dav-users/{$webDavUser->username}/edit");
+
+        $response->assertOk();
+
+        $response->assertSee($webDavUser->label);
+    }
+
+    public function testEditWebDavUserViewFailsIfWebDavUserDoesNotBelongToUser(): void {
+        $otherUser = $this->createUser();
+
+        $webDavUser = WebDavUser::factory()
+            ->for($otherUser)
+            ->create();
+
+        $response = $this->get("/web-dav-users/{$webDavUser->username}/edit");
+
+        $response->assertNotFound();
+    }
+
+    public function testUpdatedWebDavUserConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $webDavUser = WebDavUser::factory()
+            ->for($this->user)
+            ->create();
+
+        $confirmResponse = $this->put(
+            "/web-dav-users/{$webDavUser->username}",
+            [
+                'label' => 'Label',
+                'readonly' => true,
+                'active' => false,
+            ]
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testWebDavUserCanBeUpdated(): void {
+        $this->passwordConfirmed();
+
+        $webDavUser = WebDavUser::factory()
+            ->for($this->user)
+            ->create();
+
+        $label = 'Test WebDav User';
+        $readonly = !$webDavUser->readonly;
+        $active = !$webDavUser->active;
+
+        $response = $this->put("/web-dav-users/{$webDavUser->username}", [
+            'label' => $label,
+            'readonly' => $readonly,
+            'active' => $active,
+        ]);
+
+        $response->assertRedirect("/web-dav-users/{$webDavUser->username}");
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $this->assertDatabaseHas('web_dav_users', [
+            'id' => $webDavUser->id,
+            'label' => $label,
+            'readonly' => $readonly,
+            'active' => $active,
+            'user_id' => $this->user->id,
+        ]);
+    }
+
+    public function testWebDavUserCantBeUpdatedForOtherUser(): void {
+        $otherUser = $this->createUser();
+
+        $webDavUser = WebDavUser::factory()
+            ->for($otherUser)
+            ->create();
+
+        $label = 'Test WebDav User';
+        $readonly = !$webDavUser->readonly;
+        $active = !$webDavUser->active;
+
+        $response = $this->put("/web-dav-users/{$webDavUser->username}", [
+            'label' => $label,
+            'readonly' => $readonly,
+            'active' => $active,
+        ]);
+
+        $response->assertNotFound();
+
+        $this->assertDatabaseHas('web_dav_users', [
+            'id' => $webDavUser->id,
+            'label' => $webDavUser->label,
+            'readonly' => $webDavUser->readonly,
+            'active' => $webDavUser->active,
+            'user_id' => $otherUser->id,
+        ]);
     }
 
     public function testDeleteWebDavUserConfirmsPassword(): void {
