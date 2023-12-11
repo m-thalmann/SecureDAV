@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\WebDavUsers;
+namespace Tests\Feature\WebDav;
 
 use App\Models\File;
 use App\Models\User;
@@ -364,3 +364,4 @@ class WebDavUserTest extends TestCase {
         ]);
     }
 }
+

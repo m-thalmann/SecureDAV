@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="actions my-4">
-        <a href="#" class="btn btn-neutral btn-sm">
+        <a href="{{ route('web-dav-users.files.create', [$webDavUser]) }}" class="btn btn-neutral btn-sm">
             <i class="fa-solid fa-file-circle-plus mr-2"></i>
             {{ __('Add access to file') }}
         </a>
