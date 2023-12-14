@@ -383,4 +383,77 @@ class WebDavUserFileTest extends TestCase {
             'file_id' => $file->id,
         ]);
     }
+
+    public function testDeleteWebDavUserFileConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $webDavUser = WebDavUser::factory()
+            ->for($this->user)
+            ->hasAttached($file)
+            ->create();
+
+        $confirmResponse = $this->from(static::REDIRECT_TEST_ROUTE)->delete(
+            "/web-dav-users/{$webDavUser->username}/files/{$file->uuid}"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testWebDavUserFileCanBeDeleted(): void {
+        $this->passwordConfirmed();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $webDavUser = WebDavUser::factory()
+            ->for($this->user)
+            ->hasAttached($file)
+            ->create();
+
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->delete(
+            "/web-dav-users/{$webDavUser->username}/files/{$file->uuid}"
+        );
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $this->assertDatabaseMissing('web_dav_user_files', [
+            'web_dav_user_id' => $webDavUser->id,
+            'file_id' => $file->id,
+        ]);
+    }
+
+    public function testWebDavUserFileCantBeDeletedIfUserCantUpdateWebDavUser(): void {
+        $this->passwordConfirmed();
+
+        $otherUser = $this->createUser();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $webDavUser = WebDavUser::factory()
+            ->for($otherUser)
+            ->hasAttached($file)
+            ->create();
+
+        $response = $this->delete(
+            "/web-dav-users/{$webDavUser->username}/files/{$file->uuid}"
+        );
+
+        $response->assertNotFound();
+
+        $this->assertDatabaseHas('web_dav_user_files', [
+            'web_dav_user_id' => $webDavUser->id,
+            'file_id' => $file->id,
+        ]);
+    }
 }

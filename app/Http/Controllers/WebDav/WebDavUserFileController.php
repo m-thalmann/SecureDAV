@@ -105,5 +105,21 @@ class WebDavUserFileController extends Controller {
                 )->forDuration()
             );
     }
+
+    public function destroy(
+        WebDavUser $webDavUser,
+        File $file
+    ): RedirectResponse {
+        $this->authorize('update', $webDavUser);
+
+        $webDavUser->files()->detach($file);
+
+        return back()->with(
+            'snackbar',
+            SessionMessage::success(
+                __('File access removed successfully')
+            )->forDuration()
+        );
+    }
 }
 

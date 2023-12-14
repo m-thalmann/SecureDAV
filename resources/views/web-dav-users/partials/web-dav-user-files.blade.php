@@ -16,12 +16,21 @@
                 <x-files-table.file-row :file="$file" :hover="false" :includeParentDirectory="true">
                     <x-slot name="actions">
                         <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)">
-                            <li>
-                                <button class="hover:bg-error hover:text-error-content">
-                                    <i class="fa-solid fa-user-slash w-6"></i>
-                                    {{ __('Revoke access') }}
-                                </button>
-                            </li>
+                            <form
+                                method="POST"
+                                action="{{ route('web-dav-users.files.destroy', [$webDavUser, $file]) }}"
+                                onsubmit="return confirm(`{{ __('Are you sure you want to revoke access to this file?') }}`)"
+                            >
+                                @method('DELETE')
+                                @csrf
+
+                                <li>
+                                    <button class="hover:bg-error hover:text-error-content">
+                                        <i class="fa-solid fa-user-slash w-6"></i>
+                                        {{ __('Revoke access') }}
+                                    </button>
+                                </li>
+                            </form>
                         </x-dropdown>
                     </x-slot>
                 </x-files-table.file-row>
