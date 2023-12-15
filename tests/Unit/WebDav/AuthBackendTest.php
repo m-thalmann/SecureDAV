@@ -76,6 +76,24 @@ class AuthBackendTest extends TestCase {
         );
     }
 
+    public function testValidateUserPassUpdatesLastAccessTimeIfLoginSucceeds(): void {
+        $webDavUser = WebDavUser::factory()->create();
+
+        $this->assertNull($webDavUser->fresh()->last_access);
+
+        $this->authBackend->validateUserPass($webDavUser->username, 'password');
+
+        $freshWebDavUser = $webDavUser->fresh();
+
+        $this->assertNotNull($freshWebDavUser->last_access);
+
+        $this->assertEqualsWithDelta(
+            now()->timestamp,
+            $freshWebDavUser->last_access->timestamp,
+            1
+        );
+    }
+
     public function testValidateUserPassIsRateLimited(): void {
         $username = 'wrong-user';
 

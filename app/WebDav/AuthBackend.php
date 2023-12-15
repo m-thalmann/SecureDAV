@@ -32,6 +32,9 @@ class AuthBackend extends DAV\Auth\Backend\AbstractBasic {
             throw new TooManyRequestsException($availableIn);
         }
 
+        /**
+         * @var WebDavUser|null
+         */
         $webDavUser = WebDavUser::query()
             ->where('username', $username)
             ->with('user')
@@ -49,6 +52,8 @@ class AuthBackend extends DAV\Auth\Backend\AbstractBasic {
         }
 
         RateLimiter::clear($rateLimiterKey);
+
+        $webDavUser->forceFill(['last_access' => now()])->save();
 
         $this->authenticatedWebDavUser = $webDavUser;
 

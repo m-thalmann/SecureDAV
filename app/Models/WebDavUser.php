@@ -20,6 +20,7 @@ class WebDavUser extends Model {
         'password' => 'hashed',
         'active' => 'boolean',
         'readonly' => 'boolean',
+        'last_access' => 'datetime',
     ];
 
     public function uniqueIds(): array {
