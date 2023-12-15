@@ -1,7 +1,5 @@
 <x-app-layout :title="__('Search files')">
     <form action="{{ route('files.search') }}" method="GET" class="w-full sm:w-2/3 mx-auto mb-12 relative">
-        @csrf
-
         <label for="search-input" class="absolute top-1/2 left-4 -translate-y-1/2">
             <i class="fa-solid fa-search"></i>
         </label>

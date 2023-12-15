@@ -5,6 +5,7 @@ namespace App\Http\Controllers\WebDav;
 use App\Http\Controllers\Controller;
 use App\Models\WebDavUser;
 use App\Support\SessionMessage;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -23,12 +24,23 @@ class WebDavUserController extends Controller {
         ]);
     }
 
-    public function index(): View {
+    public function index(Request $request): View {
+        $search = $request->get('q', default: null);
+
+        $webDavUsers = WebDavUser::query()
+            ->withCount('files')
+            ->when($search, function (Builder $query, string $search) {
+                $query
+                    ->where('label', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%");
+            })
+            ->forUser(authUser())
+            ->paginate(perPage: 10)
+            ->appends(['q' => $search]);
+
         return view('web-dav-users.index', [
-            'webDavUsers' => WebDavUser::query()
-                ->withCount('files')
-                ->forUser(authUser())
-                ->get(),
+            'webDavUsers' => $webDavUsers,
+            'search' => $search,
         ]);
     }
 

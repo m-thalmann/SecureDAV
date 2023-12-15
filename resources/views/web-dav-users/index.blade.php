@@ -11,6 +11,14 @@
             </a>
         </div>
 
+        <form method="GET" class="w-full sm:w-1/2 mb-4 relative">
+            <label for="search-input" class="absolute top-1/2 left-4 -translate-y-1/2">
+                <i class="fa-solid fa-search"></i>
+            </label>
+
+            <input value="{{ $search }}" placeholder="{{ __('Search users...') }}" name="q" class="input bg-base-300 w-full pl-10 max-sm:rounded-none shadow-md" id="search-input" />
+        </form>
+
         <div class="overflow-auto w-full bg-base-100 rounded-md">
             <table class="table">
                 <thead>
@@ -90,4 +98,6 @@
             </table>
         </div>
     </x-card>
+
+    {{ $webDavUsers->links() }}
 </x-app-layout>

@@ -58,6 +58,28 @@ class WebDavUserTest extends TestCase {
         $response->assertDontSee($otherWebDavUser->label);
     }
 
+    public function testIndexWebDavUsersViewCanSearchList(): void {
+        $webDavUsers = WebDavUser::factory(20)
+            ->for($this->user)
+            ->create();
+
+        $searchedUser = WebDavUser::factory()
+            ->for($this->user)
+            ->create([
+                'label' => 'Test User',
+            ]);
+
+        $response = $this->get('/web-dav-users?q=' . $searchedUser->label);
+
+        $response->assertOk();
+
+        $response->assertSee($searchedUser->label);
+
+        foreach ($webDavUsers as $webDavUser) {
+            $response->assertDontSee($webDavUser->label);
+        }
+    }
+
     public function testCreateWebDavUserViewCanBeRendered(): void {
         $response = $this->get('/web-dav-users/create');
 
