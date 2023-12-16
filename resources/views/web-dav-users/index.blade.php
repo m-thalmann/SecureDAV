@@ -23,11 +23,11 @@
             <table class="table">
                 <thead>
                     <tr>
+                        <th class="text-center">{{ __('Active') }}</th>
                         <th>{{ __('Label') }}</th>
                         <th>{{ __('Username') }}</th>
                         <th class="text-right">{{ __('Accessible files') }}</th>
                         <th class="text-center">{{ __('Read-Only') }}</th>
-                        <th class="text-center">{{ __('Active') }}</th>
                         <th>{{ __('Last access') }}</th>
                         <th class="w-0"></th>
                     </tr>
@@ -35,18 +35,6 @@
                 <tbody>
                     @foreach ($webDavUsers as $webDavUser)
                         <tr>
-                            <td>
-                                <a href="{{ route('web-dav-users.show', [$webDavUser]) }}" class="link">{{ $webDavUser->label }}</a>
-                            </td>
-                            <td class="font-mono">
-                                <span class="select-all">{{ $webDavUser->username }}</span>
-
-                                <x-copy-button :data="$webDavUser->username" />
-                            </td>
-                            <td class="text-right">{{ $webDavUser->files_count }}</td>
-                            <td class="text-center">
-                                <input type="checkbox" @checked($webDavUser->readonly) class="checkbox checkbox-primary cursor-not-allowed align-middle" tabindex="-1" onclick="return false;" />
-                            </td>
                             <td class="text-center">
                                 @if ($webDavUser->active)
                                     <i class="fa-solid fa-circle-check text-success text-xl"></i>
@@ -54,7 +42,32 @@
                                     <i class="fa-solid fa-circle-xmark text-error text-xl"></i>
                                 @endif
                             </td>
-                            <td>
+                            <td @class([
+                                'opacity-50' => !$webDavUser->active,
+                            ])>
+                                <a href="{{ route('web-dav-users.show', [$webDavUser]) }}" class="link">{{ $webDavUser->label }}</a>
+                            </td>
+                            <td @class([
+                                'font-mono',
+                                'opacity-50' => !$webDavUser->active,
+                            ])>
+                                <span class="select-all">{{ $webDavUser->username }}</span>
+
+                                <x-copy-button :data="$webDavUser->username" />
+                            </td>
+                            <td @class([
+                                'text-right',
+                                'opacity-50' => !$webDavUser->active,
+                            ])>{{ $webDavUser->files_count }}</td>
+                            <td @class([
+                                'text-center',
+                                'opacity-50' => !$webDavUser->active,
+                            ])>
+                                <input type="checkbox" @checked($webDavUser->readonly) class="checkbox checkbox-primary cursor-not-allowed align-middle" tabindex="-1" onclick="return false;" />
+                            </td>
+                            <td @class([
+                                'opacity-50' => !$webDavUser->active,
+                            ])>
                                 <span class="tooltip" data-tip="{{ $webDavUser->last_access ?? '-' }}">{{ $webDavUser->last_access?->diffForHumans() ?? '-' }}</span>
                             </td>
                             <td>

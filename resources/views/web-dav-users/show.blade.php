@@ -5,7 +5,7 @@
         </x:slot>
 
         <x-slot name="subtitle">
-            <span class="tooltip" data-tip="{{ __('Created') }}">{{ $webDavUser->created_at }}</span>
+            {{ __('Last access') }}: <span class="tooltip" data-tip="{{ $webDavUser->last_access }}">{{ $webDavUser->last_access?->diffForHumans() ?? __('never') }}</span>
         </x-slot>
 
         <x-slot name="suffix">

@@ -15,7 +15,19 @@
             @foreach ($webDavUser->files as $file)
                 <x-files-table.file-row :file="$file" :hover="false" :includeParentDirectory="true">
                     <x-slot name="actions">
-                        <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)">
+                        <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)" width="w-52">
+                            <li>
+                                <x-copy-button :data="$file->webDavUrl" plain containerClass="flex items-center gap-2">
+                                    <i class="fas fa-server w-6"></i>
+                                    {{ __('Copy WebDAV url') }}
+
+                                    <x-slot name="success">
+                                        <i class="fa-solid fa-check text-success w-6"></i>
+                                        {{ __('Copy WebDAV url') }}
+                                    </x-slot>
+                                </x-copy-button>
+                            </li>
+
                             <form
                                 method="POST"
                                 action="{{ route('web-dav-users.files.destroy', [$webDavUser, $file]) }}"
