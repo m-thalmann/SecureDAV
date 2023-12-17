@@ -100,7 +100,7 @@ class FileController extends Controller {
 
             $file->save();
 
-            processFile($requestFile->path(), function (
+            processResource(fopen($requestFile->path(), 'rb'), function (
                 mixed $fileResource
             ) use ($fileVersionService, $file) {
                 $fileVersionService->createNewVersion($file, $fileResource);

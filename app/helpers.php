@@ -161,32 +161,28 @@ if (!function_exists('authUser')) {
     }
 }
 
-if (!function_exists('processFile')) {
+if (!function_exists('processResource')) {
     /**
-     * Opens a file and passes it to a callback function for processing.
-     * After the callback function has finished (or an exception occurs), the file is closed.
+     * Passes the resource to a callback function for processing.
+     * After the callback function has finished (or an exception occurs), the resource is closed.
      *
-     * @param string $path The path to the file to open.
-     * @param Closure $callback The callback function to process the file.
+     * @param resource $resource The resource to process.
+     * @param Closure $callback The callback function to process the resource.
      * @param Closure|null $exceptionCallback An optional callback function to handle any exceptions thrown during processing.
-     * @param string $mode The mode to use when opening the file (default 'rb').
      *
      * @return mixed The result of the callback function.
      */
-    function processFile(
-        string $path,
+    function processResource(
+        mixed $resource,
         Closure $callback,
-        ?Closure $exceptionCallback = null,
-        string $mode = 'rb'
+        ?Closure $exceptionCallback = null
     ): mixed {
-        $file = fopen($path, $mode);
-
         $returnValue = null;
 
         try {
-            $returnValue = $callback($file);
+            $returnValue = $callback($resource);
         } catch (Exception $e) {
-            fclose($file);
+            fclose($resource);
 
             if ($exceptionCallback !== null) {
                 $exceptionCallback($e);
@@ -195,7 +191,7 @@ if (!function_exists('processFile')) {
             throw $e;
         }
 
-        fclose($file);
+        fclose($resource);
 
         return $returnValue;
     }

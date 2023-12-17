@@ -64,8 +64,8 @@ class LatestFileVersionController extends Controller {
         $uploadedFile = $request->file('file');
 
         try {
-            $versionUpdated = processFile(
-                $uploadedFile->path(),
+            $versionUpdated = processResource(
+                fopen($uploadedFile->path(), 'rb'),
                 fn(
                     mixed $fileResource
                 ) => $fileVersionService->updateLatestVersion(

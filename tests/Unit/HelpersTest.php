@@ -103,23 +103,18 @@ class HelpersTest extends TestCase {
         $this->assertNull(authUser());
     }
 
-    public function testProcessFileOpensTheFileAndPassesItToTheCallback(): void {
-        $path = 'test.txt';
+    public function testProcessResourcePassesTheResourceToTheCallback(): void {
         $contents = 'test contents';
 
-        /**
-         * @var FilesystemAdapter
-         */
-        $storage = Storage::fake();
-        $storage->put($path, $contents);
+        $stream = $this->createStream($contents);
 
         $expectedResponse = 'test response';
 
-        $response = processFile($storage->path($path), function (
-            mixed $file
-        ) use ($contents, $expectedResponse) {
-            $this->assertIsResource($file);
-            $this->assertEquals($contents, stream_get_contents($file));
+        $response = processResource($stream, function (
+            mixed $receivedStream
+        ) use ($stream, $expectedResponse) {
+            $this->assertIsResource($receivedStream);
+            $this->assertEquals($stream, $receivedStream);
 
             return $expectedResponse;
         });
@@ -127,78 +122,35 @@ class HelpersTest extends TestCase {
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testProcessFileUsesTheDefaultModeIfNoneProvided(): void {
-        $path = 'test.txt';
+    public function testProcessResourceClosesTheStreamAfterTheCallbackIsFinished(): void {
+        $stream = $this->createStream('test contents');
 
-        /**
-         * @var FilesystemAdapter
-         */
-        $storage = Storage::fake();
-        $storage->put($path, 'test contents');
+        $resource = processResource($stream, function (mixed $receivedStream) {
+            $this->assertIsNotClosedResource($receivedStream);
 
-        processFile($storage->path($path), function (mixed $file) {
-            $this->assertEquals('rb', stream_get_meta_data($file)['mode']);
-        });
-    }
-
-    public function testProcessFileUsesTheProvidedMode(): void {
-        $path = 'test.txt';
-
-        /**
-         * @var FilesystemAdapter
-         */
-        $storage = Storage::fake();
-        $storage->put($path, 'test contents');
-
-        processFile(
-            $storage->path($path),
-            function (mixed $file) {
-                $this->assertEquals('w', stream_get_meta_data($file)['mode']);
-            },
-            mode: 'w'
-        );
-    }
-
-    public function testProcessFileClosesTheStreamAfterTheCallbackIsFinished(): void {
-        $path = 'test.txt';
-
-        /**
-         * @var FilesystemAdapter
-         */
-        $storage = Storage::fake();
-        $storage->put($path, '123');
-
-        $resource = processFile($storage->path($path), function (mixed $file) {
-            $this->assertIsNotClosedResource($file);
-
-            return $file;
+            return $receivedStream;
         });
 
         $this->assertIsClosedResource($resource);
     }
 
-    public function testProcessFileClosesTheStreamOnExceptionAndRethrows(): void {
+    public function testProcessResourceClosesTheStreamOnExceptionAndRethrows(): void {
         $expectedException = new Exception('test exception');
-        $path = 'test.txt';
 
-        /**
-         * @var FilesystemAdapter
-         */
-        $storage = Storage::fake();
-        $storage->put($path, '123');
+        $stream = $this->createStream('test contents');
 
         $this->expectExceptionObject($expectedException);
 
         $resource = null;
 
         try {
-            processFile($storage->path($path), function (mixed $file) use (
+            processResource($stream, function (mixed $receivedStream) use (
                 $expectedException,
                 &$resource
             ) {
-                $this->assertIsNotClosedResource($file);
+                $this->assertIsNotClosedResource($receivedStream);
 
-                $resource = $file;
+                $resource = $receivedStream;
 
                 throw $expectedException;
             });
@@ -209,15 +161,10 @@ class HelpersTest extends TestCase {
         }
     }
 
-    public function testProcessFileExecutesExceptionCallbackOnException(): void {
+    public function testProcessResourceExecutesExceptionCallbackOnException(): void {
         $expectedException = new Exception('test exception');
-        $path = 'test.txt';
 
-        /**
-         * @var FilesystemAdapter
-         */
-        $storage = Storage::fake();
-        $storage->put($path, '123');
+        $stream = $this->createStream('test contents');
 
         $this->expectExceptionObject($expectedException);
 
@@ -226,10 +173,13 @@ class HelpersTest extends TestCase {
         $callbackExecuted = false;
 
         try {
-            processFile(
-                $storage->path($path),
-                function (mixed $file) use ($expectedException, &$resource) {
-                    $resource = $file;
+            processResource(
+                $stream,
+                function (mixed $receivedStream) use (
+                    $expectedException,
+                    &$resource
+                ) {
+                    $resource = $receivedStream;
 
                     throw $expectedException;
                 },

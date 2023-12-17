@@ -261,20 +261,15 @@ class FileVersionService {
         } else {
             $outputPath = $this->storage->path($tmpPath);
 
-            processFile(
-                $outputPath,
-                function (mixed $outputResource) use (
+            processResource(fopen($outputPath, 'w'), function (
+                mixed $outputResource
+            ) use ($resource, $encryptionKey) {
+                $this->fileEncryptionService->encrypt(
+                    $encryptionKey,
                     $resource,
-                    $encryptionKey
-                ) {
-                    $this->fileEncryptionService->encrypt(
-                        $encryptionKey,
-                        $resource,
-                        $outputResource
-                    );
-                },
-                mode: 'w'
-            );
+                    $outputResource
+                );
+            });
         }
 
         if ($useTemporaryFile) {
@@ -343,17 +338,15 @@ class FileVersionService {
         return response()
             ->streamDownload(
                 function () use ($file, $version) {
-                    processFile(
-                        'php://output',
-                        function (mixed $outputStream) use ($file, $version) {
-                            $this->writeContentsToStream(
-                                $file,
-                                $version,
-                                $outputStream
-                            );
-                        },
-                        mode: 'w'
-                    );
+                    processResource(fopen('php://output', 'w'), function (
+                        mixed $outputStream
+                    ) use ($file, $version) {
+                        $this->writeContentsToStream(
+                            $file,
+                            $version,
+                            $outputStream
+                        );
+                    });
                 },
                 $file->name,
                 [

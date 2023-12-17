@@ -47,7 +47,7 @@ class FileVersionController extends Controller {
 
         try {
             if ($uploadedFile !== null) {
-                processFile($uploadedFile->path(), function (
+                processResource(fopen($uploadedFile->path(), 'rb'), function (
                     mixed $fileResource
                 ) use ($fileVersionService, $file, $data) {
                     $fileVersionService->createNewVersion(
