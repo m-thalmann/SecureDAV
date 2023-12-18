@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Pivots\BackupConfigurationFile;
 use App\Rules\UniqueFileName;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -90,6 +91,15 @@ class File extends Model {
 
     public function webDavUsers(): BelongsToMany {
         return $this->belongsToMany(WebDavUser::class, 'web_dav_user_files');
+    }
+
+    public function backupConfigurations(): BelongsToMany {
+        return $this->belongsToMany(
+            BackupConfiguration::class,
+            'backup_configuration_files'
+        )
+            ->using(BackupConfigurationFile::class)
+            ->withPivot(BackupConfigurationFile::PIVOT_COLUMNS);
     }
 
     public function directory(): BelongsTo {

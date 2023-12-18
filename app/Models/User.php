@@ -41,6 +41,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasMany(WebDavUser::class);
     }
 
+    public function backupConfigurations(): HasMany {
+        return $this->hasMany(BackupConfiguration::class);
+    }
+
     protected function initials(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {

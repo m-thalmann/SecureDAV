@@ -1,0 +1,200 @@
+<?php
+
+namespace Tests\Unit\Backups;
+
+use App\Backups\WebDavBackupProvider;
+use App\Models\BackupConfiguration;
+use App\Models\File;
+use App\Models\FileVersion;
+use App\Services\FileVersionService;
+use Exception;
+use GuzzleHttp\Client as HttpClient;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Mockery;
+use Mockery\MockInterface;
+use Psr\Http\Message\ResponseInterface;
+use Tests\TestCase;
+
+class WebDavBackupProviderTest extends TestCase {
+    use LazilyRefreshDatabase;
+
+    protected array $webDavConfig = [
+        'targetUrl' => 'https://example.com/remote.php/dav/files/username/',
+        'username' => 'username',
+        'password' => 'password',
+        'method' => 'PUT',
+    ];
+
+    protected BackupConfiguration $backupConfiguration;
+    protected FileVersionService|MockInterface $mockFileVersionService;
+    protected HttpClient|MockInterface $mockHttpClient;
+
+    protected WebDavBackupProviderTestClass|MockInterface $webDavBackupProvider;
+
+    protected function setUp(): void {
+        parent::setUp();
+
+        $this->backupConfiguration = BackupConfiguration::factory()->create([
+            'provider_class' => WebDavBackupProvider::class,
+            'config' => $this->webDavConfig,
+        ]);
+        $this->mockFileVersionService = Mockery::mock(
+            FileVersionService::class
+        );
+        $this->mockHttpClient = Mockery::mock(HttpClient::class);
+
+        $this->webDavBackupProvider = Mockery::mock(
+            WebDavBackupProviderTestClass::class,
+            [
+                $this->backupConfiguration,
+                $this->mockFileVersionService,
+                $this->mockHttpClient,
+            ]
+        )
+            ->makePartial(['getFileContentStream'])
+            ->shouldAllowMockingProtectedMethods();
+    }
+
+    public function testGetDisplayInformationReturnsArrayWithProviderInformation(): void {
+        $displayInformation = WebDavBackupProvider::getDisplayInformation();
+
+        $this->assertIsArray($displayInformation);
+        $this->assertArrayHasKey('name', $displayInformation);
+        $this->assertArrayHasKey('icon', $displayInformation);
+        $this->assertArrayHasKey('description', $displayInformation);
+    }
+
+    public function testBackupFileUploadsTheLatestVersionToTheTargetUrl(): void {
+        $file = File::factory()
+            ->for($this->backupConfiguration->user)
+            ->has(FileVersion::factory(), 'versions')
+            ->create();
+
+        $testContentStream = $this->createStream('test content');
+
+        $this->webDavBackupProvider
+            ->shouldReceive('getFileContentStream')
+            ->once()
+            ->with($file)
+            ->andReturn($testContentStream);
+
+        $response = Mockery::mock(ResponseInterface::class);
+        $response->shouldReceive('getStatusCode')->andReturn(200);
+
+        $this->mockHttpClient
+            ->shouldReceive('request')
+            ->once()
+            ->with(
+                $this->webDavConfig['method'],
+                $this->webDavConfig['targetUrl'] . $file->name,
+                [
+                    'auth' => [
+                        $this->webDavConfig['username'],
+                        $this->webDavConfig['password'],
+                    ],
+                    'body' => $testContentStream,
+                ]
+            )
+            ->andReturn($response);
+
+        $this->webDavBackupProvider->backupFile($file);
+
+        $this->assertIsClosedResource($testContentStream);
+    }
+
+    public function testBackupFileThrowsExceptionIfTheResponseStatusCodeIsNotBetween200And299(): void {
+        $file = File::factory()
+            ->for($this->backupConfiguration->user)
+            ->has(FileVersion::factory(), 'versions')
+            ->create();
+
+        $testContentStream = $this->createStream('test content');
+
+        $this->webDavBackupProvider
+            ->shouldReceive('getFileContentStream')
+            ->once()
+            ->with($file)
+            ->andReturn($testContentStream);
+
+        $response = Mockery::mock(ResponseInterface::class);
+        $response->shouldReceive('getStatusCode')->andReturn(401);
+        $response->shouldReceive('getReasonPhrase')->andReturn('Unauthorized');
+
+        $this->mockHttpClient
+            ->shouldReceive('request')
+            ->once()
+            ->with(
+                $this->webDavConfig['method'],
+                $this->webDavConfig['targetUrl'] . $file->name,
+                [
+                    'auth' => [
+                        $this->webDavConfig['username'],
+                        $this->webDavConfig['password'],
+                    ],
+                    'body' => $testContentStream,
+                ]
+            )
+            ->andReturn($response);
+
+        $this->expectExceptionMessage('Error: Unauthorized');
+
+        try {
+            $this->webDavBackupProvider->backupFile($file);
+        } catch (Exception $e) {
+            $this->assertIsClosedResource($testContentStream);
+
+            throw $e;
+        }
+    }
+
+    public function testGetWebDavConfigReturnsTheConfigOfTheConfiguration(): void {
+        $this->assertEquals(
+            $this->webDavConfig,
+            $this->webDavBackupProvider->getWebDavConfig()
+        );
+    }
+
+    public function testGetWebDavConfigAddsTrailingSlashToTargetUrlIfMissing(): void {
+        $this->backupConfiguration
+            ->forceFill([
+                'config->targetUrl' =>
+                    'https://example.com/remote.php/dav/files/username',
+            ])
+            ->save();
+
+        $this->assertStringEndsWith(
+            '/',
+            $this->webDavBackupProvider->getWebDavConfig()['targetUrl']
+        );
+    }
+
+    public function testGetWebDavConfigThrowsExceptionIfTargetUrlIsNotConfigured(): void {
+        $this->backupConfiguration
+            ->forceFill(['config->targetUrl' => null])
+            ->save();
+
+        $this->expectException(Exception::class);
+
+        $this->webDavBackupProvider->getWebDavConfig();
+    }
+
+    public function testGetWebDavConfigThrowsExceptionIfUsernameIsNotConfigured(): void {
+        $this->backupConfiguration
+            ->forceFill(['config->username' => null])
+            ->save();
+
+        $this->expectException(Exception::class);
+
+        $this->webDavBackupProvider->getWebDavConfig();
+    }
+}
+
+class WebDavBackupProviderTestClass extends WebDavBackupProvider {
+    public function backupFile(File $file): void {
+        parent::backupFile($file);
+    }
+
+    public function getWebDavConfig(): array {
+        return parent::getWebDavConfig();
+    }
+}

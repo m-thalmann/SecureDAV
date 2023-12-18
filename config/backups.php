@@ -1,0 +1,14 @@
+<?php
+
+use App\Backups\WebDavBackupProvider;
+
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Backup settings
+    |--------------------------------------------------------------------------
+    */
+
+    'providers' => [WebDavBackupProvider::class => []],
+];
+
