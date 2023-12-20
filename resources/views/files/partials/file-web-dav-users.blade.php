@@ -88,6 +88,6 @@
             </table>
         </div>
     @else
-        <span class="italic text-base-content/70">{{ __('This file is not accessible by any access group') }}</span>
+        <span class="italic text-base-content/70">{{ __('This file is not accessible by any WebDav user') }}</span>
     @endif
 </x-card>

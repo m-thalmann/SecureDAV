@@ -17,6 +17,7 @@ return new class extends Migration {
                 ->cascadeOnUpdate();
             $table->string('label')->nullable();
             $table->json('config');
+            $table->timestamp('last_run_at')->nullable();
             $table->timestamps();
         });
     }

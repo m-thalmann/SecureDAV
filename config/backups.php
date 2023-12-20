@@ -9,6 +9,12 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'providers' => [WebDavBackupProvider::class => []],
+    'providers' => [
+        WebDavBackupProvider::class => [],
+    ],
+
+    'aliases' => [
+        'webdav' => WebDavBackupProvider::class,
+    ],
 ];
 

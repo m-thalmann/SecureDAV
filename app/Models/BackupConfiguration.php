@@ -16,6 +16,7 @@ class BackupConfiguration extends Model {
 
     protected $casts = [
         'config' => 'json',
+        'last_run_at' => 'datetime',
     ];
 
     protected $attributes = [

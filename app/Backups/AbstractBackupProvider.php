@@ -77,6 +77,12 @@ abstract class AbstractBackupProvider {
                     'last_error' => null,
                     'last_error_at' => null,
                 ]);
+
+            $this->backupConfiguration
+                ->forceFill([
+                    'last_run_at' => now(),
+                ])
+                ->save();
         }
 
         return $success;
