@@ -3,9 +3,7 @@
 namespace Tests\Unit;
 
 use Exception;
-use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -134,6 +132,20 @@ class HelpersTest extends TestCase {
         $this->assertIsClosedResource($resource);
     }
 
+    public function testProcessResourceDoesNotCloseStreamIfIsAlreadyClosedAfterTheCallbackIsFinished(): void {
+        $stream = $this->createStream('test contents');
+
+        fclose($stream);
+
+        $resource = processResource($stream, function (mixed $receivedStream) {
+            $this->assertIsClosedResource($receivedStream);
+
+            return $receivedStream;
+        });
+
+        $this->assertIsClosedResource($resource);
+    }
+
     public function testProcessResourceClosesTheStreamOnExceptionAndRethrows(): void {
         $expectedException = new Exception('test exception');
 
@@ -149,6 +161,35 @@ class HelpersTest extends TestCase {
                 &$resource
             ) {
                 $this->assertIsNotClosedResource($receivedStream);
+
+                $resource = $receivedStream;
+
+                throw $expectedException;
+            });
+        } catch (Exception $e) {
+            $this->assertIsClosedResource($resource);
+
+            throw $e;
+        }
+    }
+
+    public function testProcessResourceDoesNotCloseStreamIfIsAlreadyClosedOnException(): void {
+        $expectedException = new Exception('test exception');
+
+        $stream = $this->createStream('test contents');
+
+        fclose($stream);
+
+        $this->expectExceptionObject($expectedException);
+
+        $resource = null;
+
+        try {
+            processResource($stream, function (mixed $receivedStream) use (
+                $expectedException,
+                &$resource
+            ) {
+                $this->assertIsClosedResource($receivedStream);
 
                 $resource = $receivedStream;
 

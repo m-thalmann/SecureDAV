@@ -182,7 +182,9 @@ if (!function_exists('processResource')) {
         try {
             $returnValue = $callback($resource);
         } catch (Exception $e) {
-            fclose($resource);
+            if (is_resource($resource)) {
+                fclose($resource);
+            }
 
             if ($exceptionCallback !== null) {
                 $exceptionCallback($e);
@@ -191,7 +193,9 @@ if (!function_exists('processResource')) {
             throw $e;
         }
 
-        fclose($resource);
+        if (is_resource($resource)) {
+            fclose($resource);
+        }
 
         return $returnValue;
     }
