@@ -19,7 +19,7 @@ class BackupConfigurationFactory extends Factory {
             'uuid' => fake()->uuid(),
             'provider_class' => 'App\Backups\ExampleBackupProvider',
             'user_id' => User::factory(),
-            'label' => null,
+            'label' => fake()->words(2, true),
             'config' => [],
         ];
     }

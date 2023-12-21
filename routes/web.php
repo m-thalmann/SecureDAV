@@ -237,9 +237,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ])
         ->only(['create', 'store', 'destroy']);
 
-    Route::resource('backups', BackupConfigurationController::class)->scoped([
-        'backup_configuration' => 'uuid',
-    ]);
+    Route::resource('backups', BackupConfigurationController::class)
+        ->parameters([
+            'backups' => 'backup_configuration',
+        ])
+        ->scoped([
+            'backup_configuration' => 'uuid',
+        ]);
 
     Route::controller(NotificationController::class)
         ->prefix('notifications')

@@ -22,7 +22,7 @@
             "name" => __("Backups"),
             "icon" => "fa-solid fa-sync-alt",
             "activeRoutes" => [
-                "backups.index",
+                "backups.*",
             ],
         ],
     ];

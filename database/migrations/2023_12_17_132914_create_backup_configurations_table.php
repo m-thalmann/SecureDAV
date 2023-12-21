@@ -15,7 +15,7 @@ return new class extends Migration {
                 ->constrained('users')
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
-            $table->string('label')->nullable();
+            $table->string('label');
             $table->json('config');
             $table->timestamp('last_run_at')->nullable();
             $table->timestamps();

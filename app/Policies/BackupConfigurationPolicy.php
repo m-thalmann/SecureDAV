@@ -10,5 +10,14 @@ class BackupConfigurationPolicy {
     public function viewAny(User $user): Response {
         return Response::allow();
     }
+
+    public function view(
+        User $user,
+        BackupConfiguration $backupConfiguration
+    ): Response {
+        return $backupConfiguration->user_id === $user->id
+            ? Response::allow()
+            : Response::denyAsNotFound();
+    }
 }
 

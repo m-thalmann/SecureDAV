@@ -1,6 +1,6 @@
 <x-app-layout :title="__('WebDav Users')">
     <x-card>
-        <x-slot name="title" icon="fa-solid fa-user-group" :amount="count($webDavUsers)">
+        <x-slot name="title" icon="fa-solid fa-user-group" :amount="$webDavUsers->total()">
             {{ __('WebDav Users') }}
         </x-slot>
 
@@ -45,7 +45,7 @@
                             <td @class([
                                 'opacity-50' => !$webDavUser->active,
                             ])>
-                                <a href="{{ route('web-dav-users.show', [$webDavUser]) }}" class="link">{{ $webDavUser->label }}</a>
+                                <a href="{{ route('web-dav-users.show', [$webDavUser]) }}" class="link underline-offset-2">{{ $webDavUser->label }}</a>
                             </td>
                             <td @class([
                                 'font-mono',

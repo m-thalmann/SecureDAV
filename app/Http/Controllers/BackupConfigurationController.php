@@ -28,11 +28,20 @@ class BackupConfigurationController extends Controller {
         $configurations = authUser()
             ->backupConfigurations()
             ->withCount('files')
-            ->get();
+            ->paginate(perPage: 10);
 
         return view('backups.index', [
             'providers' => $providers,
             'configurations' => $configurations,
+        ]);
+    }
+
+    public function show(BackupConfiguration $backupConfiguration): View {
+        $backupConfiguration->load(['files.latestVersion', 'files.directory']);
+
+        return view('backups.show', [
+            'configuration' => $backupConfiguration,
+            'displayInformation' => $backupConfiguration->provider_class::getDisplayInformation(),
         ]);
     }
 }

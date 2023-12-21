@@ -22,13 +22,13 @@ class SearchFileTest extends TestCase {
     public function testViewCanBeRenderedWithoutQuery(): void {
         $response = $this->get('/files/search');
 
-        $response->assertStatus(200);
+        $response->assertOk();
     }
 
     public function testViewCanBeRenderedWithQuery(): void {
         $response = $this->get('/files/search?q=foo');
 
-        $response->assertStatus(200);
+        $response->assertOk();
     }
 
     public function testViewWithoutQueryDoesNotSearch(): void {

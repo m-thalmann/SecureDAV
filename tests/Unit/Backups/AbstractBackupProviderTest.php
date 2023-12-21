@@ -94,6 +94,14 @@ class AbstractBackupProviderTest extends TestCase {
             $pivotFile->pivot->last_backup_at->getTimestamp(),
             1
         );
+
+        $this->backupConfiguration->refresh();
+
+        $this->assertEqualsWithDelta(
+            now()->getTimestamp(),
+            $this->backupConfiguration->last_run_at->getTimestamp(),
+            1
+        );
     }
 
     public function testBackupDoesNotBackupFileWithNoVersion(): void {

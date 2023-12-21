@@ -77,13 +77,13 @@ abstract class AbstractBackupProvider {
                     'last_error' => null,
                     'last_error_at' => null,
                 ]);
-
-            $this->backupConfiguration
-                ->forceFill([
-                    'last_run_at' => now(),
-                ])
-                ->save();
         }
+
+        $this->backupConfiguration
+            ->forceFill([
+                'last_run_at' => now(),
+            ])
+            ->save();
 
         return $success;
     }
@@ -131,14 +131,14 @@ abstract class AbstractBackupProvider {
      *
      * @param \App\Models\User $user
      * @param array $config
-     * @param string|null $label
+     * @param string $label
      *
      * @return BackupConfiguration
      */
     public static function createConfiguration(
         User $user,
         array $config,
-        ?string $label = null
+        string $label
     ): BackupConfiguration {
         $backupConfiguration = $user
             ->backupConfigurations()

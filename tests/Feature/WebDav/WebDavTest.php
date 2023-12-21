@@ -299,7 +299,7 @@ XML;
             data: $lockRequest
         );
 
-        $response->assertStatus(200);
+        $response->assertOk();
 
         $response->assertHeader('Lock-Token');
 
@@ -313,7 +313,7 @@ XML;
             ]
         );
 
-        $response->assertStatus(204);
+        $response->assertNoContent();
     }
 
     public function testFileOfOtherUserCantBeLocked(): void {
@@ -343,7 +343,7 @@ XML;
             data: $lockRequest
         );
 
-        $response->assertStatus(403);
+        $response->assertForbidden();
     }
 
     protected function fetchWebDav(
