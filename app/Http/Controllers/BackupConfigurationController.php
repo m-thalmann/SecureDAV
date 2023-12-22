@@ -3,12 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\BackupConfiguration;
+use App\Support\SessionMessage;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class BackupConfigurationController extends Controller {
     public function __construct() {
         $this->authorizeResource(BackupConfiguration::class);
+
+        $this->middleware('password.confirm')->only([
+            'destroy',
+        ]);
     }
 
     public function index(): View {
@@ -43,6 +49,21 @@ class BackupConfigurationController extends Controller {
             'configuration' => $backupConfiguration,
             'displayInformation' => $backupConfiguration->provider_class::getDisplayInformation(),
         ]);
+    }
+
+    public function destroy(
+        BackupConfiguration $backupConfiguration
+    ): RedirectResponse {
+        $backupConfiguration->delete();
+
+        return redirect()
+            ->route('backups.index')
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('Backup configuration successfully deleted.')
+                )->forDuration()
+            );
     }
 }
 

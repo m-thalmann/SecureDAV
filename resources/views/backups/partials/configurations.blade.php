@@ -52,12 +52,21 @@
                                     </a>
                                 </li>
 
-                                <li>
-                                    <a href="#" class="hover:bg-error hover:text-error-content">
-                                        <i class="fas fa-trash w-6"></i>
-                                        {{ __('Delete') }}
-                                    </a>
-                                </li>
+                                <form
+                                    method="POST"
+                                    action="{{ route('backups.destroy', [$configuration]) }}"
+                                    onsubmit="return confirm(`{{ __('Are you sure you want to delete this backup configuration?') }}`)"
+                                >
+                                    @method('DELETE')
+                                    @csrf
+                                    
+                                    <li>
+                                        <button class="hover:bg-error hover:text-error-content">
+                                            <i class="fas fa-trash w-6"></i>
+                                            {{ __('Delete') }}
+                                        </button>
+                                    </li>
+                                </form>
                             </x-dropdown>
                         </td>
                     </tr>

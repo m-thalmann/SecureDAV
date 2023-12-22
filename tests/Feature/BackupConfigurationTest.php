@@ -6,6 +6,7 @@ use App\Backups\WebDavBackupProvider;
 use App\Models\BackupConfiguration;
 use App\Models\File;
 use App\Models\User;
+use App\Support\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -103,5 +104,63 @@ class BackupConfigurationTest extends TestCase {
         $response = $this->get("/backups/{$otherConfiguration->uuid}");
 
         $response->assertNotFound();
+    }
+
+    public function testDeleteConfigurationConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->create([
+                'provider_class' => WebDavBackupProvider::class,
+            ]);
+
+        $confirmResponse = $this->delete("/backups/{$configuration->uuid}");
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testConfigurationCanBeDeleted(): void {
+        $this->passwordConfirmed();
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->has(File::factory(3)->for($this->user))
+            ->create([
+                'provider_class' => WebDavBackupProvider::class,
+            ]);
+
+        $response = $this->delete("/backups/{$configuration->uuid}");
+
+        $response->assertRedirect('/backups');
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $this->assertDatabaseMissing('backup_configurations', [
+            'id' => $configuration->id,
+        ]);
+        $this->assertDatabaseMissing('backup_configuration_files', [
+            'backup_configuration_id' => $configuration->id,
+        ]);
+    }
+
+    public function testConfigurationCantBeDeletedForOtherUser(): void {
+        $otherUser = $this->createUser();
+
+        $configuration = BackupConfiguration::factory()
+            ->for($otherUser)
+            ->create([
+                'provider_class' => WebDavBackupProvider::class,
+            ]);
+
+        $response = $this->delete("/backups/{$configuration->uuid}");
+
+        $response->assertNotFound();
+
+        $this->assertDatabaseHas('backup_configurations', [
+            'id' => $configuration->id,
+        ]);
     }
 }
