@@ -5,7 +5,8 @@
         </x:slot>
 
         <x-slot name="subtitle">
-            {{ __('Last run') }}: <span class="tooltip" data-tip="{{ $configuration->last_run_at ?? '-' }}">{{ $configuration->last_run_at?->diffForHumans() ?? __('never') }}</span>
+            {{ __('Last run') }}:
+            <x-timestamp :timestamp="$configuration->last_run_at" :fallback="__('Never')" />
         </x-slot>
 
         <x-slot name="suffix">
@@ -110,7 +111,7 @@
                                 @endif
                             </td>
                             <td>
-                                <span class="tooltip" data-tip="{{ $file->fileLastUpdatedAt ?? __('No versions yet') }}">{{ $file->fileLastUpdatedAt?->diffForHumans() ?? '-' }}</span>
+                                <x-timestamp :timestamp="$file->fileLastUpdatedAt" :tooltipFallback="__('No versions yet')" />
                             </td>
                             <td>
                                 @if ($file->pivot->last_error)
@@ -119,14 +120,14 @@
                                     </span>
                                     <br>
                                     <i class="text-xs">
-                                        <span class="tooltip" data-tip="{{ $file->pivot->last_error_at }}">{{ $file->pivot->last_error_at->diffForHumans() }}</span>
+                                        <x-timestamp :timestamp="$file->pivot->last_error_at" />
                                     </i>
                                 @else
                                     -
                                 @endif
                             </td>
                             <td>
-                                <span class="tooltip" data-tip="{{ $file->pivot->last_backup_at ?? __('Never') }}">{{ $file->pivot->last_backup_at?->diffForHumans() ?? __('Never') }}</span>
+                                <x-timestamp :timestamp="$file->pivot->last_backup_at" :fallback="__('Never')" />
                             </td>
                             <td class="text-center">
                                 @if ($file->latestVersion)

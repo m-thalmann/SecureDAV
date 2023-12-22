@@ -38,7 +38,7 @@
                             {{ $configuration->files_count }}
                         </td>
                         <td>
-                            <span class="tooltip" data-tip="{{ $configuration->last_run_at ?? __('Never') }}">{{ $configuration->last_run_at?->diffForHumans() ?? __('Never') }}</span>
+                            <x-timestamp :timestamp="$configuration->last_run_at" :fallback="__('Never')" />
                         </td>
                         <td>
                             <x-dropdown

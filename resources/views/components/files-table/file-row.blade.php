@@ -63,11 +63,11 @@
         @endif
     </td>
     <td>
-        <span class="tooltip" data-tip="{{ $file->fileLastUpdatedAt ?? __('No versions yet') }}">{{ $file->fileLastUpdatedAt?->diffForHumans() ?? '-' }}</span>
+        <x-timestamp :timestamp="$file->fileLastUpdatedAt" :tooltipFallback="__('No versions yet')" />
     </td>
     @if ($deletedAtColumn)
         <td>
-            <span class="tooltip" data-tip="{{ $file->deleted_at }}">{{ $file->deleted_at->diffForHumans() }}</span>
+            <x-timestamp :timestamp="$file->deleted_at" />
         </td>
     @endif
     <td class="flex justify-end gap-2 items-center">

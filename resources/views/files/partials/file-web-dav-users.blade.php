@@ -55,7 +55,7 @@
                             <td @class([
                                 'opacity-50' => !$webDavUser->active,
                             ])>
-                                <span class="tooltip" data-tip="{{ $webDavUser->last_access ?? '-' }}">{{ $webDavUser->last_access?->diffForHumans() ?? '-' }}</span>
+                                <x-timestamp :timestamp="$webDavUser->last_access" />
                             </td>
                             <td>
                                 <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)">

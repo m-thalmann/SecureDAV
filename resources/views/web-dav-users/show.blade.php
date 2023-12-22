@@ -5,7 +5,8 @@
         </x:slot>
 
         <x-slot name="subtitle">
-            {{ __('Last access') }}: <span class="tooltip" data-tip="{{ $webDavUser->last_access }}">{{ $webDavUser->last_access?->diffForHumans() ?? __('never') }}</span>
+            {{ __('Last access') }}:
+            <x-timestamp :timestamp="$webDavUser->last_access" :fallback="__('Never')" />
         </x-slot>
 
         <x-slot name="suffix">

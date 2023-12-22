@@ -76,10 +76,10 @@
                             <td>{{ Illuminate\Support\Number::fileSize($version->bytes, maxPrecision: 2) }}</td>
                             <td>{{ $version->mime_type ?? '-' }}</td>
                             <td>
-                                <span class="tooltip" data-tip="{{ $version->created_at }}">{{ $version->created_at->diffForHumans() }}</span>
+                                <x-timestamp :timestamp="$version->created_at" />
                             </td>
                             <td>
-                                <span class="tooltip" data-tip="{{ $version->file_updated_at }}">{{ $version->file_updated_at->diffForHumans() }}</span>
+                                <x-timestamp :timestamp="$version->file_updated_at" />
                             </td>
                             <td class="font-mono">{{ $version->checksum }}</td>
                             <td class="flex gap-2 items-center">

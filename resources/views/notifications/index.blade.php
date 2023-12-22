@@ -42,9 +42,7 @@
 
                         <span>&sdot;</span>
 
-                        <span class="tooltip" data-tip="{{ $notification->created_at }}">
-                            <small class="text-xs text-base-content/75 align-middle font-normal">{{ $notification->created_at->diffForHumans() }}</small>
-                        </span>
+                        <x-timestamp :timestamp="$notification->created_at" innerContainerClass="text-xs text-base-content/75 align-middle font-normal" />
                     </x-slot>
 
                     <p class="text-base-content/75">
