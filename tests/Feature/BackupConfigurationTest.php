@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Backups\WebDavBackupProvider;
 use App\Models\BackupConfiguration;
 use App\Models\File;
 use App\Models\User;
 use App\Support\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
+use Tests\TestSupport\StubBackupProvider;
 
 class BackupConfigurationTest extends TestCase {
     use LazilyRefreshDatabase;
@@ -23,11 +23,11 @@ class BackupConfigurationTest extends TestCase {
         $this->actingAs($this->user);
     }
 
-    public function testIndexBackupsViewCanBeRendered() {
+    public function testIndexBackupsViewCanBeRendered(): void {
         $configuration = BackupConfiguration::factory()
             ->for($this->user)
             ->create([
-                'provider_class' => WebDavBackupProvider::class,
+                'provider_class' => StubBackupProvider::class,
             ]);
 
         $response = $this->get('/backups');
@@ -42,9 +42,9 @@ class BackupConfigurationTest extends TestCase {
         }
     }
 
-    public function testIndexBackupsViewOnlyShowsConfiguredBackupsOfUser() {
+    public function testIndexBackupsViewOnlyShowsConfiguredBackupsOfUser(): void {
         $otherConfigurations = BackupConfiguration::factory(3)->create([
-            'provider_class' => WebDavBackupProvider::class,
+            'provider_class' => StubBackupProvider::class,
         ]);
 
         $response = $this->get('/backups');
@@ -56,12 +56,112 @@ class BackupConfigurationTest extends TestCase {
         }
     }
 
-    public function testShowConfigurationViewCanBeRendered() {
+    public function testCreateViewCanBeRenderedWithProvider(): void {
+        $response = $this->get(
+            '/backups/create?provider=' . StubBackupProvider::class
+        );
+
+        $response->assertOk();
+
+        $response->assertSee(
+            StubBackupProvider::getDisplayInformation()['name']
+        );
+        $response->assertSee(
+            StubBackupProvider::getDisplayInformation()['description']
+        );
+    }
+
+    public function testCreateViewCanBeRenderedWithAliasProvider(): void {
+        $alias = 'stub';
+
+        config(["backups.aliases.$alias" => StubBackupProvider::class]);
+
+        $response = $this->get("/backups/create?provider=$alias");
+
+        $response->assertOk();
+    }
+
+    public function testCreateViewFailsIfProviderIsNotSet(): void {
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->get(
+            '/backups/create'
+        );
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR
+        );
+    }
+
+    public function testCreateViewFailsIfProviderDoesNotExist(): void {
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->get(
+            '/backups/create?provider=does-not-exist'
+        );
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR
+        );
+    }
+
+    public function testNewConfigurationCanBeCreated(): void {
+        StubBackupProvider::$customConfigValidator = [
+            'test' => ['required', 'string'],
+        ];
+
+        $label = 'Test label';
+
+        $response = $this->post('/backups', [
+            'label' => $label,
+            'provider' => StubBackupProvider::class,
+            'test' => 'test',
+        ]);
+
+        $createdConfiguration = BackupConfiguration::query()
+            ->where('label', $label)
+            ->firstOrFail();
+
+        $response->assertRedirect("/backups/{$createdConfiguration->uuid}");
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $this->assertDatabaseHas('backup_configurations', [
+            'label' => $label,
+            'provider_class' => StubBackupProvider::class,
+            'config' => json_encode([
+                'test' => 'test',
+            ]),
+        ]);
+
+        StubBackupProvider::$customConfigValidator = null;
+    }
+
+    public function testCreateConfigurationFailsIfProviderDoesNotExist(): void {
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->post('/backups', [
+            'label' => 'Test label',
+            'provider' => 'does-not-exist',
+        ]);
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR
+        );
+    }
+
+    public function testShowConfigurationViewCanBeRendered(): void {
         $configuration = BackupConfiguration::factory()
             ->for($this->user)
             ->hasAttached(File::factory(3)->for($this->user))
             ->create([
-                'provider_class' => WebDavBackupProvider::class,
+                'provider_class' => StubBackupProvider::class,
             ]);
 
         $response = $this->get("/backups/{$configuration->uuid}");
@@ -75,7 +175,7 @@ class BackupConfigurationTest extends TestCase {
         }
     }
 
-    public function testShowConfigurationViewOnlyShowsFilesOfConfiguration() {
+    public function testShowConfigurationViewOnlyShowsFilesOfConfiguration(): void {
         $otherFiles = File::factory(3)
             ->for($this->user)
             ->create();
@@ -83,7 +183,7 @@ class BackupConfigurationTest extends TestCase {
         $configuration = BackupConfiguration::factory()
             ->for($this->user)
             ->create([
-                'provider_class' => WebDavBackupProvider::class,
+                'provider_class' => StubBackupProvider::class,
             ]);
 
         $response = $this->get("/backups/{$configuration->uuid}");
@@ -96,9 +196,9 @@ class BackupConfigurationTest extends TestCase {
         }
     }
 
-    public function testShowConfigurationViewFailsIfConfigurationDoesNotBelongToUser() {
+    public function testShowConfigurationViewFailsIfConfigurationDoesNotBelongToUser(): void {
         $otherConfiguration = BackupConfiguration::factory()->create([
-            'provider_class' => WebDavBackupProvider::class,
+            'provider_class' => StubBackupProvider::class,
         ]);
 
         $response = $this->get("/backups/{$otherConfiguration->uuid}");
@@ -112,7 +212,7 @@ class BackupConfigurationTest extends TestCase {
         $configuration = BackupConfiguration::factory()
             ->for($this->user)
             ->create([
-                'provider_class' => WebDavBackupProvider::class,
+                'provider_class' => StubBackupProvider::class,
             ]);
 
         $confirmResponse = $this->delete("/backups/{$configuration->uuid}");
@@ -126,7 +226,7 @@ class BackupConfigurationTest extends TestCase {
             ->for($this->user)
             ->has(File::factory(3)->for($this->user))
             ->create([
-                'provider_class' => WebDavBackupProvider::class,
+                'provider_class' => StubBackupProvider::class,
             ]);
 
         $response = $this->delete("/backups/{$configuration->uuid}");
@@ -152,7 +252,7 @@ class BackupConfigurationTest extends TestCase {
         $configuration = BackupConfiguration::factory()
             ->for($otherUser)
             ->create([
-                'provider_class' => WebDavBackupProvider::class,
+                'provider_class' => StubBackupProvider::class,
             ]);
 
         $response = $this->delete("/backups/{$configuration->uuid}");

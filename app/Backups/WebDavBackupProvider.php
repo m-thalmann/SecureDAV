@@ -8,6 +8,7 @@ use App\Services\FileVersionService;
 use Exception;
 use GuzzleHttp\Client as HttpClient;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Validator;
 
 class WebDavBackupProvider extends AbstractBackupProvider {
     public function __construct(
@@ -26,6 +27,19 @@ class WebDavBackupProvider extends AbstractBackupProvider {
                 'Uploads the latest version of the files to a WebDAV server. This can also be used to backup to Nextcloud for example.'
             ),
         ];
+    }
+
+    public static function getConfigFormTemplate(): ?string {
+        return 'backups.partials.providers.webdav';
+    }
+
+    public static function validateConfig(array $config): array {
+        return Validator::make($config, [
+            'method' => ['required', 'string', 'in:PUT,POST'],
+            'targetUrl' => ['required', 'url'],
+            'username' => ['required', 'string'],
+            'password' => ['required', 'string'],
+        ])->validate();
     }
 
     protected function backupFile(File $file): void {

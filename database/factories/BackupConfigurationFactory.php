@@ -17,7 +17,7 @@ class BackupConfigurationFactory extends Factory {
     public function definition(): array {
         return [
             'uuid' => fake()->uuid(),
-            'provider_class' => 'App\Backups\ExampleBackupProvider',
+            // provider_class must be set explicitly
             'user_id' => User::factory(),
             'label' => fake()->words(2, true),
             'config' => [],

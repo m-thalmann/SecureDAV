@@ -27,6 +27,23 @@ abstract class AbstractBackupProvider {
     abstract public static function getDisplayInformation(): array;
 
     /**
+     * Returns the config-form template for the provider or null if no template is needed.
+     * This template will be rendered in the backup configuration form (creating and editing).
+     *
+     * @return string|null
+     */
+    abstract public static function getConfigFormTemplate(): string|null;
+
+    /**
+     * Validates the config values for the provider and returns them as an array.
+     *
+     * @throws \Illuminate\Validation\ValidationException If the config values are invalid.
+     *
+     * @param array $config The config values to validate.
+     */
+    abstract public static function validateConfig(array $config): array;
+
+    /**
      * Uploads the latest version of the file to the provider.
      * If the backup did not succeed an exception should be thrown.
      *

@@ -282,6 +282,14 @@ class TestBackupProvider extends AbstractBackupProvider {
         ];
     }
 
+    public static function getConfigFormTemplate(): ?string {
+        return null;
+    }
+
+    public static function validateConfig(array $config): array {
+        return [];
+    }
+
     public function backupFile(File $file): void {
         if ($this->backupFileCallback !== null) {
             call_user_func($this->backupFileCallback, $file);

@@ -10,6 +10,8 @@ use App\Services\FileVersionService;
 use Exception;
 use GuzzleHttp\Client as HttpClient;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 use Mockery;
 use Mockery\MockInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -62,6 +64,39 @@ class WebDavBackupProviderTest extends TestCase {
         $this->assertArrayHasKey('name', $displayInformation);
         $this->assertArrayHasKey('icon', $displayInformation);
         $this->assertArrayHasKey('description', $displayInformation);
+    }
+
+    public function testGetConfigFormTemplateReturnsThePathToTheTemplate(): void {
+        $view = view(WebDavBackupProvider::getConfigFormTemplate());
+
+        $this->assertInstanceOf(View::class, $view);
+    }
+
+    public function testValidateConfigReturnsArrayWithDataIfConfigIsValid(): void {
+        $config = [
+            'method' => 'PUT',
+            'targetUrl' => 'https://example.com/remote.php/dav/files/username/',
+            'username' => 'username',
+            'password' => 'password',
+        ];
+
+        $this->assertEquals(
+            $config,
+            WebDavBackupProvider::validateConfig($config)
+        );
+    }
+
+    public function testValidateConfigThrowsExceptionIfConfigIsNotValid(): void {
+        $config = [
+            'method' => 'INVALID',
+            'targetUrl' => 'https://example.com/remote.php/dav/files/username/',
+            'username' => 'username',
+            'password' => 'password',
+        ];
+
+        $this->expectException(ValidationException::class);
+
+        WebDavBackupProvider::validateConfig($config);
     }
 
     public function testBackupFileUploadsTheLatestVersionToTheTargetUrl(): void {

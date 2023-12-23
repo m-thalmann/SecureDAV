@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Backups\AbstractBackupProvider;
 use App\Models\BackupConfiguration;
 use App\Support\SessionMessage;
 use Illuminate\Http\RedirectResponse;
@@ -40,6 +41,87 @@ class BackupConfigurationController extends Controller {
             'providers' => $providers,
             'configurations' => $configurations,
         ]);
+    }
+
+    public function create(Request $request): View|RedirectResponse {
+        /**
+         * @var AbstractBackupProvider|string|null
+         */
+        $provider = $request->get('provider');
+
+        if ($provider === null) {
+            return back()->with(
+                'snackbar',
+                SessionMessage::error(
+                    __('No provider was selected.')
+                )->forDuration()
+            );
+        }
+
+        $aliases = config('backups.aliases');
+
+        if (array_key_exists($provider, $aliases)) {
+            /**
+             * @var AbstractBackupProvider
+             */
+            $provider = $aliases[$provider];
+        }
+
+        if (!class_exists($provider)) {
+            return back()->with(
+                'snackbar',
+                SessionMessage::error(
+                    __('The selected provider does not exist.')
+                )->forDuration()
+            );
+        }
+
+        $displayInformation = $provider::getDisplayInformation();
+
+        $providerTemplate = $provider::getConfigFormTemplate();
+
+        return view('backups.create', [
+            'provider' => $provider,
+            'displayInformation' => $displayInformation,
+            'providerTemplate' => $providerTemplate,
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse {
+        /**
+         * @var AbstractBackupProvider|string
+         */
+        $provider = $request->get('provider');
+
+        if (!class_exists($provider)) {
+            return back()->with(
+                'snackbar',
+                SessionMessage::error(
+                    __('The selected provider does not exist.')
+                )->forDuration()
+            );
+        }
+
+        $data = $request->validate([
+            'label' => ['required', 'string', 'max:128'],
+        ]);
+
+        $config = $provider::validateConfig($request->all());
+
+        $backupConfiguration = $provider::createConfiguration(
+            authUser(),
+            $config,
+            $data['label']
+        );
+
+        return redirect()
+            ->route('backups.show', $backupConfiguration)
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('Backup configuration successfully created.')
+                )->forDuration()
+            );
     }
 
     public function show(BackupConfiguration $backupConfiguration): View {

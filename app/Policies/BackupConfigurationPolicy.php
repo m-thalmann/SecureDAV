@@ -20,6 +20,10 @@ class BackupConfigurationPolicy {
             : Response::denyAsNotFound();
     }
 
+    public function create(User $user): Response {
+        return Response::allow();
+    }
+
     public function delete(
         User $user,
         BackupConfiguration $backupConfiguration
