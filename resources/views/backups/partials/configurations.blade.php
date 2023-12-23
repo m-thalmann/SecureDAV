@@ -46,7 +46,7 @@
                                 width="w-52"
                             >
                                 <li>
-                                    <a href="#">
+                                    <a href="{{ route('backups.edit', [$configuration]) }}">
                                         <i class="fas fa-edit w-6"></i>
                                         {{ __('Edit') }}
                                     </a>

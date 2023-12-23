@@ -14,6 +14,8 @@ class BackupConfigurationController extends Controller {
         $this->authorizeResource(BackupConfiguration::class);
 
         $this->middleware('password.confirm')->only([
+            'edit',
+            'update',
             'destroy',
         ]);
     }
@@ -131,6 +133,46 @@ class BackupConfigurationController extends Controller {
             'configuration' => $backupConfiguration,
             'displayInformation' => $backupConfiguration->provider_class::getDisplayInformation(),
         ]);
+    }
+
+    public function edit(BackupConfiguration $backupConfiguration): View {
+        $displayInformation = $backupConfiguration->provider_class::getDisplayInformation();
+
+        $providerTemplate = $backupConfiguration->provider_class::getConfigFormTemplate();
+
+        return view('backups.edit', [
+            'configuration' => $backupConfiguration,
+            'provider' => $backupConfiguration->provider_class,
+            'displayInformation' => $displayInformation,
+            'providerTemplate' => $providerTemplate,
+        ]);
+    }
+
+    public function update(
+        Request $request,
+        BackupConfiguration $backupConfiguration
+    ): RedirectResponse {
+        $data = $request->validate([
+            'label' => ['required', 'string', 'max:128'],
+        ]);
+
+        $config = $backupConfiguration->provider_class::validateConfig(
+            $request->all()
+        );
+
+        $backupConfiguration->update([
+            'label' => $data['label'],
+            'config' => $config,
+        ]);
+
+        return redirect()
+            ->route('backups.show', $backupConfiguration)
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('Backup configuration successfully updated.')
+                )->forDuration()
+            );
     }
 
     public function destroy(

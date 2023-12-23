@@ -24,6 +24,15 @@ class BackupConfigurationPolicy {
         return Response::allow();
     }
 
+    public function update(
+        User $user,
+        BackupConfiguration $backupConfiguration
+    ): Response {
+        return $backupConfiguration->user_id === $user->id
+            ? Response::allow()
+            : Response::denyAsNotFound();
+    }
+
     public function delete(
         User $user,
         BackupConfiguration $backupConfiguration

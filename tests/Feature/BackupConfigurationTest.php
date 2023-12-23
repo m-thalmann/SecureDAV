@@ -206,6 +206,109 @@ class BackupConfigurationTest extends TestCase {
         $response->assertNotFound();
     }
 
+    public function testEditConfigurationViewConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+            ]);
+
+        $confirmResponse = $this->get("/backups/{$configuration->uuid}/edit");
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testEditConfigurationViewCanBeRendered(): void {
+        $this->passwordConfirmed();
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+            ]);
+
+        $response = $this->get("/backups/{$configuration->uuid}/edit");
+
+        $response->assertOk();
+
+        $response->assertSee(
+            StubBackupProvider::getDisplayInformation()['name']
+        );
+
+        $response->assertSee($configuration->label);
+    }
+
+    public function testEditConfigurationViewFailsIfConfigurationDoesNotBelongToUser(): void {
+        $otherConfiguration = BackupConfiguration::factory()->create([
+            'provider_class' => StubBackupProvider::class,
+        ]);
+
+        $response = $this->get("/backups/{$otherConfiguration->uuid}/edit");
+
+        $response->assertNotFound();
+    }
+
+    public function testUpdateConfigurationConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+            ]);
+
+        $confirmResponse = $this->put("/backups/{$configuration->uuid}", [
+            'label' => 'Test label',
+        ]);
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testConfigurationCanBeUpdated(): void {
+        $this->passwordConfirmed();
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+            ]);
+
+        $label = 'Test label';
+
+        $response = $this->put("/backups/{$configuration->uuid}", [
+            'label' => $label,
+        ]);
+
+        $response->assertRedirect("/backups/{$configuration->uuid}");
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $this->assertDatabaseHas('backup_configurations', [
+            'id' => $configuration->id,
+            'label' => $label,
+        ]);
+    }
+
+    public function testConfigurationCantBeUpdatedForOtherUser(): void {
+        $configuration = BackupConfiguration::factory()->create([
+            'provider_class' => StubBackupProvider::class,
+        ]);
+
+        $response = $this->put("/backups/{$configuration->uuid}", [
+            'label' => 'Test label',
+        ]);
+
+        $response->assertNotFound();
+
+        $this->assertDatabaseHas('backup_configurations', [
+            'id' => $configuration->id,
+            'label' => $configuration->label,
+        ]);
+    }
+
     public function testDeleteConfigurationConfirmsPassword(): void {
         $this->session(['auth.password_confirmed_at' => null]);
 
