@@ -1,5 +1,9 @@
 <x-app-layout :title="$configuration->label . ' - ' . __('Backups')">
     <x-header-title :iconClass="$displayInformation['icon'] ?? null" :iconUrl="$displayInformation['iconUrl'] ?? null">
+        <x:slot name="icon">
+            <x-backup-provider-icon :configuration="$configuration" :large="true" />
+        </x:slot>
+
         <x:slot name="title">
             {{ $configuration->label }}
         </x:slot>
@@ -45,7 +49,7 @@
         </x-slot>
 
         <div class="actions my-4">
-            <a href="#" class="btn btn-neutral btn-sm">
+            <a href="{{ route('backups.files.create', [$configuration]) }}" class="btn btn-neutral btn-sm">
                 <i class="fa-solid fa-file-circle-plus mr-2"></i>
                 {{ __('Add file to backup') }}
             </a>

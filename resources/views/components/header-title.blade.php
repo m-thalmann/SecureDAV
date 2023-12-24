@@ -1,13 +1,12 @@
 @props([
     'iconClass' => null,
-    'iconUrl' => null,
 ])
 
 <div class="flex gap-4 items-center px-4 sm:px-0">
     @if ($iconClass !== null)
         <i class="{{ $iconClass }} text-3xl"></i>
-    @elseif ($iconUrl !== null)
-        <img src="{{ $iconUrl }}" class="w-7 h-7">
+    @elseif (isset($icon))
+        {{ $icon }}
     @endif
 
     <div>

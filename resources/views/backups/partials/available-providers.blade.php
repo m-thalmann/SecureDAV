@@ -8,11 +8,7 @@
     @foreach ($providers as $provider)
         <div class="rounded-lg bg-base-200 flex flex-row gap-4 items-center p-4 shadow-lg relative">
             <div class="icon">
-                @isset ($provider['displayInformation']['iconUrl'])
-                    <img src="{{ $provider['displayInformation']['iconUrl'] }}" class="w-10 h-10 max-w-none rounded-sm" />
-                @else
-                    <i class="{{ $provider['displayInformation']['icon'] }} text-3xl"></i>
-                @endif
+                <x-backup-provider-icon :provider="$provider['class']" large="true" />
             </div>
 
             <div class="body mr-6">

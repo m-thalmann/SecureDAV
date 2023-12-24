@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Backups;
 
 use App\Models\BackupConfiguration;
 use App\Models\File;

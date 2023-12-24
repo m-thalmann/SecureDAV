@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\BackupConfigurationController;
+use App\Http\Controllers\Backups\BackupConfigurationController;
+use App\Http\Controllers\Backups\BackupConfigurationFileController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\Files\FileController;
@@ -244,6 +245,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->scoped([
             'backup_configuration' => 'uuid',
         ]);
+
+    Route::resource('backups.files', BackupConfigurationFileController::class)
+        ->parameters([
+            'backups' => 'backup_configuration',
+        ])
+        ->scoped([
+            'backup_configuration' => 'uuid',
+            'file' => 'uuid',
+        ])
+        ->only(['create', 'store', 'destroy']);
 
     Route::controller(NotificationController::class)
         ->prefix('notifications')

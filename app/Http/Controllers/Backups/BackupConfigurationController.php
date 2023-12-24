@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Backups;
 
 use App\Backups\AbstractBackupProvider;
+use App\Http\Controllers\Controller;
 use App\Models\BackupConfiguration;
 use App\Support\SessionMessage;
 use Illuminate\Http\RedirectResponse;

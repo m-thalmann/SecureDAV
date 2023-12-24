@@ -23,11 +23,7 @@
                         </td>
                         <td>
                             <span class="flex gap-2 items-center">
-                                @isset ($configuration->provider_class::getDisplayInformation()['iconUrl'])
-                                    <img src="{{ $configuration->provider_class::getDisplayInformation()['iconUrl'] }}" class="w-4 h-4 max-w-none rounded-sm" />
-                                @else
-                                    <i class="{{ $configuration->provider_class::getDisplayInformation()['icon'] }}"></i>
-                                @endif
+                                <x-backup-provider-icon :configuration="$configuration" />
 
                                 <span class="underline underline-offset-4 decoration-dashed" title="{{ $configuration->provider_class::getDisplayInformation()['description'] }}">
                                     {{ $configuration->provider_class::getDisplayInformation()['name'] }}
