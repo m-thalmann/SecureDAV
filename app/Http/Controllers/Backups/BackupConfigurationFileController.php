@@ -107,5 +107,21 @@ class BackupConfigurationFileController extends Controller {
                 )->forDuration()
             );
     }
+
+    public function destroy(
+        BackupConfiguration $backupConfiguration,
+        File $file
+    ): RedirectResponse {
+        $this->authorize('update', $backupConfiguration);
+
+        $backupConfiguration->files()->detach($file);
+
+        return back()->with(
+            'snackbar',
+            SessionMessage::success(
+                __('File successfully removed from backup')
+            )->forDuration()
+        );
+    }
 }
 

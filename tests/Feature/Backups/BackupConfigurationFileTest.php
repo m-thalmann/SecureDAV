@@ -387,4 +387,83 @@ class BackupConfigurationFileTest extends TestCase {
             'file_id' => $file->id,
         ]);
     }
+
+    public function testDeleteBackupConfigurationFileConfirmsPassword(): void {
+        $this->session(['auth.password_confirmed_at' => null]);
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->hasAttached($file)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+            ]);
+
+        $confirmResponse = $this->from(static::REDIRECT_TEST_ROUTE)->delete(
+            "/backups/{$configuration->uuid}/files/{$file->uuid}"
+        );
+        $confirmResponse->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testBackupConfigurationFileCanBeDeleted(): void {
+        $this->passwordConfirmed();
+
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->hasAttached($file)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+            ]);
+
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->delete(
+            "/backups/{$configuration->uuid}/files/{$file->uuid}"
+        );
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $this->assertDatabaseMissing('backup_configuration_files', [
+            'backup_configuration_id' => $configuration->id,
+            'file_id' => $file->id,
+        ]);
+    }
+
+    public function testBackupConfigurationFileCantBeDeletedIfUserCantUpdateWebDavUser(): void {
+        $this->passwordConfirmed();
+
+        $otherUser = $this->createUser();
+
+        $file = File::factory()
+            ->for($otherUser)
+            ->create();
+
+        $configuration = BackupConfiguration::factory()
+            ->for($otherUser)
+            ->hasAttached($file)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+            ]);
+
+        $response = $this->delete(
+            "/backups/{$configuration->uuid}/files/{$file->uuid}"
+        );
+
+        $response->assertNotFound();
+
+        $this->assertDatabaseHas('backup_configuration_files', [
+            'backup_configuration_id' => $configuration->id,
+            'file_id' => $file->id,
+        ]);
+    }
 }

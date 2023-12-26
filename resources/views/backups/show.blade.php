@@ -161,12 +161,21 @@
                             </td>
                             <td>
                                 <x-dropdown :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)" width="w-56">
-                                    <li>
-                                        <button class="hover:bg-error hover:text-error-content">
-                                            <i class="fa-solid fa-circle-minus w-6"></i>
-                                            {{ __('Remove from backup') }}
-                                        </button>
-                                    </li>
+                                    <form
+                                        method="POST"
+                                        action="{{ route('backups.files.destroy', [$configuration, $file]) }}"
+                                        onsubmit="return confirm(`{{ __('Are you sure you want to remove this file from the backup?') }}`)"
+                                    >
+                                        @method('DELETE')
+                                        @csrf
+
+                                        <li>
+                                            <button class="hover:bg-error hover:text-error-content">
+                                                <i class="fa-solid fa-circle-minus w-6"></i>
+                                                {{ __('Remove from backup') }}
+                                            </button>
+                                        </li>
+                                    </form>
                                 </x-dropdown>
                             </td>
                         </tr>
