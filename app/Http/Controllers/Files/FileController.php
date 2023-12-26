@@ -132,7 +132,8 @@ class FileController extends Controller {
         $file
             ->load('latestVersion')
             ->load('versions')
-            ->load('webDavUsers');
+            ->load('webDavUsers')
+            ->load('backupConfigurations');
 
         return view('files.show', [
             'file' => $file,

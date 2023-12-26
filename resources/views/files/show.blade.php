@@ -96,4 +96,6 @@
     @include('files.partials.file-versions')
 
     @include('files.partials.file-web-dav-users')
+
+    @include('files.partials.file-backups')
 </x-app-layout>

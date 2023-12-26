@@ -78,12 +78,6 @@
                             </td>
                         </tr>
                     @endforeach
-
-                    @if (count($file->webDavUsers) === 0)
-                        <tr>
-                            <td colspan="7" class="text-center italic text-base-content/70">{{ __('No WebDav users with access') }}</td>
-                        </tr>
-                    @endif
                 </tbody>
             </table>
         </div>
