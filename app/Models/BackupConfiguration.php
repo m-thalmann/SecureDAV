@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Backups\AbstractBackupProvider;
 use App\Models\Pivots\BackupConfigurationFile;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,6 +36,12 @@ class BackupConfiguration extends Model {
         return $this->belongsToMany(File::class, 'backup_configuration_files')
             ->using(BackupConfigurationFile::class)
             ->withPivot(BackupConfigurationFile::PIVOT_COLUMNS);
+    }
+
+    public function buildProvider(): AbstractBackupProvider {
+        return app()->makeWith($this->provider_class, [
+            'backupConfiguration' => $this,
+        ]);
     }
 }
 

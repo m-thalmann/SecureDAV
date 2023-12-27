@@ -43,6 +43,15 @@
         </x-slot>
     </x-header-title>
 
+    <form action="{{ route('backups.backup', [$configuration]) }}" method="post">
+        @csrf
+
+        <button class="btn btn-primary">
+            <i class="fa-solid fa-play"></i>
+            {{ __('Run backup') }}
+        </button>
+    </form>
+
     <x-card id="files">
         <x-slot name="title" :amount="$configuration->files->count()">
             {{ __('Backed up files') }}
@@ -77,7 +86,7 @@
                             <td class="text-center pr-0">
                                 <i class="{{ $file->fileIcon }} text-xl align-middle"></i>
                             </td>
-                            <td class="pl-2 flex items-center gap-2">
+                            <td class="pl-2">
                                 <div class="text-sm breadcrumbs">
                                     <ul>
                                         <li>
@@ -101,12 +110,6 @@
                                         </li>
                                     </ul>
                                 </div>
-
-                                @if ($file->isEncrypted)
-                                    <span class="tooltip" data-tip="{{ __('Encrypted') }}">
-                                        <i class="fa-solid fa-lock text-primary text-xs"></i>
-                                    </span>
-                                @endif
                             </td>
                             <td class="max-sm:hidden text-right">
                                 @if ($file->latestVersion)

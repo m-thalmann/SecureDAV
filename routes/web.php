@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Backups\BackupConfigurationController;
 use App\Http\Controllers\Backups\BackupConfigurationFileController;
+use App\Http\Controllers\Backups\BackupController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
 use App\Http\Controllers\Files\FileController;
@@ -255,6 +256,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'file' => 'uuid',
         ])
         ->only(['create', 'store', 'destroy']);
+
+    Route::post(
+        'backups/{backup_configuration:uuid}/backup',
+        BackupController::class
+    )->name('backups.backup');
 
     Route::controller(NotificationController::class)
         ->prefix('notifications')
