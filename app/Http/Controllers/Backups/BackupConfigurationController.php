@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Backups;
 use App\Backups\AbstractBackupProvider;
 use App\Http\Controllers\Controller;
 use App\Models\BackupConfiguration;
+use App\Models\FileVersion;
 use App\Support\SessionMessage;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -35,8 +37,40 @@ class BackupConfigurationController extends Controller {
             )
             ->values();
 
+        $upToDateSubQuery = FileVersion::query()
+            ->latestVersion()
+            ->join('files', 'files.id', 'file_versions.file_id')
+            ->join(
+                'backup_configuration_files',
+                'backup_configuration_files.file_id',
+                'files.id'
+            )
+            ->join(
+                'backup_configurations as inner_backup_configurations',
+                'inner_backup_configurations.id',
+                'backup_configuration_files.backup_configuration_id'
+            )
+            ->whereColumn(
+                'inner_backup_configurations.id',
+                'backup_configurations.id'
+            )
+            ->where(function (Builder $query) {
+                $query
+                    ->where(
+                        'backup_configuration_files.last_backup_checksum',
+                        null
+                    )
+                    ->orWhereColumn(
+                        'file_versions.checksum',
+                        '!=',
+                        'backup_configuration_files.last_backup_checksum'
+                    );
+            })
+            ->selectRaw('COUNT(*) = 0');
+
         $configurations = authUser()
             ->backupConfigurations()
+            ->addSelect(['up_to_date' => $upToDateSubQuery])
             ->withCount('files')
             ->paginate(perPage: 10);
 

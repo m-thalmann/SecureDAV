@@ -46,10 +46,23 @@
     <form action="{{ route('backups.backup', [$configuration]) }}" method="post">
         @csrf
 
-        <button class="btn btn-primary">
-            <i class="fa-solid fa-play"></i>
-            {{ __('Run backup') }}
-        </button>
+        <div class="flex gap-4 items-center">
+            <button class="btn btn-primary">
+                <i class="fa-solid fa-play"></i>
+                {{ __('Run backup') }}
+            </button>
+
+            @if ($configuration->started_at !== null)
+                <div class="alert w-fit">
+                    <span class="loading loading-ring loading-md text-primary"></span>
+
+                    <span>
+                        {{ __('This backup is currently running. Starting it again may lead to unwanted side effects.') }}
+                        <div class="text-base-content/50 text-xs"><x-timestamp :timestamp="$configuration->started_at" /></div>
+                    </span>
+                </div>
+            @endif
+        </div>
     </form>
 
     <x-card id="files">
@@ -74,7 +87,7 @@
                         <th>{{ __('Current version') }}</th>
                         <th>{{ __('Last updated') }}</th>
                         <th>{{ __('Last backup error') }}</th>
-                        <th>{{ __('Last successfull backup') }}</th>
+                        <th>{{ __('Last successful backup') }}</th>
                         <th class="w-0">{{ __('Status') }}</th>
                         <th class="w-0"></th>
                     </tr>
@@ -111,7 +124,7 @@
                                     </ul>
                                 </div>
                             </td>
-                            <td class="max-sm:hidden text-right">
+                            <td class="max-sm:hidden text-right whitespace-nowrap">
                                 @if ($file->latestVersion)
                                     {{ Illuminate\Support\Number::fileSize($file->latestVersion->bytes, maxPrecision: 2) }}
                                 @else
@@ -131,10 +144,16 @@
                             </td>
                             <td>
                                 @if ($file->pivot->last_error)
-                                    <span class="text-error">
-                                        {{ $file->pivot->last_error }}
-                                    </span>
-                                    <br>
+                                    <div class="flex items-center gap-2" x-data="{ open: false }">
+                                        <span class="text-error max-w-sm" :class="open || 'line-clamp-2'">
+                                            {{ $file->pivot->last_error }}
+                                        </span>
+
+                                        <button class="btn btn-xs btn-circle" @click="open = !open">
+                                            <i class="fa-solid fa-chevron-up" x-show="open"></i>
+                                            <i class="fa-solid fa-chevron-down" x-show="!open"></i>
+                                        </button>
+                                    </div>
                                     <i class="text-xs">
                                         <x-timestamp :timestamp="$file->pivot->last_error_at" />
                                     </i>

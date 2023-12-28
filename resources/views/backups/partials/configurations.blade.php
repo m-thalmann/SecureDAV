@@ -11,6 +11,7 @@
                     <th>{{ __('Provider') }}</th>
                     <th>{{ __('Files') }}</th>
                     <th>{{ __('Last run') }}</th>
+                    <th class="w-0 text-center">{{ __('Status') }}</th>
                     <th class="w-0"></th>
                 </tr>
             </thead>
@@ -35,6 +36,23 @@
                         </td>
                         <td>
                             <x-timestamp :timestamp="$configuration->last_run_at" :fallback="__('Never')" />
+                        </td>
+                        <td class="text-center">
+                            @if ($configuration->started_at !== null)
+                                <span class="tooltip" data-tip="{{ __('Running') }}">
+                                    <span class="loading loading-ring loading-md text-primary"></span>
+                                </span>
+                            @else
+                                @if ($configuration->up_to_date)
+                                    <span class="tooltip" data-tip="{{ __('Up to date') }}">
+                                        <i class="fa-solid fa-circle-check text-success"></i>
+                                    </span>
+                                @else
+                                    <span class="tooltip" data-tip="{{ __('Outdated') }}">
+                                        <i class="fa-solid fa-circle-exclamation text-error"></i>
+                                    </span>
+                                @endif
+                            @endif
                         </td>
                         <td>
                             <x-dropdown

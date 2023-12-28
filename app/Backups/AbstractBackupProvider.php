@@ -61,6 +61,12 @@ abstract class AbstractBackupProvider {
     public function backup(): bool {
         $success = true;
 
+        $this->backupConfiguration
+            ->forceFill([
+                'started_at' => now(),
+            ])
+            ->save();
+
         foreach ($this->backupConfiguration->files as $file) {
             $latestVersion = $file->latestVersion;
 
@@ -98,6 +104,7 @@ abstract class AbstractBackupProvider {
 
         $this->backupConfiguration
             ->forceFill([
+                'started_at' => null,
                 'last_run_at' => now(),
             ])
             ->save();

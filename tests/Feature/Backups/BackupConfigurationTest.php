@@ -4,6 +4,7 @@ namespace Tests\Feature\Backups;
 
 use App\Models\BackupConfiguration;
 use App\Models\File;
+use App\Models\FileVersion;
 use App\Models\User;
 use App\Support\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -54,6 +55,47 @@ class BackupConfigurationTest extends TestCase {
         foreach ($otherConfigurations as $configuration) {
             $response->assertDontSee($configuration->label);
         }
+    }
+
+    public function testIndexBackupsViewShowsOutdatedBackups(): void {
+        $configurations = BackupConfiguration::factory(2)
+            ->for($this->user)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+            ]);
+
+        $outdatedFile = File::factory()
+            ->for($this->user)
+            ->has(FileVersion::factory(), 'versions')
+            ->hasAttached($configurations->get(0))
+            ->create();
+
+        $fileWithNoVersion = File::factory()
+            ->for($this->user)
+            ->hasAttached($configurations->get(1))
+            ->create();
+
+        $response = $this->get('/backups');
+
+        $response->assertOk();
+
+        $response->assertSee('Outdated'); // outdated file
+        $response->assertSee('Up to date'); // no version file
+    }
+
+    public function testIndexBackupsViewShowsRunningState(): void {
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+                'started_at' => now(),
+            ]);
+
+        $response = $this->get('/backups');
+
+        $response->assertOk();
+
+        $response->assertSee('Running');
     }
 
     public function testCreateViewCanBeRenderedWithProvider(): void {
