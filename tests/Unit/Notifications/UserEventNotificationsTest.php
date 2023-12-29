@@ -2,12 +2,15 @@
 
 namespace Tests\Unit\Notifications;
 
+use App\Events\BackupFailed;
 use App\Events\EmailUpdated;
 use App\Events\PasswordUpdated;
 use App\Events\UserDeleted;
 use App\Events\WebDavResumed;
 use App\Events\WebDavSuspended;
+use App\Models\BackupConfiguration;
 use App\Models\User;
+use App\Notifications\BackupFailedNotification;
 use App\Notifications\EmailUpdatedNotification;
 use App\Notifications\PasswordResetNotification;
 use App\Notifications\PasswordUpdatedNotification;
@@ -25,6 +28,7 @@ use Laravel\Fortify\Events\RecoveryCodeReplaced;
 use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
 use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
 use Tests\TestCase;
+use Tests\TestSupport\StubBackupProvider;
 
 class UserEventNotificationsTest extends TestCase {
     use LazilyRefreshDatabase;
@@ -103,6 +107,47 @@ class UserEventNotificationsTest extends TestCase {
 
             return true;
         });
+    }
+
+    public function testBackupFailedEventSendsNotification(): void {
+        Notification::fake();
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+            ]);
+
+        event(new BackupFailed($configuration));
+
+        Notification::assertSentTo(
+            $this->user,
+            BackupFailedNotification::class,
+            function (BackupFailedNotification $notification) use (
+                $configuration
+            ) {
+                $this->assertEquals(
+                    $configuration->id,
+                    $notification->backupConfiguration->id
+                );
+
+                /**
+                 * @var MailMessage
+                 */
+                $mail = $notification->toMail($this->user);
+                $data = $notification->toArray($this->user);
+
+                $viaConnections = $notification->viaConnections();
+
+                $this->assertEquals($data['title'], $mail->subject);
+                $this->assertEquals($data['body'], $mail->introLines[0]);
+
+                $this->assertArrayHasKey('database', $viaConnections);
+                $this->assertEquals('sync', $viaConnections['database']);
+
+                return true;
+            }
+        );
     }
 
     public static function eventAndNotificationProvider(): array {

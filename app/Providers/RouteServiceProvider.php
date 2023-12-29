@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Jobs\RunBackup;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -43,6 +44,12 @@ class RouteServiceProvider extends ServiceProvider {
     protected function configureRateLimiting() {
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by(authUser()?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('backups', function (RunBackup $job) {
+            return Limit::perMinutes(5, 2)->by(
+                $job->backupConfiguration->user_id
+            );
         });
     }
 }

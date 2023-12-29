@@ -47,6 +47,13 @@
 
                     <p class="text-base-content/75">
                         {{ $notification->data['body'] }}
+
+                        @if (isset($notification->data['action']))
+                            <br>
+                            <a href="{{ $notification->data['action']['url'] }}" class="btn btn-secondary mt-4">
+                                {{ $notification->data['action']['name'] }}
+                            </a>
+                        @endif
                     </p>
 
                     <x-slot name="actions">

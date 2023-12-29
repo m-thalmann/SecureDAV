@@ -2,11 +2,13 @@
 
 namespace App\Listeners;
 
+use App\Events\BackupFailed;
 use App\Events\EmailUpdated;
 use App\Events\PasswordUpdated;
 use App\Events\UserDeleted;
 use App\Events\WebDavResumed;
 use App\Events\WebDavSuspended;
+use App\Notifications\BackupFailedNotification;
 use App\Notifications\EmailUpdatedNotification;
 use App\Notifications\PasswordResetNotification;
 use App\Notifications\PasswordUpdatedNotification;
@@ -80,6 +82,12 @@ class UserEventNotificationSubscriber {
         $event->user->notify(new WebDavResumedNotification($event->user));
     }
 
+    public function handleBackupFailed(BackupFailed $event): void {
+        $event->backupConfiguration->user->notify(
+            new BackupFailedNotification($event->backupConfiguration)
+        );
+    }
+
     public function subscribe(Dispatcher $events): array {
         return [
             EmailUpdated::class => 'handleEmailUpdated',
@@ -93,6 +101,7 @@ class UserEventNotificationSubscriber {
             UserDeleted::class => 'handleUserDeleted',
             WebDavSuspended::class => 'handleWebDavSuspended',
             WebDavResumed::class => 'handleWebDavResumed',
+            BackupFailed::class => 'handleBackupFailed',
         ];
     }
 }
