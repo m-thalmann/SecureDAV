@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Backups\AbstractBackupProvider;
 use App\Models\Pivots\BackupConfigurationFile;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class BackupConfiguration extends Model {
     use HasFactory, HasUuids;
 
-    protected $fillable = ['label', 'config'];
+    protected $fillable = ['label', 'config', 'cron_schedule'];
 
     protected $casts = [
         'config' => 'json',
@@ -27,6 +28,10 @@ class BackupConfiguration extends Model {
 
     public function uniqueIds(): array {
         return ['uuid'];
+    }
+
+    public function scopeWithSchedule(Builder $query): Builder {
+        return $query->whereNot('cron_schedule', null);
     }
 
     public function user(): BelongsTo {

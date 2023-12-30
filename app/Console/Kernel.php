@@ -11,6 +11,8 @@ class Kernel extends ConsoleKernel {
      */
     protected function schedule(Schedule $schedule): void {
         $schedule->command('model:prune')->daily();
+
+        $schedule->command('backups:run-scheduled')->hourly();
     }
 
     /**
@@ -20,3 +22,4 @@ class Kernel extends ConsoleKernel {
         $this->load(__DIR__ . '/Commands');
     }
 }
+

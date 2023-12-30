@@ -145,7 +145,7 @@
                             <td>
                                 @if ($file->pivot->last_error)
                                     <div class="flex items-center gap-2" x-data="{ open: false }">
-                                        <span class="text-error max-w-sm" :class="open || 'line-clamp-2'">
+                                        <span class="text-error max-w-xs" :class="open || 'line-clamp-2'">
                                             {{ $file->pivot->last_error }}
                                         </span>
 
