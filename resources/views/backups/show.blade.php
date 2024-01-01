@@ -65,6 +65,39 @@
         </div>
     </form>
 
+    <x-card id="schedule">
+        <x-slot name="title">
+            {{ __('Schedule') }}
+        </x-slot>
+
+        <div class="mb-2">
+            <a href="#" class="btn btn-sm btn-neutral">
+                <i class="fas fa-pen mr-2"></i>
+                {{ __('Edit schedule') }}
+            </a>
+        </div>
+
+        @if ($configuration->cron_schedule === null)
+            <i class="text-base-content/50">
+                {{ __('This backup is not scheduled to run automatically.') }}
+            </i>
+        @else
+            <span class="font-bold">{{ __('Next runs') }}:</span>
+            <div class="flex gap-4">
+                @foreach ($scheduleInfo['nextRunDates'] as $index => $nextRun)
+                    <div class="flex gap-4 items-center bg-base-300 px-4 py-2 rounded-md shadow-md">
+                        <span class="font-bold">{{ $index + 1 }}.</span>
+                        <span class="h-2/3 w-[1px] bg-base-content/25"></span>
+                        <div class="flex flex-col">
+                            <span class="block">{{ $nextRun->diffForHumans() }}</span>
+                            <small class="text-xs text-base-content/75">{{ $nextRun }}</small>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </x-card>
+
     <x-card id="files">
         <x-slot name="title" :amount="$configuration->files->count()">
             {{ __('Backed up files') }}

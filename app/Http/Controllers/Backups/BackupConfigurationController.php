@@ -7,6 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Models\BackupConfiguration;
 use App\Models\FileVersion;
 use App\Support\SessionMessage;
+use Carbon\Carbon;
+use Cron\CronExpression;
+use DateTime;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -164,9 +167,28 @@ class BackupConfigurationController extends Controller {
     public function show(BackupConfiguration $backupConfiguration): View {
         $backupConfiguration->load(['files.latestVersion', 'files.directory']);
 
+        $scheduleInfo = null;
+
+        if ($backupConfiguration->cron_schedule !== null) {
+            $cronExpression = new CronExpression(
+                $backupConfiguration->cron_schedule
+            );
+
+            $nextRunDates = array_map(
+                fn(DateTime $date) => Carbon::createFromInterface($date),
+                $cronExpression->getMultipleRunDates(total: 4)
+            );
+
+            $scheduleInfo = [
+                'expression' => $cronExpression,
+                'nextRunDates' => $nextRunDates,
+            ];
+        }
+
         return view('backups.show', [
             'configuration' => $backupConfiguration,
             'displayInformation' => $backupConfiguration->provider_class::getDisplayInformation(),
+            'scheduleInfo' => $scheduleInfo,
         ]);
     }
 

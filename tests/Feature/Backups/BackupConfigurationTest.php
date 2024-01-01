@@ -7,6 +7,8 @@ use App\Models\File;
 use App\Models\FileVersion;
 use App\Models\User;
 use App\Support\SessionMessage;
+use Carbon\Carbon;
+use Cron\CronExpression;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 use Tests\TestSupport\StubBackupProvider;
@@ -214,6 +216,25 @@ class BackupConfigurationTest extends TestCase {
 
         foreach ($configuration->files as $file) {
             $response->assertSee($file->name);
+        }
+    }
+
+    public function testShowConfigurationViewShowsInformationAboutSchedule(): void {
+        $cronExpression = new CronExpression('0 * * * *');
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+                'cron_schedule' => $cronExpression->getExpression(),
+            ]);
+
+        $response = $this->get("/backups/{$configuration->uuid}");
+
+        $response->assertOk();
+
+        foreach ($cronExpression->getMultipleRunDates(4) as $runDate) {
+            $response->assertSee(Carbon::createFromInterface($runDate));
         }
     }
 
