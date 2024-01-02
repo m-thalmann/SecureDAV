@@ -71,7 +71,7 @@
         </x-slot>
 
         <div class="mb-2">
-            <a href="#" class="btn btn-sm btn-neutral">
+            <a href="{{ route('backups.schedule.edit', [$configuration]) }}" class="btn btn-sm btn-neutral">
                 <i class="fas fa-pen mr-2"></i>
                 {{ __('Edit schedule') }}
             </a>

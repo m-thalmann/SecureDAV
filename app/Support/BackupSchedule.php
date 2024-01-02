@@ -59,6 +59,11 @@ class BackupSchedule {
         );
     }
 
+    /**
+     * Returns an array with all available schedules as instances of this class.
+     *
+     * @return \App\Support\BackupSchedule[]
+     */
     public static function createAllAvailable(): array {
         return array_map(
             fn(string $expression) => new BackupSchedule($expression),

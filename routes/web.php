@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Backups\BackupConfigurationController;
 use App\Http\Controllers\Backups\BackupConfigurationFileController;
+use App\Http\Controllers\Backups\BackupConfigurationScheduleController;
 use App\Http\Controllers\Backups\BackupController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\DirectoryController;
@@ -238,6 +239,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'file' => 'uuid',
         ])
         ->only(['create', 'store', 'destroy']);
+
+    Route::controller(BackupConfigurationScheduleController::class)
+        ->prefix('backups/{backup_configuration:uuid}/schedule')
+        ->as('backups.schedule.')
+        ->group(function () {
+            Route::get('/', 'edit')->name('edit');
+            Route::put('/', 'update')->name('update');
+        });
 
     Route::resource('backups', BackupConfigurationController::class)
         ->parameters([
