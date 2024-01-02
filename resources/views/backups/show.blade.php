@@ -83,7 +83,7 @@
             </i>
         @else
             <span class="font-bold">{{ __('Next runs') }}:</span>
-            <div class="flex gap-4">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 @foreach ($scheduleInfo['nextRunDates'] as $index => $nextRun)
                     <div class="flex gap-4 items-center bg-base-300 px-4 py-2 rounded-md shadow-md">
                         <span class="font-bold">{{ $index + 1 }}.</span>

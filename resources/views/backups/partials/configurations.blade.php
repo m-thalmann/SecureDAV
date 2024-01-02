@@ -11,6 +11,7 @@
                     <th>{{ __('Provider') }}</th>
                     <th>{{ __('Files') }}</th>
                     <th>{{ __('Last run') }}</th>
+                    <th class="w-0">{{ __('Next scheduled run') }}</th>
                     <th class="w-0 text-center">{{ __('Status') }}</th>
                     <th class="w-0"></th>
                 </tr>
@@ -37,6 +38,9 @@
                         <td>
                             <x-timestamp :timestamp="$configuration->last_run_at" :fallback="__('Never')" />
                         </td>
+                        <td>
+                            <x-timestamp :timestamp="$configuration->schedule?->getNextRunDate()" />
+                        </td>
                         <td class="text-center">
                             @if ($configuration->started_at !== null)
                                 <span class="tooltip" data-tip="{{ __('Running') }}">
@@ -45,11 +49,11 @@
                             @else
                                 @if ($configuration->up_to_date)
                                     <span class="tooltip" data-tip="{{ __('Up to date') }}">
-                                        <i class="fa-solid fa-circle-check text-success"></i>
+                                        <i class="fa-solid fa-circle-check text-success text-lg"></i>
                                     </span>
                                 @else
                                     <span class="tooltip" data-tip="{{ __('Outdated') }}">
-                                        <i class="fa-solid fa-circle-exclamation text-error"></i>
+                                        <i class="fa-solid fa-circle-exclamation text-error text-lg"></i>
                                     </span>
                                 @endif
                             @endif

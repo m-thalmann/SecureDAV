@@ -4,7 +4,9 @@ namespace App\Models;
 
 use App\Backups\AbstractBackupProvider;
 use App\Models\Pivots\BackupConfigurationFile;
+use App\Support\BackupSchedule;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -42,6 +44,18 @@ class BackupConfiguration extends Model {
         return $this->belongsToMany(File::class, 'backup_configuration_files')
             ->using(BackupConfigurationFile::class)
             ->withPivot(BackupConfigurationFile::PIVOT_COLUMNS);
+    }
+
+    protected function schedule(): Attribute {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                if ($attributes['cron_schedule'] === null) {
+                    return null;
+                }
+
+                return new BackupSchedule($attributes['cron_schedule']);
+            }
+        );
     }
 
     public function buildProvider(): AbstractBackupProvider {
