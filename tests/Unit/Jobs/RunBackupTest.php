@@ -3,7 +3,7 @@
 namespace Tests\Unit\Jobs;
 
 use App\Events\BackupFailed;
-use App\Jobs\RunBackup;
+use App\Jobs\RunBackup as BaseRunBackup;
 use App\Models\BackupConfiguration;
 use Exception;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -48,8 +48,51 @@ class RunBackupTest extends TestCase {
                 $event->backupConfiguration->id
             );
 
+            $this->assertFalse($event->rateLimited);
+
             return true;
         });
+    }
+
+    public function testBackupIsRateLimited(): void {
+        for ($i = 0; $i < RunBackup::RATE_LIMITER_ATTEMPTS; $i++) {
+            $this->assertFalse(
+                RunBackup::isRateLimited($this->backupConfiguration)
+            );
+
+            RunBackup::dispatchSync($this->backupConfiguration);
+        }
+
+        $this->assertTrue(RunBackup::isRateLimited($this->backupConfiguration));
+    }
+
+    public function testEventIsDispatchedWhenRateLimited(): void {
+        Event::fake([BackupFailed::class]);
+
+        for ($i = 0; $i < RunBackup::RATE_LIMITER_ATTEMPTS + 1; $i++) {
+            RunBackup::dispatchSync($this->backupConfiguration);
+        }
+
+        Event::assertDispatched(BackupFailed::class, function (
+            BackupFailed $event
+        ) {
+            $this->assertEquals(
+                $this->backupConfiguration->id,
+                $event->backupConfiguration->id
+            );
+
+            $this->assertTrue($event->rateLimited);
+
+            return true;
+        });
+    }
+}
+
+class RunBackup extends BaseRunBackup {
+    public static function getRateLimiterKey(
+        BackupConfiguration $backupConfiguration
+    ): string {
+        return parent::getRateLimiterKey($backupConfiguration);
     }
 }
 

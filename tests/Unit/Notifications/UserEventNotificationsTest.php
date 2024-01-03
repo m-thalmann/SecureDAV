@@ -131,6 +131,51 @@ class UserEventNotificationsTest extends TestCase {
                     $notification->backupConfiguration->id
                 );
 
+                $this->assertFalse($notification->rateLimited);
+
+                /**
+                 * @var MailMessage
+                 */
+                $mail = $notification->toMail($this->user);
+                $data = $notification->toArray($this->user);
+
+                $viaConnections = $notification->viaConnections();
+
+                $this->assertEquals($data['title'], $mail->subject);
+                $this->assertEquals($data['body'], $mail->introLines[0]);
+
+                $this->assertArrayHasKey('database', $viaConnections);
+                $this->assertEquals('sync', $viaConnections['database']);
+
+                return true;
+            }
+        );
+    }
+
+    public function testBackupFailedEventWithRateLimitingSendsNotification(): void {
+        Notification::fake();
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+            ]);
+
+        event(new BackupFailed($configuration, rateLimited: true));
+
+        Notification::assertSentTo(
+            $this->user,
+            BackupFailedNotification::class,
+            function (BackupFailedNotification $notification) use (
+                $configuration
+            ) {
+                $this->assertEquals(
+                    $configuration->id,
+                    $notification->backupConfiguration->id
+                );
+
+                $this->assertTrue($notification->rateLimited);
+
                 /**
                  * @var MailMessage
                  */

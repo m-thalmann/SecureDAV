@@ -8,12 +8,15 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\RateLimiter;
 use Throwable;
 
 class RunBackup implements ShouldQueue {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected const RATE_LIMITER_KEY = 'backup';
+    public const RATE_LIMITER_ATTEMPTS = 1;
 
     public BackupConfiguration $backupConfiguration;
 
@@ -22,6 +25,18 @@ class RunBackup implements ShouldQueue {
     }
 
     public function handle(): void {
+        if (static::isRateLimited($this->backupConfiguration)) {
+            event(
+                new BackupFailed($this->backupConfiguration, rateLimited: true)
+            );
+
+            return;
+        }
+
+        $rateLimiterKey = static::getRateLimiterKey($this->backupConfiguration);
+
+        RateLimiter::hit($rateLimiterKey);
+
         $success = false;
 
         try {
@@ -34,8 +49,21 @@ class RunBackup implements ShouldQueue {
         }
     }
 
-    public function middleware(): array {
-        return [new RateLimited('backups')];
+    public static function isRateLimited(
+        BackupConfiguration $backupConfiguration
+    ): bool {
+        $rateLimiterKey = static::getRateLimiterKey($backupConfiguration);
+
+        return RateLimiter::tooManyAttempts(
+            $rateLimiterKey,
+            static::RATE_LIMITER_ATTEMPTS
+        );
+    }
+
+    public static function getRateLimiterKey(
+        BackupConfiguration $backupConfiguration
+    ): string {
+        return static::RATE_LIMITER_KEY . ':' . $backupConfiguration->id;
     }
 }
 

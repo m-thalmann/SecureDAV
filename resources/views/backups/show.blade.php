@@ -82,6 +82,9 @@
                 {{ __('This backup is not scheduled to run automatically.') }}
             </i>
         @else
+            <span class="font-bold">{{ __('Selected') }}:</span>
+            <div class="mb-4">{{ $configuration->schedule->getName() ?? __('Custom') }}</div>
+
             <span class="font-bold">{{ __('Next runs') }}:</span>
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 @foreach ($scheduleInfo['nextRunDates'] as $index => $nextRun)

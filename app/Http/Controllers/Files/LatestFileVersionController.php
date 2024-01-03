@@ -113,7 +113,7 @@ class LatestFileVersionController extends Controller {
                     __(
                         'This file doesn\'t have a version yet. Upload a file to create a new one.'
                     )
-                )
+                )->forDuration()
             );
     }
 }

@@ -12,7 +12,8 @@ class BackupFailedNotification extends Notification implements ShouldQueue {
     use Queueable;
 
     public function __construct(
-        public readonly BackupConfiguration $backupConfiguration
+        public readonly BackupConfiguration $backupConfiguration,
+        public readonly bool $rateLimited = false
     ) {
     }
 
@@ -38,11 +39,17 @@ class BackupFailedNotification extends Notification implements ShouldQueue {
     }
 
     public function toArray(object $notifiable): array {
+        $body = $this->rateLimited
+            ? __(
+                'A backup of your files could not be started because you have exceeded the maximum number of allowed backup attempts. Please try again later.'
+            )
+            : __(
+                'A backup of your files has failed. Please check your backup configuration and try again.'
+            );
+
         return [
             'title' => __('Backup failed'),
-            'body' => __(
-                'A backup of your files has failed. Please check your backup configuration and try again.'
-            ),
+            'body' => $body,
             'action' => [
                 'name' => __('Go to backup'),
                 'url' => route('backups.show', $this->backupConfiguration),

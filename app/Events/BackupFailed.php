@@ -9,7 +9,8 @@ class BackupFailed {
     use SerializesModels;
 
     public function __construct(
-        public readonly BackupConfiguration $backupConfiguration
+        public readonly BackupConfiguration $backupConfiguration,
+        public readonly bool $rateLimited = false
     ) {
     }
 }

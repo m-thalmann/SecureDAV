@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Support\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 use Tests\TestSupport\StubBackupProvider;
 
@@ -59,6 +60,38 @@ class BackupTest extends TestCase {
 
             return true;
         });
+    }
+
+    public function testShowsErrorWhenBackupIsRateLimited(): void {
+        Queue::fake();
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->hasAttached(
+                File::factory()
+                    ->for($this->user)
+                    ->has(FileVersion::factory(), 'versions')
+            )
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+            ]);
+
+        for ($i = 0; $i < RunBackup::RATE_LIMITER_ATTEMPTS; $i++) {
+            RateLimiter::hit(RunBackup::getRateLimiterKey($configuration));
+        }
+
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->post(
+            "/backups/{$configuration->uuid}/backup"
+        );
+
+        $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR
+        );
+
+        Queue::assertNothingPushed();
     }
 
     public function testBackupCannotBeRunForOtherUser(): void {

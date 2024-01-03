@@ -84,7 +84,10 @@ class UserEventNotificationSubscriber {
 
     public function handleBackupFailed(BackupFailed $event): void {
         $event->backupConfiguration->user->notify(
-            new BackupFailedNotification($event->backupConfiguration)
+            new BackupFailedNotification(
+                $event->backupConfiguration,
+                $event->rateLimited
+            )
         );
     }
 
