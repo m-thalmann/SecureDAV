@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\FileAlreadyExistsException;
 use App\Exceptions\FileWriteException;
 use App\Exceptions\NoVersionFoundException;
+use App\Exceptions\StreamWriteException;
 use App\Models\File;
 use App\Models\FileVersion;
 use App\Support\FileInfo;
@@ -22,7 +23,7 @@ class FileVersionService {
     protected const TMP_SUFFIX = '.tmp';
 
     public function __construct(
-        protected FileEncryptionService $fileEncryptionService,
+        protected EncryptionService $encryptionService,
         protected FilesystemAdapter $storage
     ) {
     }
@@ -264,11 +265,15 @@ class FileVersionService {
             processResource(fopen($outputPath, 'w'), function (
                 mixed $outputResource
             ) use ($resource, $encryptionKey) {
-                $this->fileEncryptionService->encrypt(
-                    $encryptionKey,
-                    $resource,
-                    $outputResource
-                );
+                try {
+                    $this->encryptionService->encrypt(
+                        $encryptionKey,
+                        $resource,
+                        $outputResource
+                    );
+                } catch (StreamWriteException $e) {
+                    throw new FileWriteException($e->getMessage());
+                }
             });
         }
 
@@ -303,7 +308,7 @@ class FileVersionService {
         $readStream = $this->storage->readStream($version->storage_path);
 
         if ($file->isEncrypted) {
-            $this->fileEncryptionService->decrypt(
+            $this->encryptionService->decrypt(
                 $file->encryption_key,
                 $readStream,
                 $outputStream

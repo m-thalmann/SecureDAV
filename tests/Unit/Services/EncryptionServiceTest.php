@@ -2,27 +2,27 @@
 
 namespace Tests\Unit\Services;
 
-use App\Exceptions\FileWriteException;
-use App\Services\FileEncryptionService;
+use App\Exceptions\StreamWriteException;
+use App\Services\EncryptionService;
 use Exception;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
-class FileEncryptionServiceTest extends TestCase {
-    protected FileEncryptionService $service;
+class EncryptionServiceTest extends TestCase {
+    protected EncryptionService $service;
 
     protected string $inputPath;
     protected string $encryptedPath;
     protected string $decryptedPath;
 
     protected string $encryptionKey;
-    protected string $testData = 'This file was created to test the file encryption service of the secure-dav project.';
+    protected string $testData = 'This file was created to test the encryption service of the secure-dav project.';
 
     protected function setUp(): void {
         parent::setUp();
 
-        $this->service = new FileEncryptionService();
+        $this->service = new EncryptionService();
 
         $tempDir = sys_get_temp_dir();
 
@@ -49,7 +49,7 @@ class FileEncryptionServiceTest extends TestCase {
         }
     }
 
-    public function testFileCanBeEncrypted(): void {
+    public function testStreamCanBeEncrypted(): void {
         $inputResource = fopen($this->inputPath, 'rb');
         $encryptedResource = fopen($this->encryptedPath, 'w');
 
@@ -72,14 +72,14 @@ class FileEncryptionServiceTest extends TestCase {
         );
     }
 
-    public function testFileCantBeEncryptedIfPassedResourcesAreNotValid(): void {
+    public function testStreamCantBeEncryptedIfPassedResourcesAreNotValid(): void {
         $this->expectException(InvalidArgumentException::class);
 
         $this->service->encrypt($this->encryptionKey, 'invalid', 'invalid');
     }
 
     public function testEncryptThrowsAnExceptionIfOutputIsNotWritable(): void {
-        $this->expectException(FileWriteException::class);
+        $this->expectException(StreamWriteException::class);
 
         $inputResource = fopen($this->inputPath, 'rb');
         $encryptedResource = fopen($this->encryptedPath, 'r');
@@ -101,7 +101,7 @@ class FileEncryptionServiceTest extends TestCase {
         fclose($encryptedResource);
     }
 
-    public function testFileCanBeDecrypted(): void {
+    public function testStreamCanBeDecrypted(): void {
         $inputResource = fopen($this->inputPath, 'rb');
         $encryptedResource = fopen($this->encryptedPath, 'w');
 
@@ -132,13 +132,13 @@ class FileEncryptionServiceTest extends TestCase {
         );
     }
 
-    public function testFileCantBeDecryptedIfPassedResourcesAreNotValid(): void {
+    public function testStreamCantBeDecryptedIfPassedResourcesAreNotValid(): void {
         $this->expectException(InvalidArgumentException::class);
 
         $this->service->decrypt($this->encryptionKey, 'invalid', 'invalid');
     }
 
-    public function testFileCantBeDecryptedWithWrongKey(): void {
+    public function testStreamCantBeDecryptedWithWrongKey(): void {
         $inputResource = fopen($this->inputPath, 'rb');
         $encryptedResource = fopen($this->encryptedPath, 'w');
 
@@ -167,7 +167,7 @@ class FileEncryptionServiceTest extends TestCase {
     }
 
     public function testDecryptThrowsAnExceptionIfOutputIsNotWritable(): void {
-        $this->expectException(FileWriteException::class);
+        $this->expectException(StreamWriteException::class);
 
         $inputResource = fopen($this->inputPath, 'rb');
         $encryptedResource = fopen($this->encryptedPath, 'w');
@@ -201,3 +201,4 @@ class FileEncryptionServiceTest extends TestCase {
         fclose($decryptedResource);
     }
 }
+

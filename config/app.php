@@ -185,7 +185,7 @@ return [
              * Custom Service Providers...
              */
 
-            App\Providers\FileEncryptionServiceProvider::class,
+            App\Providers\EncryptionServiceProvider::class,
             App\Providers\FileVersionServiceProvider::class,
         ])
         ->toArray(),

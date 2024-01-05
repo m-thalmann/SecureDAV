@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
-use App\Services\FileEncryptionService;
+use App\Services\EncryptionService;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 
-class FileEncryptionServiceProvider extends ServiceProvider implements
+class EncryptionServiceProvider extends ServiceProvider implements
     DeferrableProvider {
     /**
      * Register services.
@@ -14,8 +14,8 @@ class FileEncryptionServiceProvider extends ServiceProvider implements
      * @return void
      */
     public function register() {
-        $this->app->singleton(FileEncryptionService::class, function ($app) {
-            return new FileEncryptionService();
+        $this->app->singleton(EncryptionService::class, function ($app) {
+            return new EncryptionService();
         });
     }
 
@@ -25,6 +25,7 @@ class FileEncryptionServiceProvider extends ServiceProvider implements
      * @return array
      */
     public function provides() {
-        return [FileEncryptionService::class];
+        return [EncryptionService::class];
     }
 }
+

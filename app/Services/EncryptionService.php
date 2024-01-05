@@ -2,23 +2,23 @@
 
 namespace App\Services;
 
-use App\Exceptions\FileWriteException;
+use App\Exceptions\StreamWriteException;
 use InvalidArgumentException;
 
-class FileEncryptionService {
-    protected const FILE_ENCRYPTION_BLOCKS = 10000;
+class EncryptionService {
+    protected const ENCRYPTION_BLOCKS = 10000;
     protected const CIPHER = 'AES-128-CBC';
 
     /**
-     * Encrypts the given file with the given key and writes the result into the given output file.
-     * Does not close the file pointers.
+     * Encrypts the given stream with the given key and writes the result into the given output stream.
+     * Does **not** close the pointers.
      *
      * @param string $key
      * @param resource $inputResource
      * @param resource $outputResource
      *
      * @throws \InvalidArgumentException
-     * @throws \App\Exceptions\FileWriteException
+     * @throws \App\Exceptions\StreamWriteException
      */
     public function encrypt(
         string $key,
@@ -27,7 +27,7 @@ class FileEncryptionService {
     ): void {
         if (!is_resource($inputResource) || !is_resource($outputResource)) {
             throw new InvalidArgumentException(
-                'Resources must be valid file pointers.'
+                'Resources must be valid streams.'
             );
         }
 
@@ -35,13 +35,13 @@ class FileEncryptionService {
         $iv = openssl_random_pseudo_bytes($ivLength);
 
         if (@fwrite($outputResource, $iv) === false) {
-            throw new FileWriteException();
+            throw new StreamWriteException();
         }
 
         while (!feof($inputResource)) {
             $plainText = fread(
                 $inputResource,
-                $ivLength * static::FILE_ENCRYPTION_BLOCKS
+                $ivLength * static::ENCRYPTION_BLOCKS
             );
 
             $cipherText = openssl_encrypt(
@@ -58,15 +58,15 @@ class FileEncryptionService {
     }
 
     /**
-     * Decrypts the given file with the given key and writes the result into the given output file.
-     * Does not close the file pointers.
+     * Decrypts the given stream with the given key and writes the result into the given output stream.
+     * Does **not** close the pointers.
      *
      * @param string $key
      * @param resource $inputResource
      * @param resource $outputResource
      *
      * @throws \InvalidArgumentException
-     * @throws \App\Exceptions\FileWriteException
+     * @throws \App\Exceptions\StreamWriteException
      */
     public function decrypt(
         string $key,
@@ -75,7 +75,7 @@ class FileEncryptionService {
     ): void {
         if (!is_resource($inputResource) || !is_resource($outputResource)) {
             throw new InvalidArgumentException(
-                'Resources must be valid file pointers.'
+                'Resources must be valid streams.'
             );
         }
 
@@ -85,7 +85,7 @@ class FileEncryptionService {
         while (!feof($inputResource)) {
             $cipherText = fread(
                 $inputResource,
-                $ivLength * (static::FILE_ENCRYPTION_BLOCKS + 1)
+                $ivLength * (static::ENCRYPTION_BLOCKS + 1)
             );
             $plainText = openssl_decrypt(
                 $cipherText,
@@ -98,8 +98,9 @@ class FileEncryptionService {
             $iv = substr($plainText, 0, $ivLength);
 
             if (@fwrite($outputResource, $plainText) === false) {
-                throw new FileWriteException();
+                throw new StreamWriteException();
             }
         }
     }
 }
+

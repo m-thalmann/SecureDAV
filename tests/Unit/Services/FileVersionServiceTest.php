@@ -5,9 +5,10 @@ namespace Tests\Unit\Services;
 use App\Exceptions\FileAlreadyExistsException;
 use App\Exceptions\FileWriteException;
 use App\Exceptions\NoVersionFoundException;
+use App\Exceptions\StreamWriteException;
 use App\Models\File;
 use App\Models\FileVersion;
-use App\Services\FileEncryptionService;
+use App\Services\EncryptionService;
 use App\Services\FileVersionService;
 use App\Support\FileInfo;
 use Closure;
@@ -26,20 +27,18 @@ class FileVersionServiceTest extends TestCase {
 
     protected FileVersionServiceTestClass|MockInterface $service;
 
-    protected FileEncryptionService|MockInterface $fileEncryptionServiceMock;
+    protected EncryptionService|MockInterface $encryptionServiceMock;
 
     protected function setUp(): void {
         parent::setUp();
 
-        $this->fileEncryptionServiceMock = Mockery::mock(
-            FileEncryptionService::class
-        );
+        $this->encryptionServiceMock = Mockery::mock(EncryptionService::class);
 
         /**
          * @var FileVersionServiceTestClass|MockInterface
          */
         $this->service = Mockery::mock(FileVersionServiceTestClass::class, [
-            $this->fileEncryptionServiceMock,
+            $this->encryptionServiceMock,
             $this->storageFake,
         ]);
 
@@ -561,7 +560,7 @@ class FileVersionServiceTest extends TestCase {
         $content = fake()->text();
         $resource = $this->createStream($content);
 
-        $this->fileEncryptionServiceMock
+        $this->encryptionServiceMock
             ->shouldReceive('encrypt')
             ->withArgs(function (
                 string $key,
@@ -623,7 +622,7 @@ class FileVersionServiceTest extends TestCase {
 
         $resource = $this->createStream($content);
 
-        $this->fileEncryptionServiceMock
+        $this->encryptionServiceMock
             ->shouldReceive('encrypt')
             ->withArgs(function (
                 string $key,
@@ -659,16 +658,16 @@ class FileVersionServiceTest extends TestCase {
     }
 
     public function testStoreFileFailsIfTheEncryptionFails(): void {
-        $this->expectException(FileWriteException::class);
+        $this->expectException(StreamWriteException::class);
 
         $path = 'test-path';
 
         $resource = $this->createStream(fake()->text());
 
-        $this->fileEncryptionServiceMock
+        $this->encryptionServiceMock
             ->shouldReceive('encrypt')
             ->once()
-            ->andThrow(new FileWriteException());
+            ->andThrow(new StreamWriteException());
 
         try {
             $this->service->storeFile(
@@ -782,7 +781,7 @@ class FileVersionServiceTest extends TestCase {
             '==encrypted-content=='
         );
 
-        $this->fileEncryptionServiceMock
+        $this->encryptionServiceMock
             ->shouldReceive('decrypt')
             ->withArgs(function (
                 string $key,

@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Services\FileEncryptionService;
+use App\Services\EncryptionService;
 use App\Services\FileVersionService;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\Facades\Storage;
@@ -18,7 +18,7 @@ class FileVersionServiceProvider extends ServiceProvider implements
     public function register() {
         $this->app->singleton(FileVersionService::class, function ($app) {
             return new FileVersionService(
-                $app->make(FileEncryptionService::class),
+                $app->make(EncryptionService::class),
                 Storage::disk('files')
             );
         });
@@ -33,3 +33,4 @@ class FileVersionServiceProvider extends ServiceProvider implements
         return [FileVersionService::class];
     }
 }
+

@@ -5,7 +5,7 @@ namespace Tests\Feature\Files;
 use App\Models\File;
 use App\Models\FileVersion;
 use App\Models\User;
-use App\Services\FileEncryptionService;
+use App\Services\EncryptionService;
 use App\Services\FileVersionService;
 use App\Support\SessionMessage;
 use Exception;
@@ -35,7 +35,7 @@ class LatestFileVersionTest extends TestCase {
         $fileVersionServiceSpy = $this->instance(
             FileVersionService::class,
             Mockery::spy(FileVersionService::class, [
-                Mockery::mock(FileEncryptionService::class),
+                Mockery::mock(EncryptionService::class),
                 $this->storageFake,
             ])
         )->makePartial();
