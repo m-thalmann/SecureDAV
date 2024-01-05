@@ -658,7 +658,7 @@ class FileVersionServiceTest extends TestCase {
     }
 
     public function testStoreFileFailsIfTheEncryptionFails(): void {
-        $this->expectException(StreamWriteException::class);
+        $this->expectException(FileWriteException::class);
 
         $path = 'test-path';
 

@@ -101,18 +101,24 @@ class HelpersTest extends TestCase {
         $this->assertNull(authUser());
     }
 
-    public function testProcessResourcePassesTheResourceToTheCallback(): void {
-        $contents = 'test contents';
+    public function testProcessResourcesPassesTheResourcesToTheCallback(): void {
+        $contents1 = 'test contents 1';
+        $contents2 = 'test contents 2';
 
-        $stream = $this->createStream($contents);
+        $stream1 = $this->createStream($contents1);
+        $stream2 = $this->createStream($contents2);
 
         $expectedResponse = 'test response';
 
-        $response = processResource($stream, function (
-            mixed $receivedStream
-        ) use ($stream, $expectedResponse) {
-            $this->assertIsResource($receivedStream);
-            $this->assertEquals($stream, $receivedStream);
+        $response = processResources([$stream1, $stream2], function (
+            array $receivedStreams
+        ) use ($stream1, $stream2, $expectedResponse) {
+            foreach ($receivedStreams as $receivedStream) {
+                $this->assertIsResource($receivedStream);
+            }
+
+            $this->assertEquals($stream1, $receivedStreams[0]);
+            $this->assertEquals($stream2, $receivedStreams[1]);
 
             return $expectedResponse;
         });
@@ -120,60 +126,76 @@ class HelpersTest extends TestCase {
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testProcessResourceClosesTheStreamAfterTheCallbackIsFinished(): void {
-        $stream = $this->createStream('test contents');
+    public function testProcessResourcesClosesTheStreamsAfterTheCallbackIsFinished(): void {
+        $stream1 = $this->createStream('test contents');
+        $stream2 = $this->createStream('test contents');
 
-        $resource = processResource($stream, function (mixed $receivedStream) {
-            $this->assertIsNotClosedResource($receivedStream);
-
-            return $receivedStream;
-        });
-
-        $this->assertIsClosedResource($resource);
-    }
-
-    public function testProcessResourceDoesNotCloseStreamIfIsAlreadyClosedAfterTheCallbackIsFinished(): void {
-        $stream = $this->createStream('test contents');
-
-        fclose($stream);
-
-        $resource = processResource($stream, function (mixed $receivedStream) {
-            $this->assertIsClosedResource($receivedStream);
-
-            return $receivedStream;
-        });
-
-        $this->assertIsClosedResource($resource);
-    }
-
-    public function testProcessResourceClosesTheStreamOnExceptionAndRethrows(): void {
-        $expectedException = new Exception('test exception');
-
-        $stream = $this->createStream('test contents');
-
-        $this->expectExceptionObject($expectedException);
-
-        $resource = null;
-
-        try {
-            processResource($stream, function (mixed $receivedStream) use (
-                $expectedException,
-                &$resource
-            ) {
+        $resources = processResources([$stream1, $stream2], function (
+            array $receivedStreams
+        ) {
+            foreach ($receivedStreams as $receivedStream) {
                 $this->assertIsNotClosedResource($receivedStream);
+            }
 
-                $resource = $receivedStream;
+            return $receivedStreams;
+        });
+
+        foreach ($resources as $resource) {
+            $this->assertIsClosedResource($resource);
+        }
+    }
+
+    public function testProcessResourcesDoesNotCloseStreamIfIsAlreadyClosedAfterTheCallbackIsFinished(): void {
+        $stream = $this->createStream('test contents');
+
+        fclose($stream);
+
+        $resource = processResources([$stream], function (
+            array $receivedStreams
+        ) {
+            $this->assertIsClosedResource($receivedStreams[0]);
+
+            return $receivedStreams[0];
+        });
+
+        $this->assertIsClosedResource($resource);
+    }
+
+    public function testProcessResourcesClosesTheStreamsOnExceptionAndRethrows(): void {
+        $expectedException = new Exception('test exception');
+
+        $stream1 = $this->createStream('test contents');
+        $stream2 = $this->createStream('test contents');
+
+        $this->expectExceptionObject($expectedException);
+
+        /**
+         * @var resource[]|null
+         */
+        $resources = null;
+
+        try {
+            processResources([$stream1, $stream2], function (
+                array $receivedStreams
+            ) use ($expectedException, &$resources) {
+                foreach ($receivedStreams as $receivedStream) {
+                    $this->assertIsNotClosedResource($receivedStream);
+                }
+
+                $resources = $receivedStreams;
 
                 throw $expectedException;
             });
         } catch (Exception $e) {
-            $this->assertIsClosedResource($resource);
+            foreach ($resources as $resource) {
+                $this->assertIsClosedResource($resource);
+            }
 
             throw $e;
         }
     }
 
-    public function testProcessResourceDoesNotCloseStreamIfIsAlreadyClosedOnException(): void {
+    public function testProcessResourcesDoesNotCloseStreamIfIsAlreadyClosedOnException(): void {
         $expectedException = new Exception('test exception');
 
         $stream = $this->createStream('test contents');
@@ -185,13 +207,13 @@ class HelpersTest extends TestCase {
         $resource = null;
 
         try {
-            processResource($stream, function (mixed $receivedStream) use (
+            processResources([$stream], function (array $receivedStreams) use (
                 $expectedException,
                 &$resource
             ) {
-                $this->assertIsClosedResource($receivedStream);
+                $this->assertIsClosedResource($receivedStreams[0]);
 
-                $resource = $receivedStream;
+                $resource = $receivedStreams[0];
 
                 throw $expectedException;
             });
@@ -202,7 +224,7 @@ class HelpersTest extends TestCase {
         }
     }
 
-    public function testProcessResourceExecutesExceptionCallbackOnException(): void {
+    public function testProcessResourcesExecutesExceptionCallbackOnException(): void {
         $expectedException = new Exception('test exception');
 
         $stream = $this->createStream('test contents');
@@ -214,13 +236,13 @@ class HelpersTest extends TestCase {
         $callbackExecuted = false;
 
         try {
-            processResource(
-                $stream,
-                function (mixed $receivedStream) use (
+            processResources(
+                [$stream],
+                function (mixed $receivedStreams) use (
                     $expectedException,
                     &$resource
                 ) {
-                    $resource = $receivedStream;
+                    $resource = $receivedStreams[0];
 
                     throw $expectedException;
                 },
@@ -242,6 +264,25 @@ class HelpersTest extends TestCase {
 
             throw $e;
         }
+    }
+
+    public function testProcessResourceUsesProcessResourcesFunction(): void {
+        $stream = $this->createStream('test contents');
+
+        $expectedResponse = 'test response';
+
+        $response = processResource($stream, function (
+            mixed $receivedStream
+        ) use ($stream, $expectedResponse) {
+            $this->assertIsResource($receivedStream);
+            $this->assertEquals($stream, $receivedStream);
+
+            return $expectedResponse;
+        });
+
+        $this->assertEquals($expectedResponse, $response);
+
+        $this->assertIsClosedResource($stream);
     }
 
     public function testPreviousUrlReturnsThePreviousUrl(): void {
@@ -266,6 +307,37 @@ class HelpersTest extends TestCase {
         $this->get($current);
 
         $this->assertEquals($fallback, previousUrl($fallback));
+    }
+
+    public function testCreateStreamCreatesAStream(): void {
+        $stream = createStream();
+
+        $this->assertIsResource($stream);
+        $this->assertIsNotClosedResource($stream);
+
+        $this->assertEmpty(stream_get_contents($stream));
+    }
+
+    public function testCreateStreamCreatesAStreamWithTheGivenContents(): void {
+        $contents = 'test contents';
+
+        $stream = createStream($contents);
+
+        $this->assertIsResource($stream);
+        $this->assertIsNotClosedResource($stream);
+
+        $this->assertEquals($contents, stream_get_contents($stream));
+    }
+
+    public function testCreateStreamCreatesIndependentStreams(): void {
+        $content1 = 'test contents 1';
+        $content2 = 'test contents 2';
+
+        $stream1 = createStream($content1);
+        $stream2 = createStream($content2);
+
+        $this->assertEquals($content1, stream_get_contents($stream1));
+        $this->assertEquals($content2, stream_get_contents($stream2));
     }
 
     public static function formatHoursProvider(): array {

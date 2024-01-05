@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Backups\AbstractBackupProvider;
+use App\Casts\EncryptedBackupConfig;
 use App\Models\Pivots\BackupConfigurationFile;
 use App\Support\BackupSchedule;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,13 +20,13 @@ class BackupConfiguration extends Model {
     protected $fillable = ['label', 'config', 'cron_schedule'];
 
     protected $casts = [
-        'config' => 'json',
+        'config' => EncryptedBackupConfig::class,
         'started_at' => 'datetime',
         'last_run_at' => 'datetime',
     ];
 
     protected $attributes = [
-        'config' => '[]',
+        'config' => null,
     ];
 
     public function uniqueIds(): array {

@@ -166,12 +166,11 @@ abstract class AbstractBackupProvider {
     ): BackupConfiguration {
         $backupConfiguration = $user
             ->backupConfigurations()
-            ->make([
-                'label' => $label,
-                'config' => $config,
-            ])
+            ->make()
             ->forceFill([
                 'provider_class' => static::class,
+                'label' => $label,
+                'config' => $config,
             ]);
 
         $backupConfiguration->save();

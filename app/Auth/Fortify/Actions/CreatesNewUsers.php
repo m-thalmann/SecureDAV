@@ -5,6 +5,7 @@ namespace App\Auth\Fortify\Actions;
 use App\Auth\Fortify\Concerns\PasswordValidationRules;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers as CreatesNewUsersContract;
 
@@ -24,6 +25,11 @@ class CreatesNewUsers implements CreatesNewUsersContract {
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create($data);
+        $user = User::make($data);
+        $user->encryption_key = Str::random(16);
+
+        $user->save();
+
+        return $user;
     }
 }

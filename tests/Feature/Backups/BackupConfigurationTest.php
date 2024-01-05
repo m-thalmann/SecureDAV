@@ -10,6 +10,7 @@ use App\Support\SessionMessage;
 use Carbon\Carbon;
 use Cron\CronExpression;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use Tests\TestSupport\StubBackupProvider;
 
@@ -24,6 +25,12 @@ class BackupConfigurationTest extends TestCase {
         $this->user = $this->createUser();
 
         $this->actingAs($this->user);
+    }
+
+    protected function tearDown(): void {
+        parent::tearDown();
+
+        StubBackupProvider::$customConfigValidator = null;
     }
 
     public function testIndexBackupsViewCanBeRendered(): void {
@@ -178,12 +185,36 @@ class BackupConfigurationTest extends TestCase {
         $this->assertDatabaseHas('backup_configurations', [
             'label' => $label,
             'provider_class' => StubBackupProvider::class,
-            'config' => json_encode([
-                'test' => 'test',
-            ]),
+        ]);
+    }
+
+    public function testNewConfigurationStoresConfigEncrypted(): void {
+        $label = 'Test label';
+
+        StubBackupProvider::$customConfigValidator = [
+            'test' => ['required', 'string'],
+        ];
+
+        $config = ['test' => 'test'];
+
+        $response = $this->post('/backups', [
+            'label' => $label,
+            'provider' => StubBackupProvider::class,
+            ...$config,
         ]);
 
-        StubBackupProvider::$customConfigValidator = null;
+        $createdConfiguration = BackupConfiguration::query()
+            ->where('label', $label)
+            ->firstOrFail();
+
+        $this->assertEquals($config, $createdConfiguration->config);
+
+        $rawConfiguration = DB::table($createdConfiguration->getTable())
+            ->where('id', $createdConfiguration->id)
+            ->select('config')
+            ->first()->config;
+
+        $this->assertNotEquals($config, $rawConfiguration);
     }
 
     public function testCreateConfigurationFailsIfProviderDoesNotExist(): void {
@@ -355,6 +386,40 @@ class BackupConfigurationTest extends TestCase {
         ]);
     }
 
+    public function testUpdateConfigurationStoresConfigEncrypted(): void {
+        $this->passwordConfirmed();
+
+        StubBackupProvider::$customConfigValidator = [
+            'test' => ['required', 'string'],
+        ];
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+            ]);
+
+        $label = 'Test label';
+
+        $config = ['test' => 'test'];
+
+        $response = $this->put("/backups/{$configuration->uuid}", [
+            'label' => $label,
+            ...$config,
+        ]);
+
+        $configuration->refresh();
+
+        $this->assertEquals($config, $configuration->config);
+
+        $rawConfiguration = DB::table($configuration->getTable())
+            ->where('id', $configuration->id)
+            ->select('config')
+            ->first()->config;
+
+        $this->assertNotEquals($config, $rawConfiguration);
+    }
+
     public function testConfigurationCantBeUpdatedForOtherUser(): void {
         $configuration = BackupConfiguration::factory()->create([
             'provider_class' => StubBackupProvider::class,
@@ -430,3 +495,4 @@ class BackupConfigurationTest extends TestCase {
         ]);
     }
 }
+

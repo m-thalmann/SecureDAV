@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->string('password');
             $table->boolean('is_admin');
             $table->boolean('is_webdav_suspended');
+            $table->string('encryption_key', 16);
             $table->rememberToken();
             $table->timestamps();
         });

@@ -15,7 +15,7 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     protected $fillable = ['name', 'email', 'password'];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'encryption_key'];
 
     protected $casts = [
         'email_verified_at' => 'datetime',

@@ -190,12 +190,13 @@ class WebDavBackupProviderTest extends TestCase {
     }
 
     public function testGetWebDavConfigAddsTrailingSlashToTargetUrlIfMissing(): void {
-        $this->backupConfiguration
-            ->forceFill([
-                'config->targetUrl' =>
-                    'https://example.com/remote.php/dav/files/username',
-            ])
-            ->save();
+        $config = $this->backupConfiguration->config;
+        $config['targetUrl'] =
+            'https://example.com/remote.php/dav/files/username';
+
+        $this->backupConfiguration->update([
+            'config' => $config,
+        ]);
 
         $this->assertStringEndsWith(
             '/',
@@ -204,9 +205,12 @@ class WebDavBackupProviderTest extends TestCase {
     }
 
     public function testGetWebDavConfigThrowsExceptionIfTargetUrlIsNotConfigured(): void {
-        $this->backupConfiguration
-            ->forceFill(['config->targetUrl' => null])
-            ->save();
+        $config = $this->backupConfiguration->config;
+        $config['targetUrl'] = null;
+
+        $this->backupConfiguration->update([
+            'config' => $config,
+        ]);
 
         $this->expectException(Exception::class);
 
@@ -214,9 +218,12 @@ class WebDavBackupProviderTest extends TestCase {
     }
 
     public function testGetWebDavConfigThrowsExceptionIfUsernameIsNotConfigured(): void {
-        $this->backupConfiguration
-            ->forceFill(['config->username' => null])
-            ->save();
+        $config = $this->backupConfiguration->config;
+        $config['username'] = null;
+
+        $this->backupConfiguration->update([
+            'config' => $config,
+        ]);
 
         $this->expectException(Exception::class);
 

@@ -161,10 +161,56 @@ if (!function_exists('authUser')) {
     }
 }
 
+if (!function_exists('processResources')) {
+    /**
+     * Passes the resources to a callback function for processing.
+     * After the callback function has finished (or an exception occurs), the resources are closed.
+     *
+     * @param array<resource> $resources The resources to process.
+     * @param Closure $callback The callback function to process the resources.
+     * @param Closure|null $exceptionCallback An optional callback function to handle any exceptions thrown during processing.
+     *
+     * @return mixed The result of the callback function.
+     */
+    function processResources(
+        array $resources,
+        Closure $callback,
+        ?Closure $exceptionCallback = null
+    ): mixed {
+        $returnValue = null;
+
+        try {
+            $returnValue = $callback($resources);
+        } catch (Exception $e) {
+            foreach ($resources as $resource) {
+                if (is_resource($resource)) {
+                    fclose($resource);
+                }
+            }
+
+            if ($exceptionCallback !== null) {
+                $exceptionCallback($e);
+            }
+
+            throw $e;
+        }
+
+        foreach ($resources as $resource) {
+            if (is_resource($resource)) {
+                fclose($resource);
+            }
+        }
+
+        return $returnValue;
+    }
+}
+
 if (!function_exists('processResource')) {
     /**
      * Passes the resource to a callback function for processing.
      * After the callback function has finished (or an exception occurs), the resource is closed.
+     *
+     * @see processResources
      *
      * @param resource $resource The resource to process.
      * @param Closure $callback The callback function to process the resource.
@@ -177,27 +223,11 @@ if (!function_exists('processResource')) {
         Closure $callback,
         ?Closure $exceptionCallback = null
     ): mixed {
-        $returnValue = null;
-
-        try {
-            $returnValue = $callback($resource);
-        } catch (Exception $e) {
-            if (is_resource($resource)) {
-                fclose($resource);
-            }
-
-            if ($exceptionCallback !== null) {
-                $exceptionCallback($e);
-            }
-
-            throw $e;
-        }
-
-        if (is_resource($resource)) {
-            fclose($resource);
-        }
-
-        return $returnValue;
+        return processResources(
+            [$resource],
+            fn(array $r) => $callback($r[0]),
+            $exceptionCallback
+        );
     }
 }
 
@@ -217,6 +247,27 @@ if (!function_exists('previousUrl')) {
         }
 
         return $url;
+    }
+}
+
+if (!function_exists('createStream')) {
+    /**
+     * Creates a temporary in-memory stream.
+     * If a string is passed, the stream is filled with it.
+     *
+     * @param string|null $string
+     *
+     * @return resource
+     */
+    function createStream(?string $string = null): mixed {
+        $stream = fopen('php://memory', 'r+');
+
+        if ($string) {
+            fwrite($stream, $string);
+            rewind($stream);
+        }
+
+        return $stream;
     }
 }
 

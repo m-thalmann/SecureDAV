@@ -16,7 +16,7 @@ return new class extends Migration {
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
             $table->string('label');
-            $table->json('config');
+            $table->text('config')->nullable();
             $table->integer('cron_schedule')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('last_run_at')->nullable();
