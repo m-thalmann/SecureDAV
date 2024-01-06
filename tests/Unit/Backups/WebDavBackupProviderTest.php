@@ -99,6 +99,13 @@ class WebDavBackupProviderTest extends TestCase {
         WebDavBackupProvider::validateConfig($config);
     }
 
+    public function testGetSensitiveConfigKeysReturnsArrayWithSensitiveKeys(): void {
+        $this->assertContains(
+            'password',
+            WebDavBackupProvider::getSensitiveConfigKeys()
+        );
+    }
+
     public function testBackupFileUploadsTheLatestVersionToTheTargetUrl(): void {
         $file = File::factory()
             ->for($this->backupConfiguration->user)
@@ -240,3 +247,4 @@ class WebDavBackupProviderTestClass extends WebDavBackupProvider {
         return parent::getWebDavConfig();
     }
 }
+

@@ -104,7 +104,7 @@
 
                     @if (count($webDavUsers) === 0)
                         <tr>
-                            <td colspan="7" class="text-center italic text-base-content/70">{{ __('No WebDav users') }}</td>
+                            <td colspan="100" class="text-center italic text-base-content/70">{{ __('No WebDav users') }}</td>
                         </tr>
                     @endif
                 </tbody>

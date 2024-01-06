@@ -164,6 +164,11 @@ class BackupConfigurationController extends Controller {
     public function show(BackupConfiguration $backupConfiguration): View {
         $backupConfiguration->load(['files.latestVersion', 'files.directory']);
 
+        $jsonConfig = json_encode(
+            $backupConfiguration->maskedConfig,
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+        );
+
         $scheduleInfo = null;
 
         if ($backupConfiguration->cron_schedule !== null) {
@@ -180,6 +185,7 @@ class BackupConfigurationController extends Controller {
         return view('backups.show', [
             'configuration' => $backupConfiguration,
             'displayInformation' => $backupConfiguration->provider_class::getDisplayInformation(),
+            'jsonConfig' => $jsonConfig,
             'scheduleInfo' => $scheduleInfo,
         ]);
     }

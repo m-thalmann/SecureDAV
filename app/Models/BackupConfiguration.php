@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Arr;
 
 class BackupConfiguration extends Model {
     use HasFactory, HasUuids;
@@ -55,6 +56,25 @@ class BackupConfiguration extends Model {
                 }
 
                 return new BackupSchedule($attributes['cron_schedule']);
+            }
+        );
+    }
+
+    protected function maskedConfig(): Attribute {
+        return Attribute::make(
+            get: function (mixed $value, array $attributes) {
+                $config = $this->config;
+
+                foreach (
+                    $this->provider_class::getSensitiveConfigKeys()
+                    as $sensitiveKey
+                ) {
+                    if (Arr::has($config, $sensitiveKey)) {
+                        Arr::set($config, $sensitiveKey, '********');
+                    }
+                }
+
+                return $config;
             }
         );
     }

@@ -46,7 +46,7 @@
     <form action="{{ route('backups.backup', [$configuration]) }}" method="post">
         @csrf
 
-        <div class="flex gap-4 items-center">
+        <div class="flex gap-4 items-center px-4 sm:px-0">
             <button class="btn btn-primary">
                 <i class="fa-solid fa-play"></i>
                 {{ __('Run backup') }}
@@ -64,6 +64,14 @@
             @endif
         </div>
     </form>
+
+    <x-card id="config">
+        <x-slot name="title">
+            {{ __('Config') }}
+        </x-slot>
+
+        <pre><code class="language-json rounded-lg shadow-lg">{{ $jsonConfig }}</code></pre>
+    </x-card>
 
     <x-card id="schedule">
         <x-slot name="title">
@@ -241,11 +249,15 @@
 
                     @if (count($configuration->files) === 0)
                         <tr>
-                            <td colspan="7" class="text-center italic text-base-content/70">{{ __('No files to backup') }}</td>
+                            <td colspan="100" class="text-center italic text-base-content/70">{{ __('No files to backup') }}</td>
                         </tr>
                     @endif
                 </tbody>
             </table>
         </div>
     </x-card>
+
+    @push('scripts')
+        @vite(['resources/js/highlight.js'])
+    @endpush
 </x-app-layout>

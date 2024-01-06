@@ -92,7 +92,7 @@
 
                 @if (count($configurations) === 0)
                     <tr>
-                        <td colspan="4" class="text-center italic text-base-content/70">{{ __('No backups configured yet') }}</td>
+                        <td colspan="100" class="text-center italic text-base-content/70">{{ __('No backups configured yet') }}</td>
                     </tr>
                 @endif
             </tbody>

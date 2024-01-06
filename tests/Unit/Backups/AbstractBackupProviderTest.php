@@ -290,6 +290,10 @@ class TestBackupProvider extends AbstractBackupProvider {
         return [];
     }
 
+    public static function getSensitiveConfigKeys(): array {
+        return [];
+    }
+
     public function backupFile(File $file): void {
         if ($this->backupFileCallback !== null) {
             call_user_func($this->backupFileCallback, $file);
@@ -309,3 +313,4 @@ class TestBackupProvider extends AbstractBackupProvider {
         return parent::getConfig($key, $default);
     }
 }
+

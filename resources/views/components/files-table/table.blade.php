@@ -25,12 +25,12 @@
 
         @if ($directoriesCount === 0 && $filesCount === 0)
             <tr>
-                <td colspan="6" class="text-center italic text-base-content/70">{{ $noItemsContent ?? __('No items') }}</td>
+                <td colspan="100" class="text-center italic text-base-content/70">{{ $noItemsContent ?? __('No items') }}</td>
             </tr>
         @elseif ($showCountSummary)
             <tr>
                 <td></td>
-                <td colspan="5" class="text-sm text-base-content/50 pl-0">
+                <td colspan="100" class="text-sm text-base-content/50 pl-2">
                     {{ trans_choice('{1} 1 directory|[2,*] :count directories', $directoriesCount) }},
                     {{ trans_choice('{1} 1 file|[2,*] :count files', $filesCount) }}
                 </td>

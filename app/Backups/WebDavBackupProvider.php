@@ -42,6 +42,10 @@ class WebDavBackupProvider extends AbstractBackupProvider {
         ])->validate();
     }
 
+    public static function getSensitiveConfigKeys(): array {
+        return ['password'];
+    }
+
     protected function backupFile(File $file): void {
         $response = processResource(
             $this->getFileContentStream($file),
@@ -101,3 +105,4 @@ class WebDavBackupProvider extends AbstractBackupProvider {
         ];
     }
 }
+

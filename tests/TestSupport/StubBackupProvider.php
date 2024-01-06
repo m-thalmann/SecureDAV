@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 
 class StubBackupProvider extends AbstractBackupProvider {
     public static ?array $customConfigValidator = null;
+    public static array $customSensitiveConfigKeys = [];
 
     public static function getDisplayInformation(): array {
         return [
@@ -32,6 +33,11 @@ class StubBackupProvider extends AbstractBackupProvider {
         )->validate();
     }
 
+    public static function getSensitiveConfigKeys(): array {
+        return static::$customSensitiveConfigKeys;
+    }
+
     protected function backupFile(File $file): void {
     }
 }
+

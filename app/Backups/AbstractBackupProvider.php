@@ -44,6 +44,16 @@ abstract class AbstractBackupProvider {
     abstract public static function validateConfig(array $config): array;
 
     /**
+     * Returns the config keys that should not be displayed to the client in clear text (only masked).
+     * Examples would be credentials, tokens, etc.
+     *
+     * **Note:** The config keys may also use the dot-notation for nested arrays.
+     *
+     * @return array
+     */
+    abstract public static function getSensitiveConfigKeys(): array;
+
+    /**
      * Uploads the latest version of the file to the provider.
      * If the backup did not succeed an exception should be thrown.
      *
