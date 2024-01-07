@@ -3,31 +3,26 @@
 namespace Tests\Unit\Support;
 
 use App\Support\FileInfo;
-use InvalidArgumentException;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class FileInfoTest extends TestCase {
     protected function setUp(): void {
         parent::setUp();
     }
 
-    public function testFromStorageCreatesNewInstance(): void {
+    public function testFromResourceCreatesNewInstance(): void {
         $path = 'test.txt';
         $content = 'Hello World';
 
-        $this->storageFake->put($path, $content);
+        $resource = fopen('php://memory', 'r+');
+        fwrite($resource, $content);
+        rewind($resource);
 
-        $fileInfo = FileInfo::fromStorage($this->storageFake, $path);
+        $fileInfo = FileInfo::fromResource($path, $resource);
 
-        $this->assertSame($this->storageFake->path($path), $fileInfo->path);
+        $this->assertSame($path, $fileInfo->path);
         $this->assertSame('text/plain', $fileInfo->mimeType);
         $this->assertSame(strlen($content), $fileInfo->size);
         $this->assertSame(md5($content), $fileInfo->checksum);
-    }
-
-    public function testFromStorageThrowsExceptionIfFileDoesNotExist(): void {
-        $this->expectException(InvalidArgumentException::class);
-
-        FileInfo::fromStorage($this->storageFake, 'test.txt');
     }
 }

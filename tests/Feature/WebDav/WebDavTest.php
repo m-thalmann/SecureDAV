@@ -6,6 +6,7 @@ use App\Models\Directory;
 use App\Models\File;
 use App\Models\FileVersion;
 use App\Models\WebDavUser;
+use App\Services\FileVersionService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
@@ -94,22 +95,34 @@ class WebDavTest extends TestCase {
         $response->assertSee('Sabre\DAV\Exception\NotAuthenticated');
     }
 
-    public function testFilesContainsAccessibleFileWithVersionForUser(): void {
-        $file = File::factory()
+    /**
+     * @dataProvider isEncryptedProvider
+     */
+    public function testFilesContainsAccessibleFileWithVersionForUser(bool $isEncrypted): void {
+        $expectedContent = fake()->text(50);
+
+        $fileFactory = File::factory()
             ->for($this->webDavUser->user)
-            ->has(FileVersion::factory(), 'versions')
-            ->hasAttached($this->webDavUser)
-            ->create();
+            ->hasAttached($this->webDavUser);
+
+        if ($isEncrypted) {
+            $fileFactory->encrypted();
+        }
+
+        $file = $fileFactory->create();
+
+        $resource = $this->createStream($expectedContent);
+
+        app(FileVersionService::class)->createNewVersion(
+            $file,
+            $resource
+        );
 
         $response = $this->fetchWebDav(
             route('webdav.files', [$file->uuid, $file->name])
         );
 
         $response->assertOk();
-
-        $expectedContent = Storage::disk('files')->get(
-            $file->latestVersion->storage_path
-        );
 
         /**
          * @var StreamedResponse
@@ -365,5 +378,8 @@ XML;
     public static function webdavRouteProvider(): array {
         return [['webdav.files.base'], ['webdav.directories']];
     }
-}
 
+    public static function isEncryptedProvider(): array {
+        return [[false], [true]];
+    }
+}

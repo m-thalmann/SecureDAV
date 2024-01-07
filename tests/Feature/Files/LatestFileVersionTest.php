@@ -28,7 +28,10 @@ class LatestFileVersionTest extends TestCase {
         $this->actingAs($this->user);
     }
 
-    public function testShowLatestFileVersionDownloadsFile(): void {
+    /**
+     * @dataProvider isEncryptedProvider
+     */
+    public function testShowLatestFileVersionDownloadsFile(bool $isEncrypted): void {
         /**
          * @var FileVersionService|MockInterface
          */
@@ -44,13 +47,24 @@ class LatestFileVersionTest extends TestCase {
             ->for($this->user)
             ->create();
 
-        FileVersion::factory(2)
+        $fileFactory = File::factory()->for($this->user);
+
+        if ($isEncrypted) {
+            $fileFactory->encrypted();
+        }
+
+        $file = $fileFactory->create();
+
+        $otherVersion = FileVersion::factory()
             ->for($file)
             ->create();
 
-        $latestVersion = FileVersion::factory()
-            ->for($file)
-            ->create();
+        $file->refresh();
+
+        $content = 'Test content';
+        $resource = $this->createStream($content);
+
+        $latestVersion = $fileVersionServiceSpy->createNewVersion($file, $resource);
 
         $response = $this->get("/files/{$file->uuid}/versions/latest");
 
@@ -59,7 +73,7 @@ class LatestFileVersionTest extends TestCase {
         $response->assertDownload($file->name);
 
         $this->assertEquals(
-            $this->storageFake->get($latestVersion->storage_path),
+            $content,
             $response->streamedContent()
         );
 
@@ -281,6 +295,10 @@ class LatestFileVersionTest extends TestCase {
             SessionMessage::TYPE_ERROR,
             key: 'session-message'
         );
+    }
+
+    public static function isEncryptedProvider(): array {
+        return [[false], [true]];
     }
 }
 

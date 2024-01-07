@@ -61,23 +61,13 @@ class FileVersionServiceTest extends TestCase {
                 File $file,
                 Closure $storeFileAction,
                 ?string $label,
-                ?FileInfo $fileInfo
             ) use ($latestVersion, $newLabel) {
                 $this->assertEquals($latestVersion->file_id, $file->id);
-                $this->assertEquals(
-                    $latestVersion->mime_type,
-                    $fileInfo->mimeType
-                );
-                $this->assertEquals(
-                    $latestVersion->checksum,
-                    $fileInfo->checksum
-                );
-                $this->assertEquals($latestVersion->bytes, $fileInfo->size);
                 $this->assertEquals($newLabel, $label);
 
                 $newPath = 'test-path';
 
-                $storeFileAction($newPath);
+                $storedFileInfo = $storeFileAction($newPath);
 
                 $this->storageFake->assertExists($newPath);
 
@@ -85,6 +75,16 @@ class FileVersionServiceTest extends TestCase {
                     $this->storageFake->get($latestVersion->storage_path),
                     $this->storageFake->get($newPath)
                 );
+
+                $this->assertEquals(
+                    $latestVersion->mime_type,
+                    $storedFileInfo->mimeType
+                );
+                $this->assertEquals(
+                    $latestVersion->checksum,
+                    $storedFileInfo->checksum
+                );
+                $this->assertEquals($latestVersion->bytes, $storedFileInfo->size);
 
                 return true;
             })
@@ -116,7 +116,6 @@ class FileVersionServiceTest extends TestCase {
                 File $file,
                 Closure $storeFileAction,
                 ?string $label,
-                ?FileInfo $fileInfo
             ) use ($latestVersion) {
                 $newPath = 'test-path';
 
@@ -150,10 +149,17 @@ class FileVersionServiceTest extends TestCase {
 
         $createdVersion = FileVersion::make();
 
+        $fileInfo = new FileInfo(
+            $newPath,
+            'text/plain',
+            strlen($content),
+            md5($content)
+        );
+
         $this->service
             ->shouldReceive('storeFile')
             ->withArgs([$resource, $newPath, $file->encryption_key, false])
-            ->once();
+            ->once()->andReturn($fileInfo);
 
         $this->service
             ->shouldReceive('createVersion')
@@ -161,13 +167,13 @@ class FileVersionServiceTest extends TestCase {
                 File $receivedFile,
                 Closure $storeFileAction,
                 ?string $label,
-                ?FileInfo $fileInfo = null
-            ) use ($file, $newLabel, $newPath) {
+            ) use ($file, $newLabel, $newPath, $fileInfo) {
                 $this->assertEquals($file->id, $receivedFile->id);
                 $this->assertEquals($newLabel, $label);
-                $this->assertNull($fileInfo);
 
-                $storeFileAction($newPath);
+                $storedFileInfo = $storeFileAction($newPath);
+
+                $this->assertEquals($fileInfo, $storedFileInfo);
 
                 return true;
             })
@@ -202,16 +208,26 @@ class FileVersionServiceTest extends TestCase {
             $uploadContent
         );
 
+        $fileInfo = new FileInfo(
+                "test-path",
+                $uploadFile->getMimeType(),
+                $uploadFile->getSize(),
+                md5($uploadContent)
+            );
+
         $storeFileAction = function (string $newPath) use (
             &$storeFileActionCalled,
             &$foundNewPath,
-            $uploadFile
+            $uploadFile,
+            $fileInfo
         ) {
             $storeFileActionCalled = true;
 
             $foundNewPath = $newPath;
 
             $this->storageFake->putFileAs('', $uploadFile, $foundNewPath);
+
+            return $fileInfo;
         };
 
         $createdVersion = $this->service->createVersion(
@@ -222,17 +238,14 @@ class FileVersionServiceTest extends TestCase {
 
         $this->assertTrue($storeFileActionCalled);
 
-        $expectedBytes = $uploadFile->getSize();
-        $expectedChecksum = md5($uploadContent);
-
         $this->assertDatabaseHas('file_versions', [
             'file_id' => $file->id,
             'label' => $newLabel,
             'version' => $nextVersion,
-            'mime_type' => $uploadFile->getMimeType(),
+            'mime_type' => $fileInfo->mimeType,
             'storage_path' => $foundNewPath,
-            'checksum' => $expectedChecksum,
-            'bytes' => $expectedBytes,
+            'checksum' => $fileInfo->checksum,
+            'bytes' => $fileInfo->size,
         ]);
 
         $this->assertInstanceOf(FileVersion::class, $createdVersion);
@@ -242,59 +255,6 @@ class FileVersionServiceTest extends TestCase {
         $file->refresh();
 
         $this->assertEquals($nextVersion + 1, $file->next_version);
-    }
-
-    public function testCreateVersionCreatesANewVersionWithFileInfo(): void {
-        $file = File::factory()->create();
-
-        $foundNewPath = null;
-
-        $uploadContent = 'test content';
-        $uploadFile = UploadedFile::fake()->createWithContent(
-            'test.txt',
-            $uploadContent
-        );
-
-        $storeFileAction = function (string $newPath) use (
-            &$foundNewPath,
-            $uploadFile
-        ) {
-            $foundNewPath = $newPath;
-
-            $this->storageFake->putFileAs('', $uploadFile, $foundNewPath);
-        };
-
-        $fileInfo = new FileInfo(
-            'test-path',
-            'application/json',
-            1234,
-            'test-checksum'
-        );
-
-        $createdVersion = $this->service->createVersion(
-            $file,
-            $storeFileAction,
-            label: null,
-            fileInfo: $fileInfo
-        );
-
-        $this->assertDatabaseHas('file_versions', [
-            'file_id' => $file->id,
-            'label' => null,
-            'version' => 1,
-            'mime_type' => $fileInfo->mimeType,
-            'storage_path' => $foundNewPath,
-            'checksum' => $fileInfo->checksum,
-            'bytes' => $fileInfo->size,
-        ]);
-
-        $this->assertInstanceOf(FileVersion::class, $createdVersion);
-        $this->assertEquals($file->id, $createdVersion->file_id);
-        $this->assertEquals(null, $createdVersion->label);
-
-        $file->refresh();
-
-        $this->assertEquals(2, $file->next_version);
     }
 
     public function testCreateVersionFailsIfFileAlreadyExists(): void {
@@ -308,7 +268,11 @@ class FileVersionServiceTest extends TestCase {
         try {
             $this->service->createVersion(
                 $file,
-                fn(string $path) => $this->storageFake->put($path, 'test')
+                function(string $path) {
+                    $this->storageFake->put($path, 'test');
+
+                    return new FileInfo($path, 'text/plain', 4, md5('test'));
+                }
             );
         } catch (Exception $e) {
             Str::createUuidsNormally();
@@ -337,7 +301,11 @@ class FileVersionServiceTest extends TestCase {
         try {
             $this->service->createVersion(
                 $file,
-                fn(string $path) => $this->storageFake->put($path, 'test')
+                function(string $path) {
+                    $this->storageFake->put($path, 'test');
+
+                    return new FileInfo($path, 'text/plain', 4, md5('test'));
+                }
             );
         } catch (Exception $e) {
             $this->assertDatabaseMissing('file_versions', [
@@ -379,6 +347,13 @@ class FileVersionServiceTest extends TestCase {
             ->for($file)
             ->create(['mime_type' => 'application/json']);
 
+        $fileInfo = new FileInfo(
+            $version->storage_path,
+            'text/plain',
+            strlen($content),
+            md5($content)
+        );
+
         $this->service
             ->shouldReceive('storeFile')
             ->withArgs([
@@ -387,7 +362,7 @@ class FileVersionServiceTest extends TestCase {
                 $file->encryption_key,
                 true,
             ])
-            ->once();
+            ->once()->andReturn($fileInfo);
 
         $this->storageFake->put($version->storage_path, $content);
 
@@ -399,10 +374,10 @@ class FileVersionServiceTest extends TestCase {
             'id' => $version->id,
             'file_id' => $file->id,
             'version' => $version->version,
-            'mime_type' => 'text/plain',
+            'mime_type' => $fileInfo->mimeType,
             'storage_path' => $version->storage_path,
-            'checksum' => md5($content),
-            'bytes' => strlen($content),
+            'checksum' => $fileInfo->checksum,
+            'bytes' => $fileInfo->size,
         ]);
 
         fclose($resource);
@@ -462,7 +437,12 @@ class FileVersionServiceTest extends TestCase {
                 $file->encryption_key,
                 true,
             ])
-            ->once();
+            ->once()->andReturn(new FileInfo(
+                $version->storage_path,
+                'text/plain',
+                strlen($content),
+                md5($content)
+            ));
 
         $this->storageFake->put($version->storage_path, $content);
 
@@ -530,7 +510,7 @@ class FileVersionServiceTest extends TestCase {
         fclose($resource);
     }
 
-    public function testStoreFileSavesTheGivenFileToTheGivenPath(): void {
+    public function testStoreFileSavesTheGivenFileToTheGivenPathAndReturnsTheFileInfo(): void {
         $path = 'test-path';
 
         $content = fake()->text();
@@ -538,7 +518,7 @@ class FileVersionServiceTest extends TestCase {
 
         $this->storageFake->assertMissing($path);
 
-        $this->service->storeFile(
+        $fileInfo = $this->service->storeFile(
             $resource,
             $path,
             encryptionKey: null,
@@ -549,10 +529,15 @@ class FileVersionServiceTest extends TestCase {
 
         $this->assertEquals($content, $this->storageFake->get($path));
 
+        $this->assertEquals($path, $fileInfo->path);
+        $this->assertEquals('text/plain', $fileInfo->mimeType);
+        $this->assertEquals(strlen($content), $fileInfo->size);
+        $this->assertEquals(md5($content), $fileInfo->checksum);
+
         fclose($resource);
     }
 
-    public function testStoreFileSavesAndEncryptsTheGivenFileToTheGivenPath(): void {
+    public function testStoreFileSavesAndEncryptsTheGivenFileToTheGivenPathAndReturnsTheFileInfo(): void {
         $encryptionKey = 'test-key';
 
         $path = 'test-path';
@@ -580,12 +565,19 @@ class FileVersionServiceTest extends TestCase {
             })
             ->once();
 
-        $this->service->storeFile(
+        $fileInfo = $this->service->storeFile(
             $resource,
             $path,
             encryptionKey: $encryptionKey,
             useTemporaryFile: false
         );
+
+        $expectedFileInfo = FileInfo::fromResource($path, $resource);
+
+        $this->assertEquals($expectedFileInfo->path, $fileInfo->path);
+        $this->assertEquals($expectedFileInfo->mimeType, $fileInfo->mimeType);
+        $this->assertEquals($expectedFileInfo->size, $fileInfo->size);
+        $this->assertEquals($expectedFileInfo->checksum, $fileInfo->checksum);
 
         fclose($resource);
     }
@@ -597,7 +589,7 @@ class FileVersionServiceTest extends TestCase {
 
         $resource = $this->createStream($content);
 
-        $this->service->storeFile(
+        $fileInfo = $this->service->storeFile(
             $resource,
             $path,
             encryptionKey: null,
@@ -610,6 +602,8 @@ class FileVersionServiceTest extends TestCase {
         );
 
         $this->assertEquals($content, $this->storageFake->get($path));
+
+        $this->assertEquals($path, $fileInfo->path);
 
         fclose($resource);
     }
@@ -642,7 +636,7 @@ class FileVersionServiceTest extends TestCase {
             })
             ->once();
 
-        $this->service->storeFile(
+        $fileInfo = $this->service->storeFile(
             $resource,
             $path,
             encryptionKey: 'test-key',
@@ -653,6 +647,8 @@ class FileVersionServiceTest extends TestCase {
         $this->assertFileDoesNotExist($tmpPath);
 
         $this->assertEquals($encryptedContent, $this->storageFake->get($path));
+
+        $this->assertEquals($path, $fileInfo->path);
 
         fclose($resource);
     }
@@ -897,12 +893,16 @@ class FileVersionServiceTestClass extends FileVersionService {
         string $path,
         ?string $encryptionKey,
         bool $useTemporaryFile
-    ): void {
-        parent::storeFile($resource, $path, $encryptionKey, $useTemporaryFile);
+    ): FileInfo {
+        return parent::storeFile(
+            $resource,
+            $path,
+            $encryptionKey,
+            $useTemporaryFile
+        );
     }
 
     public function getTmpSuffix(): string {
         return static::TMP_SUFFIX;
     }
 }
-

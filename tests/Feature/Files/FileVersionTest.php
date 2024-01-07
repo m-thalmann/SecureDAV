@@ -253,7 +253,10 @@ class FileVersionTest extends TestCase {
         );
     }
 
-    public function testShowFileVersionDownloadsFile(): void {
+    /**
+     * @dataProvider isEncryptedProvider
+     */
+    public function testShowFileVersionDownloadsFile(bool $isEncrypted): void {
         /**
          * @var FileVersionService|MockInterface
          */
@@ -265,35 +268,39 @@ class FileVersionTest extends TestCase {
             ])
         )->makePartial();
 
-        $file = File::factory()
-            ->for($this->user)
-            ->create();
+        $fileFactory = File::factory()->for($this->user);
 
-        $versions = FileVersion::factory(3)
+        if ($isEncrypted) {
+            $fileFactory->encrypted();
+        }
+
+        $file = $fileFactory->create();
+
+        $content = 'Test content';
+        $resource = $this->createStream($content);
+
+        $version = $fileVersionServiceSpy->createNewVersion($file, $resource);
+
+        $otherVersions = FileVersion::factory(3)
             ->for($file)
             ->create();
 
-        $selectedVersion = $versions->get(1);
-
         $response = $this->get(
-            "/files/{$file->uuid}/versions/{$selectedVersion->version}"
+            "/files/{$file->uuid}/versions/{$version->version}"
         );
 
         $response->assertOk();
 
         $response->assertDownload($file->name);
 
-        $this->assertEquals(
-            $this->storageFake->get($selectedVersion->storage_path),
-            $response->streamedContent()
-        );
+        $this->assertEquals($content, $response->streamedContent());
 
         $fileVersionServiceSpy
             ->shouldHaveReceived('createDownloadResponse')
             ->withArgs(function (File $file, FileVersion $fileVersion) use (
-                $selectedVersion
+                $version
             ) {
-                $this->assertEquals($selectedVersion->id, $fileVersion->id);
+                $this->assertEquals($version->id, $fileVersion->id);
 
                 return true;
             });
@@ -486,5 +493,8 @@ class FileVersionTest extends TestCase {
 
         $response->assertNotFound();
     }
-}
 
+    public static function isEncryptedProvider(): array {
+        return [[false], [true]];
+    }
+}

@@ -15,7 +15,7 @@ class BackupsRunScheduledTest extends TestCase {
     public function testItDispatchesBackupJobsThatAreDue(): void {
         Queue::fake();
 
-        $nextHour = now()->hour + 1;
+        $nextHour = now()->addHour()->hour;
 
         $dueBackup = BackupConfiguration::factory()->create([
             'provider_class' => StubBackupProvider::class,

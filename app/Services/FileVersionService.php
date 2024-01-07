@@ -60,19 +60,16 @@ class FileVersionService {
             if (!$fileCopiedSuccessfully) {
                 throw new FileWriteException();
             }
-        };
 
-        return $this->createVersion(
-            $file,
-            $storeFileAction,
-            $label,
-            fileInfo: new FileInfo(
+            return new FileInfo(
                 $this->storage->path($version->storage_path),
                 $version->mime_type,
                 $version->bytes,
                 $version->checksum
-            )
-        );
+            );
+        };
+
+        return $this->createVersion($file, $storeFileAction, $label);
     }
 
     /**
@@ -93,14 +90,12 @@ class FileVersionService {
         mixed $resource,
         ?string $label = null
     ): FileVersion {
-        $storeFileAction = function (string $newPath) use ($file, $resource) {
-            $this->storeFile(
-                $resource,
-                $newPath,
-                $file->encryption_key,
-                useTemporaryFile: false
-            );
-        };
+        $storeFileAction = fn(string $newPath) => $this->storeFile(
+            $resource,
+            $newPath,
+            $file->encryption_key,
+            useTemporaryFile: false
+        );
 
         return $this->createVersion($file, $storeFileAction, $label);
     }
@@ -111,7 +106,7 @@ class FileVersionService {
      * **Info:** This function uses a transaction
      *
      * @param \App\Models\File $file
-     * @param \Closure $storeFileAction The action to store the file. It receives the new path (inside of the disk) as the first argument.
+     * @param \Closure $storeFileAction The action to store the file. It receives the new path (inside of the disk) as the first argument and has to return a FileInfo instance of the file.
      * @param string|null $label The optional label for the new version
      *
      * @throws \App\Exceptions\FileAlreadyExistsException
@@ -122,8 +117,7 @@ class FileVersionService {
     protected function createVersion(
         File $file,
         Closure $storeFileAction,
-        ?string $label = null,
-        ?FileInfo $fileInfo = null
+        ?string $label = null
     ): FileVersion {
         $newPath = Str::uuid()->toString();
 
@@ -131,11 +125,10 @@ class FileVersionService {
             throw new FileAlreadyExistsException();
         }
 
-        $storeFileAction($newPath);
-
-        if ($fileInfo === null) {
-            $fileInfo = FileInfo::fromStorage($this->storage, $newPath);
-        }
+        /**
+         * @var FileInfo
+         */
+        $fileInfo = $storeFileAction($newPath);
 
         try {
             DB::beginTransaction();
@@ -208,16 +201,11 @@ class FileVersionService {
             }
         }
 
-        $this->storeFile(
+        $fileInfo = $this->storeFile(
             $resource,
             $latestVersion->storage_path,
             $file->encryption_key,
             useTemporaryFile: true
-        );
-
-        $fileInfo = FileInfo::fromStorage(
-            $this->storage,
-            $latestVersion->storage_path
         );
 
         $latestVersion
@@ -242,13 +230,15 @@ class FileVersionService {
      * @param bool $useTemporaryFile Whether the file should be stored to a temporary file and then moved to the correct path
      *
      * @throws \App\Exceptions\FileWriteException
+     *
+     * @return \App\Support\FileInfo The file info of the stored file
      */
     protected function storeFile(
         mixed $resource,
         string $path,
         ?string $encryptionKey,
         bool $useTemporaryFile
-    ): void {
+    ): FileInfo {
         $tmpPath = $path;
 
         if ($useTemporaryFile) {
@@ -262,7 +252,7 @@ class FileVersionService {
         } else {
             $outputPath = $this->storage->path($tmpPath);
 
-            processResource(fopen($outputPath, 'w'), function (
+            processResource(fopen($outputPath, 'wb'), function (
                 mixed $outputResource
             ) use ($resource, $encryptionKey) {
                 try {
@@ -283,6 +273,8 @@ class FileVersionService {
                 throw new FileWriteException();
             }
         }
+
+        return FileInfo::fromResource($path, $resource);
     }
 
     /**
@@ -362,4 +354,3 @@ class FileVersionService {
             ->setEtag($version->checksum);
     }
 }
-

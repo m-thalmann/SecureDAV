@@ -2,9 +2,6 @@
 
 namespace App\Support;
 
-use Illuminate\Filesystem\FilesystemAdapter;
-use InvalidArgumentException;
-
 class FileInfo {
     public function __construct(
         public readonly string $path,
@@ -15,33 +12,24 @@ class FileInfo {
     }
 
     /**
-     * Create a new FileInfo instance from a file stored inside the storage.
+     * Create a new FileInfo instance from a open file resource.
      *
-     * @param \Illuminate\Filesystem\FilesystemAdapter $storage
      * @param string $path
-     *
-     * @throws \InvalidArgumentException If the file does not exist.
+     * @param mixed $resource
      *
      * @return \App\Support\FileInfo
      */
-    public static function fromStorage(
-        FilesystemAdapter $storage,
-        string $path
-    ): static {
-        if (!$storage->exists($path)) {
-            throw new InvalidArgumentException("File does not exist: $path");
-        }
+    public static function fromResource(string $path, mixed $resource): static {
+        $mimeType = mime_content_type($resource);
+        rewind($resource);
 
-        $fullPath = $storage->path($path);
+        $fstat = fstat($resource);
+        $size = $fstat['size'];
 
-        $mimeType =
-            $storage->mimeType($path) ?: mime_content_type($fullPath) ?: null;
+        $hashCtx = hash_init('md5');
+        hash_update_stream($hashCtx, $resource);
+        $checksum = hash_final($hashCtx);
 
-        return new FileInfo(
-            $fullPath,
-            $mimeType,
-            $storage->size($path),
-            md5_file($fullPath)
-        );
+        return new FileInfo($path, $mimeType, $size, $checksum);
     }
 }
