@@ -73,7 +73,6 @@ class WebDavController extends Controller {
         Request $request
     ): Response {
         $server->setRequest($request);
-
         $server->start();
 
         return $server->getResponse();

@@ -6,6 +6,7 @@ use App\Models\File;
 use App\Models\FileVersion;
 use App\Services\FileVersionService;
 use App\WebDav\AuthBackend;
+use Carbon\CarbonInterface;
 use Sabre\DAV;
 
 /**
@@ -30,15 +31,25 @@ class VirtualFile extends DAV\File {
     function get(): mixed {
         $stream = fopen('php://memory', 'rb+');
 
-        $this->fileVersionService->writeContentsToStream(
-            $this->file,
-            $this->fileVersion,
-            $stream
-        );
-
+        $this->writeToStream($stream);
         rewind($stream);
 
         return $stream;
+    }
+
+    /**
+     * Write the contents of the file to the given stream.
+     *
+     * @param resource $resource
+     *
+     * @return void
+     */
+    function writeToStream(mixed $resource): void {
+        $this->fileVersionService->writeContentsToStream(
+            $this->file,
+            $this->fileVersion,
+            $resource
+        );
     }
 
     function put(mixed $updateResource): string {
@@ -70,5 +81,9 @@ class VirtualFile extends DAV\File {
 
     function getLastModified(): int {
         return $this->fileVersion->file_updated_at->timestamp;
+    }
+
+    function getLastModifiedDateTime(): CarbonInterface {
+        return $this->fileVersion->file_updated_at;
     }
 }

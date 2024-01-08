@@ -25,6 +25,8 @@ abstract class TestCase extends BaseTestCase {
         parent::setUp();
 
         $this->storageFake = Storage::fake('files');
+
+        $this->withoutVite();
     }
 
     protected function createUser(bool $emailVerified = true): User {
@@ -98,4 +100,3 @@ abstract class TestCase extends BaseTestCase {
         });
     }
 }
-

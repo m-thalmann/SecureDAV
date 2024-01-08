@@ -41,6 +41,12 @@ class ServerTest extends TestCase {
 
         $this->assertEquals($basePath, $this->server->getBaseUri());
 
+        $this->assertInstanceOf(WebDav\Sapi::class, $this->server->sapi);
+
+        $this->assertInstanceOf(
+            WebDav\Plugins\HandleGetPlugin::class,
+            $this->server->getPlugin('handle-get')
+        );
         $this->assertInstanceOf(
             DAV\Auth\Plugin::class,
             $this->server->getPlugin('auth')
@@ -169,6 +175,57 @@ class ServerTest extends TestCase {
         $this->assertHasSubArray($responseHeaders, $receivedResponseHeaders);
     }
 
+    public function testGetResponseReturnsAStreamedResponseForCallable(): void {
+        $this->createServer();
+
+        $responseBodyContent = 'test body';
+        $responseBody = function () use ($responseBodyContent) {
+            echo $responseBodyContent;
+        };
+
+        $responseStatus = 200;
+        $responseHeaders = [
+            'x-test-header' => ['test'],
+        ];
+
+        /**
+         * @var SabreResponse|MockInterface
+         */
+        $serverHttpResponseMock = Mockery::mock($this->server->httpResponse);
+        $this->server->httpResponse = $serverHttpResponseMock;
+
+        $serverHttpResponseMock
+            ->shouldReceive('getBody')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($responseBody);
+        $serverHttpResponseMock
+            ->shouldReceive('getStatus')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($responseStatus);
+        $serverHttpResponseMock
+            ->shouldReceive('getHeaders')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($responseHeaders);
+
+        $response = $this->server->getResponse();
+
+        $this->assertInstanceOf(StreamedResponse::class, $response);
+
+        /**
+         * @var array
+         */
+        $receivedResponseHeaders = $response->headers->all();
+
+        $receivedResponseBody = $this->getStreamedResponseContent($response);
+
+        $this->assertEquals($responseBodyContent, $receivedResponseBody);
+        $this->assertEquals($responseStatus, $response->getStatusCode());
+        $this->assertHasSubArray($responseHeaders, $receivedResponseHeaders);
+    }
+
     public function testGetResponseReturnsAStreamedResponseForResource(): void {
         $this->createServer();
 
@@ -218,97 +275,6 @@ class ServerTest extends TestCase {
         $this->assertHasSubArray($responseHeaders, $receivedResponseHeaders);
 
         fclose($responseBody);
-    }
-
-    public function testGetResponseIncludesCorsHeadersIfEnabled(): void {
-        $this->createServer(['getCorsHeaders']);
-
-        $requestOrigin = 'http://test.com';
-
-        config(['webdav.cors.enabled' => true]);
-
-        $mockHeaders = ['x-test' => ['true']];
-
-        $this->server
-            ->shouldReceive('getCorsHeaders')
-            ->with($requestOrigin)
-            ->once()
-            ->andReturn($mockHeaders);
-
-        /**
-         * @var SabreRequest|MockInterface
-         */
-        $serverHttpRequestMock = Mockery::mock($this->server->httpRequest);
-        $this->server->httpRequest = $serverHttpRequestMock;
-
-        $serverHttpRequestMock
-            ->shouldReceive('getHeader')
-            ->with('Origin')
-            ->once()
-            ->andReturn($requestOrigin);
-
-        /**
-         * @var SabreResponse|MockInterface
-         */
-        $serverHttpResponseMock = Mockery::mock($this->server->httpResponse);
-        $this->server->httpResponse = $serverHttpResponseMock;
-
-        $serverHttpResponseMock
-            ->shouldReceive('getBody')
-            ->withNoArgs()
-            ->once()
-            ->andReturn(null);
-        $serverHttpResponseMock
-            ->shouldReceive('getStatus')
-            ->withNoArgs()
-            ->once()
-            ->andReturn(200);
-        $serverHttpResponseMock
-            ->shouldReceive('getHeaders')
-            ->withNoArgs()
-            ->once()
-            ->andReturn([]);
-
-        $response = $this->server->getResponse();
-
-        /**
-         * @var array
-         */
-        $responseHeaders = $response->headers->all();
-
-        $this->assertHasSubArray($mockHeaders, $responseHeaders);
-    }
-
-    public function testGetResponseDoesNotIncludeCorsHeadersIfDisabled(): void {
-        $this->createServer(['getCorsHeaders']);
-
-        config(['webdav.cors.enabled' => false]);
-
-        $this->server->shouldNotReceive('getCorsHeaders');
-
-        /**
-         * @var SabreResponse|MockInterface
-         */
-        $serverHttpResponseMock = Mockery::mock($this->server->httpResponse);
-        $this->server->httpResponse = $serverHttpResponseMock;
-
-        $serverHttpResponseMock
-            ->shouldReceive('getBody')
-            ->withNoArgs()
-            ->once()
-            ->andReturn(null);
-        $serverHttpResponseMock
-            ->shouldReceive('getStatus')
-            ->withNoArgs()
-            ->once()
-            ->andReturn(200);
-        $serverHttpResponseMock
-            ->shouldReceive('getHeaders')
-            ->withNoArgs()
-            ->once()
-            ->andReturn([]);
-
-        $this->server->getResponse();
     }
 
     public function testGetFullUrlReturnsTheUrlWithTrailingSlashAndQuery(): void {

@@ -31,9 +31,7 @@ class Server extends DAV\Server {
         string $basePath,
         DAV\Tree $tree
     ) {
-        parent::__construct($tree);
-
-        $this->sapi = new Sapi();
+        parent::__construct($tree, new Sapi());
 
         if (app()->hasDebugModeEnabled()) {
             $this->debugExceptions = true;
@@ -46,6 +44,7 @@ class Server extends DAV\Server {
                 ->toString()
         );
 
+        $this->addPlugin(new Plugins\HandleGetPlugin());
         $this->addPlugin(new DAV\Auth\Plugin($authBackend));
         $this->addPlugin(new DAV\Locks\Plugin($locksBackend));
     }
@@ -80,20 +79,17 @@ class Server extends DAV\Server {
         $status = $this->httpResponse->getStatus();
         $headers = $this->httpResponse->getHeaders();
 
-        if (config('webdav.cors.enabled', false)) {
-            $headers = array_merge(
-                $headers,
-                $this->getCorsHeaders($this->httpRequest->getHeader('Origin'))
-            );
-        }
-
-        if ($body === null || is_string($body)) {
+        if (!is_callable($body) && !is_resource($body)) {
             return response($body, $status, $headers);
         }
 
         return response()->stream(
             function () use ($body) {
-                fpassthru($body);
+                if (is_callable($body)) {
+                    $body();
+                } else {
+                    fpassthru($body);
+                }
             },
             $status,
             $headers
