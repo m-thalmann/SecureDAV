@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\EncryptionException;
 use App\Exceptions\FileAlreadyExistsException;
 use App\Exceptions\FileWriteException;
 use App\Exceptions\NoVersionFoundException;
@@ -261,7 +262,7 @@ class FileVersionService {
                         $resource,
                         $outputResource
                     );
-                } catch (StreamWriteException $e) {
+                } catch (StreamWriteException|EncryptionException $e) {
                     throw new FileWriteException($e->getMessage());
                 }
             });
@@ -285,6 +286,8 @@ class FileVersionService {
      * @param resource $outputStream
      *
      * @throws \InvalidArgumentException If the version does not belong to the file
+     * @throws \App\Exceptions\EncryptionException
+     * @throws \App\Exceptions\StreamWriteException
      */
     public function writeContentsToStream(
         File $file,
@@ -319,6 +322,8 @@ class FileVersionService {
      * @param \App\Models\FileVersion $version
      *
      * @throws \InvalidArgumentException If the version does not belong to the file
+     * @throws \App\Exceptions\EncryptionException
+     * @throws \App\Exceptions\StreamWriteException
      *
      * @return \Symfony\Component\HttpFoundation\StreamedResponse
      */

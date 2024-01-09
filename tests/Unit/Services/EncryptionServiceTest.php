@@ -2,15 +2,17 @@
 
 namespace Tests\Unit\Services;
 
+use App\Exceptions\EncryptionException;
 use App\Exceptions\StreamWriteException;
 use App\Services\EncryptionService;
 use Exception;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Tests\TestSupport\SingleWriteStreamWrapper;
 
 class EncryptionServiceTest extends TestCase {
-    protected EncryptionService $service;
+    protected EncryptionServiceTestClass $service;
 
     protected string $inputPath;
     protected string $encryptedPath;
@@ -22,7 +24,7 @@ class EncryptionServiceTest extends TestCase {
     protected function setUp(): void {
         parent::setUp();
 
-        $this->service = new EncryptionService();
+        $this->service = new EncryptionServiceTestClass();
 
         $tempDir = sys_get_temp_dir();
 
@@ -101,6 +103,60 @@ class EncryptionServiceTest extends TestCase {
         fclose($encryptedResource);
     }
 
+    public function testEncryptThrowsAnExceptionIfTheEncryptedDataCantBeWritten(): void {
+        $this->expectException(StreamWriteException::class);
+
+        stream_wrapper_register("singleWrite", SingleWriteStreamWrapper::class);
+
+        $inputResource = fopen($this->inputPath, 'rb');
+        $encryptedResource = fopen("singleWrite://test", 'w');
+
+        try {
+            $this->service->encrypt(
+                $this->encryptionKey,
+                $inputResource,
+                $encryptedResource
+            );
+        } catch (Exception $e) {
+            stream_wrapper_unregister("singleWrite");
+
+            fclose($inputResource);
+            fclose($encryptedResource);
+
+            throw $e;
+        }
+
+        stream_wrapper_unregister("singleWrite");
+
+        fclose($inputResource);
+        fclose($encryptedResource);
+    }
+
+    public function testEncryptThrowsAnExceptionIfEncryptionFails(): void {
+        $this->expectException(EncryptionException::class);
+
+        $inputResource = fopen($this->inputPath, 'rb');
+        $encryptedResource = fopen($this->encryptedPath, 'w');
+
+        $service = new EncryptionService(cipher: 'bf');
+
+        try {
+            $service->encrypt(
+                Str::random(16),
+                $inputResource,
+                $encryptedResource
+            );
+        } catch (Exception $e) {
+            fclose($inputResource);
+            fclose($encryptedResource);
+
+            throw $e;
+        }
+
+        fclose($inputResource);
+        fclose($encryptedResource);
+    }
+
     public function testStreamCanBeDecrypted(): void {
         $inputResource = fopen($this->inputPath, 'rb');
         $encryptedResource = fopen($this->encryptedPath, 'w');
@@ -138,7 +194,9 @@ class EncryptionServiceTest extends TestCase {
         $this->service->decrypt($this->encryptionKey, 'invalid', 'invalid');
     }
 
-    public function testStreamCantBeDecryptedWithWrongKey(): void {
+    public function testDecryptThrowsAnExceptionIfAWrongKeyIsUsed(): void {
+        $this->expectException(EncryptionException::class);
+
         $inputResource = fopen($this->inputPath, 'rb');
         $encryptedResource = fopen($this->encryptedPath, 'w');
 
@@ -154,16 +212,24 @@ class EncryptionServiceTest extends TestCase {
         $encryptedResource = fopen($this->encryptedPath, 'rb');
         $decryptedResource = fopen($this->decryptedPath, 'w');
 
-        $this->service->decrypt(
-            Str::random(16),
-            $encryptedResource,
-            $decryptedResource
-        );
+        try{
+            $this->service->decrypt(
+                Str::random(16),
+                $encryptedResource,
+                $decryptedResource
+            );
+        }catch(Exception $e){
+            fclose($encryptedResource);
+            fclose($decryptedResource);
+
+            $this->assertEmpty(file_get_contents($this->decryptedPath));
+
+            throw $e;
+        }
 
         fclose($encryptedResource);
         fclose($decryptedResource);
 
-        $this->assertEmpty(file_get_contents($this->decryptedPath));
     }
 
     public function testDecryptThrowsAnExceptionIfOutputIsNotWritable(): void {
@@ -200,5 +266,49 @@ class EncryptionServiceTest extends TestCase {
         fclose($encryptedResource);
         fclose($decryptedResource);
     }
+
+    public function testLargeStreamCanBeEncryptedAndDecrypted(): void {
+        $writeInputResource = fopen($this->inputPath, 'wb');
+
+        $size = $this->service->getEncryptionBlockBytes() + 1;
+        $testData = Str::random($size);
+
+        fwrite($writeInputResource, $testData);
+        fclose($writeInputResource);
+
+        $inputResource = fopen($this->inputPath, 'rb');
+        $encryptedResource = fopen($this->encryptedPath, 'wb');
+
+        $this->service->encrypt(
+            $this->encryptionKey,
+            $inputResource,
+            $encryptedResource
+        );
+
+        fclose($inputResource);
+        fclose($encryptedResource);
+
+        $encryptedResource = fopen($this->encryptedPath, 'rb');
+        $decryptedResource = fopen($this->decryptedPath, 'wb');
+
+        $this->service->decrypt(
+            $this->encryptionKey,
+            $encryptedResource,
+            $decryptedResource
+        );
+
+        fclose($encryptedResource);
+        fclose($decryptedResource);
+
+        $this->assertEquals(
+            $testData,
+            file_get_contents($this->decryptedPath)
+        );
+    }
 }
 
+class EncryptionServiceTestClass extends EncryptionService {
+    public function getEncryptionBlockBytes(): int {
+        return static::ENCRYPTION_BLOCKS * openssl_cipher_iv_length($this->cipher);
+    }
+}

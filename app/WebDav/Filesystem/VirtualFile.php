@@ -41,6 +41,9 @@ class VirtualFile extends DAV\File {
      * Write the contents of the file to the given stream.
      *
      * @param resource $resource
+     * 
+     * @throws \App\Exceptions\StreamWriteException
+     * @throws \App\Exceptions\EncryptionException
      *
      * @return void
      */

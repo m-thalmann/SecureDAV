@@ -2,12 +2,24 @@
 
 namespace App\Services;
 
+use App\Exceptions\EncryptionException;
 use App\Exceptions\StreamWriteException;
 use InvalidArgumentException;
 
 class EncryptionService {
-    protected const ENCRYPTION_BLOCKS = 10000;
-    protected const CIPHER = 'AES-128-CBC';
+    protected const DEFAULT_CIPHER = 'AES-128-CBC';
+
+    /**
+     * The number of cipher-blocks to encrypt at once.
+     * E.g. [1024] -> 1024 * 16 = 16KB for AES-128-CBC
+     */
+    protected const ENCRYPTION_BLOCKS = 1024;
+
+    protected readonly string $cipher;
+
+    public function __construct(?string $cipher = null) {
+        $this->cipher = $cipher ?? static::DEFAULT_CIPHER;
+    }
 
     /**
      * Encrypts the given stream with the given key and writes the result into the given output stream.
@@ -18,6 +30,7 @@ class EncryptionService {
      * @param resource $outputResource
      *
      * @throws \InvalidArgumentException
+     * @throws \App\Exceptions\EncryptionException
      * @throws \App\Exceptions\StreamWriteException
      */
     public function encrypt(
@@ -31,7 +44,7 @@ class EncryptionService {
             );
         }
 
-        $ivLength = openssl_cipher_iv_length(static::CIPHER);
+        $ivLength = openssl_cipher_iv_length($this->cipher);
         $iv = openssl_random_pseudo_bytes($ivLength);
 
         if (@fwrite($outputResource, $iv) === false) {
@@ -41,19 +54,28 @@ class EncryptionService {
         while (!feof($inputResource)) {
             $plainText = fread(
                 $inputResource,
-                $ivLength * static::ENCRYPTION_BLOCKS
+                static::ENCRYPTION_BLOCKS * $ivLength
             );
 
             $cipherText = openssl_encrypt(
                 $plainText,
-                static::CIPHER,
+                $this->cipher,
                 $key,
                 OPENSSL_RAW_DATA,
                 $iv
             );
+
+            if($cipherText === false) {
+                throw new EncryptionException(
+                    'Could not encrypt the given stream.'
+                );
+            }
+
             $iv = substr($cipherText, 0, $ivLength);
 
-            fwrite($outputResource, $cipherText);
+            if(@fwrite($outputResource, $cipherText) === false) {
+                throw new StreamWriteException();
+            }
         }
     }
 
@@ -66,6 +88,7 @@ class EncryptionService {
      * @param resource $outputResource
      *
      * @throws \InvalidArgumentException
+     * @throws \App\Exceptions\EncryptionException
      * @throws \App\Exceptions\StreamWriteException
      */
     public function decrypt(
@@ -79,23 +102,30 @@ class EncryptionService {
             );
         }
 
-        $ivLength = openssl_cipher_iv_length(static::CIPHER);
+        $ivLength = openssl_cipher_iv_length($this->cipher);
         $iv = fread($inputResource, $ivLength);
 
         while (!feof($inputResource)) {
             $cipherText = fread(
                 $inputResource,
-                $ivLength * (static::ENCRYPTION_BLOCKS + 1)
+                (static::ENCRYPTION_BLOCKS + 1) * $ivLength
             );
+
             $plainText = openssl_decrypt(
                 $cipherText,
-                static::CIPHER,
+                $this->cipher,
                 $key,
                 OPENSSL_RAW_DATA,
                 $iv
             );
 
-            $iv = substr($plainText, 0, $ivLength);
+            if($plainText === false) {
+                throw new EncryptionException(
+                    'Could not decrypt the given stream.'
+                );
+            }
+
+            $iv = substr($cipherText, 0, $ivLength);
 
             if (@fwrite($outputResource, $plainText) === false) {
                 throw new StreamWriteException();
