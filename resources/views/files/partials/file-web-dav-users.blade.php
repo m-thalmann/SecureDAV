@@ -1,9 +1,9 @@
-<x-card id="web-dav-users">
-    <x-slot name="title" :amount="$file->webDavUsers->count()" class="mb-4">
+<x-card id="web-dav-users" collapsible>
+    <x-slot name="title" :amount="$file->webDavUsers->count()">
         {{ __('WebDav Users') }}
     </x-slot>
 
-    <div class="actions flex gap-4 items-center mb-4">
+    <div class="actions flex gap-4 items-center my-4">
         <a href="{{ route('web-dav-users.index') }}" class="btn btn-neutral btn-sm">
             <i class="fa-solid fa-arrow-right mr-2"></i>
             {{ __('Browse WebDav users') }}

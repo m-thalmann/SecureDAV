@@ -1,5 +1,5 @@
 <x-card id="file-versions">
-    <x-slot name="title" :amount="$file->versions->count()" class="mb-4">
+    <x-slot name="title" :amount="$file->versions->count()">
         {{ __('Versions') }}
     </x-slot>
 
@@ -41,7 +41,7 @@
         </form>
     </x-slot>
 
-    <div class="actions flex gap-4 items-center mb-4">
+    <div class="actions flex gap-4 items-center my-4">
         <a href="{{ route('files.versions.create', [$file]) }}" class="btn btn-neutral btn-sm">
             <i class="fa-solid fa-clock-rotate-left mr-2"></i>
             {{ __('Create new version') }}

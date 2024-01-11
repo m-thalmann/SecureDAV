@@ -65,7 +65,7 @@
         </div>
     </form>
 
-    <x-card id="config">
+    <x-card id="config" collapsible>
         <x-slot name="title">
             {{ __('Config') }}
         </x-slot>
@@ -73,9 +73,17 @@
         <pre><code class="language-json rounded-lg shadow-lg">{{ $jsonConfig }}</code></pre>
     </x-card>
 
-    <x-card id="schedule">
+    <x-card id="schedule" collapsible>
         <x-slot name="title">
             {{ __('Schedule') }}
+        </x-slot>
+
+        <x-slot name="collapsedTitleSuffix">
+            @if ($configuration->cron_schedule === null)
+                {{ __('None') }}
+            @else
+                {{ $configuration->schedule->getName() ?? __('Custom') }}
+            @endif
         </x-slot>
 
         <div class="mb-2">
@@ -114,7 +122,7 @@
             {{ __('Backed up files') }}
         </x-slot>
 
-        <div class="actions my-4">
+        <div class="actions mb-4">
             <a href="{{ route('backups.files.create', [$configuration]) }}" class="btn btn-neutral btn-sm">
                 <i class="fa-solid fa-file-circle-plus mr-2"></i>
                 {{ __('Add file to backup') }}

@@ -1,9 +1,9 @@
-<x-card id="backups">
-    <x-slot name="title" :amount="$file->backupConfigurations->count()" class="mb-4">
+<x-card id="backups" collapsible>
+    <x-slot name="title" :amount="$file->backupConfigurations->count()">
         {{ __('Backups') }}
     </x-slot>
 
-    <div class="actions flex gap-4 items-center mb-4">
+    <div class="actions flex gap-4 items-center my-4">
         <a href="{{ route('backups.index') }}" class="btn btn-neutral btn-sm">
             <i class="fa-solid fa-arrow-right mr-2"></i>
             {{ __('Browse backups') }}
