@@ -133,6 +133,33 @@ class BackupConfigurationScheduleTest extends TestCase {
         ]);
     }
 
+    public function testBackupConfigurationScheduleCanBeDisabled(): void {
+        $this->passwordConfirmed();
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+                'cron_schedule' => BackupSchedule::DAILY,
+            ]);
+
+        $response = $this->put("/backups/{$configuration->uuid}/schedule", [
+            'schedule' => 'none',
+        ]);
+
+        $response->assertRedirect("/backups/{$configuration->uuid}");
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $this->assertDatabaseHas('backup_configurations', [
+            'uuid' => $configuration->uuid,
+            'cron_schedule' => null,
+        ]);
+    }
+
     public function testBackupConfigurationScheduleCantBeUpdatedWithNotAvailableSchedule(): void {
         $this->passwordConfirmed();
 

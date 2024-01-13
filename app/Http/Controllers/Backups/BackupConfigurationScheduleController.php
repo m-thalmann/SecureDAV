@@ -72,12 +72,14 @@ class BackupConfigurationScheduleController extends Controller {
         $data = $request->validate([
             'schedule' => [
                 'required',
-                Rule::in(BackupSchedule::AVAILABLE_SCHEDULES),
+                Rule::in('none', ...BackupSchedule::AVAILABLE_SCHEDULES),
             ],
         ]);
 
+        $schedule = $data['schedule'] === 'none' ? null : $data['schedule'];
+
         $backupConfiguration->update([
-            'cron_schedule' => $data['schedule'],
+            'cron_schedule' => $schedule,
         ]);
 
         return redirect()

@@ -20,7 +20,7 @@
                 <x-slot name="label">{{ __('Schedule') }}</x-slot>
 
                 <select name="schedule" class="select" id="schedule-input" onchange="updateNextRuns()">
-                    <option value="" @selected($configuration->cron_schedule === null)>{{ __('None') }}</option>
+                    <option value="none" @selected($configuration->cron_schedule === null)>{{ __('None') }}</option>
 
                     @foreach ($availableSchedules as $schedule)
                         <option value="{{ $schedule->getValue() }}" @selected($schedule->getValue() === $configuration->cron_schedule)>{{ $schedule->getName() }}</option>
@@ -66,7 +66,7 @@
             function updateNextRuns() {
                 const schedule = selectedScheduleInput.value;
 
-                if(schedule === '') {
+                if(schedule === 'none') {
                     nextRunsContainer.innerHTML = '<tr><td class="italic text-base-content/75">{{ __('Never') }}</td></tr>';
                     return;
                 }
