@@ -207,18 +207,19 @@ class BackupConfigurationController extends Controller {
         Request $request,
         BackupConfiguration $backupConfiguration
     ): RedirectResponse {
-        $data = $request->validate([
+        $updateData = $request->validate([
             'label' => ['required', 'string', 'max:128'],
         ]);
 
-        $config = $backupConfiguration->provider_class::validateConfig(
-            $request->all()
-        );
+        if ($request->get('edit-config') !== 'false') {
+            $config = $backupConfiguration->provider_class::validateConfig(
+                $request->all()
+            );
 
-        $backupConfiguration->update([
-            'label' => $data['label'],
-            'config' => $config,
-        ]);
+            $updateData['config'] = $config;
+        }
+
+        $backupConfiguration->update($updateData);
 
         return redirect()
             ->route('backups.show', $backupConfiguration)
@@ -245,4 +246,3 @@ class BackupConfigurationController extends Controller {
             );
     }
 }
-

@@ -25,6 +25,8 @@
             </x-form-field>
 
             @if ($providerTemplate)
+                <div class="divider">{{ __('Config') }}</div>
+
                 @include($providerTemplate)
             @endif
         </form>

@@ -386,6 +386,42 @@ class BackupConfigurationTest extends TestCase {
         ]);
     }
 
+    public function testConfigurationCanBeUpdatedWithoutConfig(): void {
+        $this->passwordConfirmed();
+
+        $config = ['test' => 'test'];
+
+        $configuration = BackupConfiguration::factory()
+            ->for($this->user)
+            ->create([
+                'provider_class' => StubBackupProvider::class,
+                'config' => $config,
+            ]);
+
+        $label = 'Test label';
+
+        $response = $this->put("/backups/{$configuration->uuid}", [
+            'label' => $label,
+            'edit-config' => 'false',
+        ]);
+
+        $response->assertRedirect("/backups/{$configuration->uuid}");
+
+        $this->assertRequestHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $this->assertDatabaseHas('backup_configurations', [
+            'id' => $configuration->id,
+            'label' => $label,
+        ]);
+
+        $configuration->refresh();
+
+        $this->assertEquals($config, $configuration->config);
+    }
+
     public function testUpdateConfigurationStoresConfigEncrypted(): void {
         $this->passwordConfirmed();
 
@@ -495,4 +531,3 @@ class BackupConfigurationTest extends TestCase {
         ]);
     }
 }
-

@@ -8,7 +8,7 @@
             {{ $displayInformation['name'] }}
         </x-slot>
 
-        <form action="{{ route('backups.update', [$configuration]) }}" method="post" id="edit-form">
+        <form action="{{ route('backups.update', [$configuration]) }}" method="post" id="edit-form" x-data="{ editConfig: false }">
             @method('PUT')
             @csrf
 
@@ -18,8 +18,20 @@
                 <x-input name="label" :value="$configuration->label" placeholder="My Backup" autofocus />
             </x-form-field>
 
+            <input type="hidden" name="edit-config" x-bind:value="editConfig ? 'true' : 'false'">
+
             @if ($providerTemplate)
-                @include($providerTemplate)
+                <button class="btn btn-neutral btn-sm" x-on:click="editConfig = true" x-show="!editConfig">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                    {{ __('Edit Config') }}
+                </button>
+
+                <template x-if="editConfig">
+                    <div>
+                        <div class="divider">{{ __('Config') }}</div>
+                        @include($providerTemplate)
+                    </div>
+                </template>
             @endif
         </form>
 
