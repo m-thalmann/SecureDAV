@@ -21,6 +21,7 @@ class BackupConfigurationFactory extends Factory {
             'user_id' => User::factory(),
             'label' => fake()->words(2, true),
             'config' => null,
+            'active' => true,
         ];
     }
 }

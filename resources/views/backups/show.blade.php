@@ -14,6 +14,12 @@
         </x-slot>
 
         <x-slot name="suffix">
+            @if (!$configuration->active)
+                <span class="tooltip" data-tip="{{ __('Inactive') }}">
+                    <i class="fa-solid fa-ban text-error text-lg"></i>
+                </span>
+            @endif
+
             <span class="flex-1"></span>
 
             <x-dropdown align="end" width="w-36">

@@ -18,6 +18,13 @@
                 <x-input name="label" :value="$configuration->label" placeholder="My Backup" autofocus />
             </x-form-field>
 
+            <div class="form-control w-fit mb-4">
+                <label class="label cursor-pointer gap-4">
+                    <span class="label-text">{{ __('Active') }}</span>
+                    <input type="checkbox" @checked($configuration->active) class="checkbox checkbox-secondary" name="active" />
+                </label>
+            </div>
+
             <input type="hidden" name="edit-config" x-bind:value="editConfig ? 'true' : 'false'">
 
             @if ($providerTemplate)

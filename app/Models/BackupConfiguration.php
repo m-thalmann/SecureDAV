@@ -18,12 +18,13 @@ use Illuminate\Support\Arr;
 class BackupConfiguration extends Model {
     use HasFactory, HasUuids;
 
-    protected $fillable = ['label', 'config', 'cron_schedule'];
+    protected $fillable = ['label', 'config', 'cron_schedule', 'active'];
 
     protected $casts = [
         'config' => EncryptedBackupConfig::class,
         'started_at' => 'datetime',
         'last_run_at' => 'datetime',
+        'active' => 'boolean',
     ];
 
     protected $attributes = [

@@ -10,6 +10,7 @@ use App\Support\SessionMessage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\View\View;
 
 class BackupConfigurationController extends Controller {
@@ -209,7 +210,10 @@ class BackupConfigurationController extends Controller {
     ): RedirectResponse {
         $updateData = $request->validate([
             'label' => ['required', 'string', 'max:128'],
+            'active' => ['nullable'],
         ]);
+
+        $updateData['active'] = !!Arr::get($updateData, 'active', false);
 
         if ($request->get('edit-config') !== 'false') {
             $config = $backupConfiguration->provider_class::validateConfig(

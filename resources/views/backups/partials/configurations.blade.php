@@ -19,7 +19,9 @@
 
             <tbody>
                 @foreach ($configurations as $configuration)
-                    <tr>
+                    <tr @class([
+                        'text-base-content/50' => !$configuration->active,
+                    ])>
                         <td>
                             <a href="{{ route('backups.show', [$configuration]) }}" class="link underline-offset-2">{{ $configuration->label }}</a>
                         </td>
@@ -42,7 +44,11 @@
                             <x-timestamp :timestamp="$configuration->schedule?->getNextRunDate()" />
                         </td>
                         <td class="text-center">
-                            @if ($configuration->started_at !== null)
+                            @if (!$configuration->active)
+                                <span class="tooltip" data-tip="{{ __('Inactive') }}">
+                                    <i class="fa-solid fa-ban text-error text-lg"></i>
+                                </span>
+                            @elseif ($configuration->started_at !== null)
                                 <span class="tooltip" data-tip="{{ __('Running') }}">
                                     <span class="loading loading-ring loading-md text-primary"></span>
                                 </span>

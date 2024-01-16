@@ -185,6 +185,7 @@ class BackupConfigurationTest extends TestCase {
         $this->assertDatabaseHas('backup_configurations', [
             'label' => $label,
             'provider_class' => StubBackupProvider::class,
+            'active' => 1
         ]);
     }
 
@@ -371,6 +372,7 @@ class BackupConfigurationTest extends TestCase {
 
         $response = $this->put("/backups/{$configuration->uuid}", [
             'label' => $label,
+            'active' => null,
         ]);
 
         $response->assertRedirect("/backups/{$configuration->uuid}");
@@ -383,6 +385,7 @@ class BackupConfigurationTest extends TestCase {
         $this->assertDatabaseHas('backup_configurations', [
             'id' => $configuration->id,
             'label' => $label,
+            'active' => 0,
         ]);
     }
 
@@ -403,6 +406,7 @@ class BackupConfigurationTest extends TestCase {
         $response = $this->put("/backups/{$configuration->uuid}", [
             'label' => $label,
             'edit-config' => 'false',
+            'active' => 'true',
         ]);
 
         $response->assertRedirect("/backups/{$configuration->uuid}");
@@ -415,6 +419,7 @@ class BackupConfigurationTest extends TestCase {
         $this->assertDatabaseHas('backup_configurations', [
             'id' => $configuration->id,
             'label' => $label,
+            'active' => 1,
         ]);
 
         $configuration->refresh();

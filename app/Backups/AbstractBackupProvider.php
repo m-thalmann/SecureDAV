@@ -181,6 +181,7 @@ abstract class AbstractBackupProvider {
                 'provider_class' => static::class,
                 'label' => $label,
                 'config' => $config,
+                'active' => true,
             ]);
 
         $backupConfiguration->save();

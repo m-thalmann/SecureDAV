@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->string('token', 100);
             $table->tinyInteger('scope');
             $table->tinyInteger('depth');
-            $table->string('uri', 1000);
+            $table->string('uri', 750);
             $table->index('token');
             $table->index('uri');
             $table->unique(['user_id', 'token']);
