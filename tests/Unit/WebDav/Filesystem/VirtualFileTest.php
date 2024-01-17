@@ -89,7 +89,7 @@ class VirtualFileTest extends TestCase {
     public function testPutUpdatesTheFileOfTheVersionWithTheProvidedData(): void {
         $contents = 'test contents';
 
-        $resource = $this->createStream($contents);
+        $inputResource = $this->createStream($contents);
 
         $webDavUser = WebDavUser::factory()->create([
             'readonly' => false,
@@ -102,12 +102,20 @@ class VirtualFileTest extends TestCase {
 
         $this->fileVersionService
             ->shouldReceive('updateLatestVersion')
-            ->withArgs([$this->file, $resource])
+            ->withArgs(function(File $file, mixed $resource) use ($contents) {
+                $this->assertEquals($this->file, $file);
+                $this->assertIsResource($resource);
+
+                // the resource is copied since the original resource will be an input stream (not seekable)
+                $this->assertEquals($contents, stream_get_contents($resource));
+
+                return true;
+            })
             ->once();
 
-        $this->virtualFile->put($resource);
+        $this->virtualFile->put($inputResource);
 
-        fclose($resource);
+        fclose($inputResource);
     }
 
     public function testPutFailsIfTheWebDavUserIsReadonly(): void {

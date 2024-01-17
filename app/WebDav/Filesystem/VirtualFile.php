@@ -60,9 +60,14 @@ class VirtualFile extends DAV\File {
             throw new DAV\Exception\Forbidden();
         }
 
+        // php://input is not seekable, so we need to copy it to a new stream
+        $resource = createStream();
+        stream_copy_to_stream($updateResource, $resource);
+        rewind($resource);
+
         $this->fileVersionService->updateLatestVersion(
             $this->file,
-            $updateResource
+            $resource
         );
 
         $this->fileVersion->refresh();
