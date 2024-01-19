@@ -54,7 +54,7 @@ class ProfileSettingsTest extends TestCase {
         ]);
 
         $response->assertRedirect('/settings/profile#update-information');
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -79,7 +79,7 @@ class ProfileSettingsTest extends TestCase {
         ]);
 
         $response->assertRedirect('/settings/profile#update-information');
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -148,7 +148,7 @@ class ProfileSettingsTest extends TestCase {
         ]);
 
         $response->assertRedirect('/settings/profile#update-password');
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -211,7 +211,7 @@ class ProfileSettingsTest extends TestCase {
         $response = $this->delete('/settings/profile/sessions');
 
         $response->assertRedirectToRoute('login');
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -228,7 +228,7 @@ class ProfileSettingsTest extends TestCase {
         $response = $this->delete('/settings/profile/sessions');
 
         $response->assertRedirect('/settings/profile#browser-sessions');
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR,
             key: 'session-message[browser-sessions]'
@@ -241,7 +241,7 @@ class ProfileSettingsTest extends TestCase {
         $response = $this->delete('/settings/profile');
 
         $response->assertRedirect('/login');
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );

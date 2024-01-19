@@ -107,7 +107,7 @@ class FileVersionTest extends TestCase {
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -147,7 +147,7 @@ class FileVersionTest extends TestCase {
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -221,7 +221,7 @@ class FileVersionTest extends TestCase {
             'label' => 'New version',
         ]);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR,
             key: 'session-message'
@@ -246,7 +246,7 @@ class FileVersionTest extends TestCase {
             'file' => $uploadedFile,
         ]);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR,
             key: 'session-message'
@@ -395,7 +395,7 @@ class FileVersionTest extends TestCase {
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -456,7 +456,7 @@ class FileVersionTest extends TestCase {
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );

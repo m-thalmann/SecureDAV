@@ -47,7 +47,7 @@ class BackupTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -86,7 +86,7 @@ class BackupTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR
         );

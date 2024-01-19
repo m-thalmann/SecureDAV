@@ -63,7 +63,7 @@ class LoginTest extends TestCase {
             'password' => 'wrong-password',
         ]);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR,
             key: 'session-message',

@@ -97,7 +97,7 @@ class LatestFileVersionTest extends TestCase {
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR
         );
@@ -159,7 +159,7 @@ class LatestFileVersionTest extends TestCase {
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR
         );
@@ -226,7 +226,7 @@ class LatestFileVersionTest extends TestCase {
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -259,7 +259,7 @@ class LatestFileVersionTest extends TestCase {
 
         $response->assertRedirect("/files/{$file->uuid}#file-versions");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR
         );
@@ -290,7 +290,7 @@ class LatestFileVersionTest extends TestCase {
 
         $response->assertRedirect("/files/{$file->uuid}/versions/latest/edit");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR,
             key: 'session-message'

@@ -139,7 +139,7 @@ class BackupConfigurationTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR
         );
@@ -152,7 +152,7 @@ class BackupConfigurationTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR
         );
@@ -177,7 +177,7 @@ class BackupConfigurationTest extends TestCase {
 
         $response->assertRedirect("/backups/{$createdConfiguration->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -226,7 +226,7 @@ class BackupConfigurationTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR
         );
@@ -377,7 +377,7 @@ class BackupConfigurationTest extends TestCase {
 
         $response->assertRedirect("/backups/{$configuration->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -411,7 +411,7 @@ class BackupConfigurationTest extends TestCase {
 
         $response->assertRedirect("/backups/{$configuration->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -505,7 +505,7 @@ class BackupConfigurationTest extends TestCase {
 
         $response->assertRedirect('/backups');
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );

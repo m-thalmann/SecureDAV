@@ -80,7 +80,7 @@ class DirectoryTest extends TestCase {
 
         $response->assertRedirect("/browse/{$createdDirectory->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -110,7 +110,7 @@ class DirectoryTest extends TestCase {
 
         $response->assertRedirect("/browse/{$createdDirectory->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -249,7 +249,7 @@ class DirectoryTest extends TestCase {
         ]);
 
         $response->assertRedirect("/browse/{$directory->uuid}");
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -356,7 +356,7 @@ class DirectoryTest extends TestCase {
         $response = $this->delete("/directories/{$directory->uuid}");
 
         $response->assertRedirect("/browse/{$parentDirectory->uuid}");
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -383,7 +383,7 @@ class DirectoryTest extends TestCase {
         );
 
         $response->assertRedirect("/browse/{$directory->uuid}");
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR
         );
@@ -410,7 +410,7 @@ class DirectoryTest extends TestCase {
         );
 
         $response->assertRedirect("/browse/{$directory->uuid}");
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR
         );

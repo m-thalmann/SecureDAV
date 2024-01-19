@@ -76,7 +76,7 @@ class FileTrashTest extends TestCase {
 
         $response->assertRedirect('/files/trash');
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -143,7 +143,7 @@ class FileTrashTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR
         );
@@ -173,7 +173,7 @@ class FileTrashTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR
         );
@@ -201,7 +201,7 @@ class FileTrashTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );

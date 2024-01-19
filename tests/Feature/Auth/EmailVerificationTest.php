@@ -66,7 +66,7 @@ class EmailVerificationTest extends TestCase {
 
         $response->assertRedirect('/email/verify');
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS,
             key: 'session-message'
@@ -96,7 +96,7 @@ class EmailVerificationTest extends TestCase {
 
         $response->assertRedirect(RouteServiceProvider::HOME);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );

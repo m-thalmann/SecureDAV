@@ -50,7 +50,7 @@ class PasswordResetTest extends TestCase {
 
         $request1 = $this->post('/forgot-password', ['email' => $user->email]);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $request1,
             SessionMessage::TYPE_SUCCESS,
             key: 'session-message',
@@ -64,7 +64,7 @@ class PasswordResetTest extends TestCase {
 
         $request2 = $this->post('/forgot-password', ['email' => $user->email]);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $request2,
             SessionMessage::TYPE_ERROR,
             key: 'session-message',
@@ -179,7 +179,7 @@ class PasswordResetTest extends TestCase {
                 'password_confirmation' => 'password',
             ]);
 
-            $this->assertRequestHasSessionMessage(
+            $this->assertResponseHasSessionMessage(
                 $response,
                 SessionMessage::TYPE_ERROR,
                 key: 'session-message',

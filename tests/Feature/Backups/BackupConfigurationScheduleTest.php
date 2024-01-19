@@ -122,7 +122,7 @@ class BackupConfigurationScheduleTest extends TestCase {
 
         $response->assertRedirect("/backups/{$configuration->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -149,7 +149,7 @@ class BackupConfigurationScheduleTest extends TestCase {
 
         $response->assertRedirect("/backups/{$configuration->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );

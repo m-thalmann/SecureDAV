@@ -59,7 +59,7 @@ class TwoFactorAuthenticationTest extends TestCase {
         );
 
         $confirmResponse->assertSessionHas('two-factor-confirmed', true);
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $confirmResponse,
             SessionMessage::TYPE_SUCCESS
         );

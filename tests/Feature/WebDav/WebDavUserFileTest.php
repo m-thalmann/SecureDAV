@@ -259,7 +259,7 @@ class WebDavUserFileTest extends TestCase {
             "/web-dav-users/{$webDavUser->username}#files"
         );
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -373,7 +373,7 @@ class WebDavUserFileTest extends TestCase {
             "/web-dav-users/{$webDavUser->username}#files"
         );
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_INFO
         );
@@ -420,7 +420,7 @@ class WebDavUserFileTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );

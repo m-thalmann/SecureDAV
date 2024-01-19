@@ -267,7 +267,7 @@ class BackupConfigurationFileTest extends TestCase {
 
         $response->assertRedirect("/backups/{$configuration->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -377,7 +377,7 @@ class BackupConfigurationFileTest extends TestCase {
 
         $response->assertRedirect("/backups/{$configuration->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_INFO
         );
@@ -428,7 +428,7 @@ class BackupConfigurationFileTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );

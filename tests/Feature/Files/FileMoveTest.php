@@ -115,7 +115,7 @@ class FileMoveTest extends TestCase {
 
         $response->assertRedirectToRoute('files.show', ['file' => $file]);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -138,7 +138,7 @@ class FileMoveTest extends TestCase {
 
         $response->assertRedirectToRoute('files.show', ['file' => $file]);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -208,7 +208,7 @@ class FileMoveTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR,
             key: 'session-message'
@@ -246,7 +246,7 @@ class FileMoveTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR,
             key: 'session-message'

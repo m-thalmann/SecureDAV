@@ -103,7 +103,7 @@ class WebDavUserTest extends TestCase {
             "/web-dav-users/{$createdWebDavUser->username}"
         );
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -231,7 +231,7 @@ class WebDavUserTest extends TestCase {
 
         $response->assertRedirect("/web-dav-users/{$webDavUser->username}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -299,7 +299,7 @@ class WebDavUserTest extends TestCase {
 
         $response->assertRedirect("/web-dav-users/{$webDavUser->username}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -356,7 +356,7 @@ class WebDavUserTest extends TestCase {
 
         $response->assertRedirect('/web-dav-users');
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );

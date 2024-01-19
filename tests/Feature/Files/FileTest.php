@@ -118,7 +118,7 @@ class FileTest extends TestCase {
 
         $response->assertRedirect("/files/{$createdFile->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -150,7 +150,7 @@ class FileTest extends TestCase {
 
         $response->assertRedirect("/files/{$createdFile->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -254,7 +254,7 @@ class FileTest extends TestCase {
 
         $response->assertRedirect('/files/create');
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_ERROR,
             key: 'session-message'
@@ -363,7 +363,7 @@ class FileTest extends TestCase {
 
         $response->assertRedirect("/files/{$file->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -469,7 +469,7 @@ class FileTest extends TestCase {
 
         $response->assertRedirect(static::REDIRECT_TEST_ROUTE);
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -518,7 +518,7 @@ class FileTest extends TestCase {
 
         $response->assertRedirect("/browse/{$directory->uuid}");
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );

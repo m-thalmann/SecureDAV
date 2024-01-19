@@ -81,7 +81,7 @@ abstract class TestCase extends BaseTestCase {
         }
     }
 
-    protected function assertRequestHasSessionMessage(
+    protected function assertResponseHasSessionMessage(
         TestResponse $response,
         string $expectedType,
         string $key = 'snackbar',

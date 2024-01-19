@@ -60,7 +60,7 @@ class RegisterTest extends TestCase {
 
         $this->assertTrue(Hash::check('password', $user->password));
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
@@ -80,7 +80,7 @@ class RegisterTest extends TestCase {
 
         $response->assertRedirect('/email/verify');
 
-        $this->assertRequestHasSessionMessage(
+        $this->assertResponseHasSessionMessage(
             $response,
             SessionMessage::TYPE_SUCCESS
         );
