@@ -26,7 +26,15 @@
                 <i class="fa-solid fa-search"></i>
             </a>
 
-            @include('layouts.partials.notification-item')
+            <a href="{{ route('notifications.index') }}" class="btn btn-ghost btn-circle">
+                <div class="indicator">
+                    <i class="fa-solid fa-bell"></i>
+
+                    @if ($notifications['totalUnread'] > 0)
+                        <span class="badge badge-xs badge-primary indicator-item indicator-bottom">{{ $notifications['totalUnread'] > 99 ? '99+' : $notifications['totalUnread'] }}</span>
+                    @endif
+                </div>
+            </a>
 
             <div class="dropdown dropdown-end">
                 <label tabindex="0" class="btn btn-ghost btn-circle avatar placeholder">
