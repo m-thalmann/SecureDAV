@@ -12,6 +12,7 @@
                     <th>{{ __('Files') }}</th>
                     <th>{{ __('Last run') }}</th>
                     <th class="w-0">{{ __('Next scheduled run') }}</th>
+                    <th class="w-0 text-center">{{ __('Store with version') }}</th>
                     <th class="w-0 text-center">{{ __('Status') }}</th>
                     <th class="w-0"></th>
                 </tr>
@@ -42,6 +43,9 @@
                         </td>
                         <td>
                             <x-timestamp :timestamp="$configuration->schedule?->getNextRunDate()" />
+                        </td>
+                        <td class="text-center">
+                            <input type="checkbox" @checked($configuration->store_with_version) class="checkbox checkbox-sm checkbox-primary cursor-not-allowed align-middle" tabindex="-1" onclick="return false;" />
                         </td>
                         <td class="text-center">
                             @if (!$configuration->active)

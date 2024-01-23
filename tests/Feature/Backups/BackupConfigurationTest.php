@@ -185,7 +185,30 @@ class BackupConfigurationTest extends TestCase {
         $this->assertDatabaseHas('backup_configurations', [
             'label' => $label,
             'provider_class' => StubBackupProvider::class,
-            'active' => 1
+            'active' => 1,
+            'store_with_version' => 0,
+        ]);
+    }
+
+    public function testNewConfigurationCanBeCreatedWithStoreWithVersion(): void {
+        $label = 'Test label';
+
+        $response = $this->post('/backups', [
+            'label' => $label,
+            'provider' => StubBackupProvider::class,
+            'store_with_version' => 'true',
+        ]);
+
+        $this->assertResponseHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+
+        $this->assertDatabaseHas('backup_configurations', [
+            'label' => $label,
+            'provider_class' => StubBackupProvider::class,
+            'active' => 1,
+            'store_with_version' => 1,
         ]);
     }
 

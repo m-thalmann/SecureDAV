@@ -16,6 +16,7 @@ return new class extends Migration {
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
             $table->string('label');
+            $table->boolean('store_with_version');
             $table->text('config')->nullable();
             $table->integer('cron_schedule')->nullable();
             $table->boolean('active');

@@ -51,21 +51,27 @@ class AbstractBackupProviderTest extends TestCase {
             ->has(FileVersion::factory(), 'versions')
             ->create();
 
+        $this->backupConfiguration->refresh();
+
         $success = $this->abstractBackupProvider->backup();
 
         $this->assertTrue($success);
 
         foreach ($files as $file) {
-            $this->assertContains(
+            $this->assertArrayHasKey(
                 $file->id,
-                $this->abstractBackupProvider->backedUpFileIds
+                $this->abstractBackupProvider->backedUpFiles
+            );
+            $this->assertEquals(
+                $file->name,
+                $this->abstractBackupProvider->backedUpFiles[$file->id]
             );
         }
 
         foreach ($otherFiles as $file) {
-            $this->assertNotContains(
+            $this->assertArrayNotHasKey(
                 $file->id,
-                $this->abstractBackupProvider->backedUpFileIds
+                $this->abstractBackupProvider->backedUpFiles
             );
         }
     }
@@ -76,6 +82,8 @@ class AbstractBackupProviderTest extends TestCase {
             ->hasAttached($this->backupConfiguration)
             ->has(FileVersion::factory(), 'versions')
             ->create();
+
+        $this->backupConfiguration->refresh();
 
         $this->abstractBackupProvider->backup();
 
@@ -104,15 +112,48 @@ class AbstractBackupProviderTest extends TestCase {
         );
     }
 
+    public function testBackupCallsBackupFileWithCorrectTargetNameIfStoreWithVersionIsTrue(): void {
+        $files = File::factory(3)
+            ->for($this->backupConfiguration->user)
+            ->hasAttached($this->backupConfiguration)
+            ->has(FileVersion::factory(), 'versions')
+            ->create();
+
+        $this->backupConfiguration
+            ->forceFill([
+                'store_with_version' => true,
+            ])
+            ->save();
+
+        $this->backupConfiguration->refresh();
+
+        $success = $this->abstractBackupProvider->backup();
+
+        $this->assertTrue($success);
+
+        foreach ($files as $file) {
+            $this->assertArrayHasKey(
+                $file->id,
+                $this->abstractBackupProvider->backedUpFiles
+            );
+            $this->assertEquals(
+                "v00{$file->latestVersion->version}-$file->name",
+                $this->abstractBackupProvider->backedUpFiles[$file->id]
+            );
+        }
+    }
+
     public function testBackupDoesNotBackupFileWithNoVersion(): void {
         $file = File::factory()
             ->for($this->backupConfiguration->user)
             ->hasAttached($this->backupConfiguration)
             ->create();
 
+        $this->backupConfiguration->refresh();
+
         $this->abstractBackupProvider->backup();
 
-        $this->assertEmpty($this->abstractBackupProvider->backedUpFileIds);
+        $this->assertEmpty($this->abstractBackupProvider->backedUpFiles);
     }
 
     public function testBackupDoesNotBackupFileWithSameChecksumAsPreviousBackup(): void {
@@ -126,9 +167,11 @@ class AbstractBackupProviderTest extends TestCase {
             'last_backup_checksum' => $file->latestVersion->checksum,
         ]);
 
+        $this->backupConfiguration->refresh();
+
         $this->abstractBackupProvider->backup();
 
-        $this->assertEmpty($this->abstractBackupProvider->backedUpFileIds);
+        $this->assertEmpty($this->abstractBackupProvider->backedUpFiles);
     }
 
     public function testBackupReturnsFalseIfOneFileBackupFailsAndUpdatesPivotTable(): void {
@@ -137,6 +180,8 @@ class AbstractBackupProviderTest extends TestCase {
             ->hasAttached($this->backupConfiguration)
             ->has(FileVersion::factory(), 'versions')
             ->create();
+
+        $this->backupConfiguration->refresh();
 
         $exception = new Exception('Test');
 
@@ -157,9 +202,9 @@ class AbstractBackupProviderTest extends TestCase {
                 continue;
             }
 
-            $this->assertContains(
+            $this->assertArrayHasKey(
                 $file->id,
-                $this->abstractBackupProvider->backedUpFileIds
+                $this->abstractBackupProvider->backedUpFiles
             );
 
             $this->assertNull(
@@ -170,9 +215,9 @@ class AbstractBackupProviderTest extends TestCase {
             );
         }
 
-        $this->assertNotContains(
+        $this->assertArrayNotHasKey(
             $files->last()->id,
-            $this->abstractBackupProvider->backedUpFileIds
+            $this->abstractBackupProvider->backedUpFiles
         );
 
         $this->assertEquals(
@@ -190,6 +235,8 @@ class AbstractBackupProviderTest extends TestCase {
             ->hasAttached($this->backupConfiguration)
             ->has(FileVersion::factory(), 'versions')
             ->create();
+
+        $this->backupConfiguration->refresh();
 
         $testContent = 'test content';
 
@@ -252,11 +299,13 @@ class AbstractBackupProviderTest extends TestCase {
             'test' => 'test',
         ];
         $label = 'test label';
+        $storeWithVersion = true;
 
         $configuration = TestBackupProvider::createConfiguration(
             $user,
             $config,
-            $label
+            $label,
+            $storeWithVersion
         );
 
         $this->assertEquals(
@@ -266,11 +315,12 @@ class AbstractBackupProviderTest extends TestCase {
         $this->assertEquals($config, $configuration->config);
         $this->assertEquals($label, $configuration->label);
         $this->assertEquals($user->id, $configuration->user_id);
+        $this->assertTrue($configuration->store_with_version);
     }
 }
 
 class TestBackupProvider extends AbstractBackupProvider {
-    public array $backedUpFileIds = [];
+    public array $backedUpFiles = [];
 
     public ?Closure $backupFileCallback = null;
 
@@ -294,12 +344,12 @@ class TestBackupProvider extends AbstractBackupProvider {
         return [];
     }
 
-    public function backupFile(File $file): void {
+    public function backupFile(File $file, string $targetName): void {
         if ($this->backupFileCallback !== null) {
             call_user_func($this->backupFileCallback, $file);
         }
 
-        $this->backedUpFileIds[] = $file->id;
+        $this->backedUpFiles[$file->id] = $targetName;
     }
 
     public function getFileContentStream(File $file): mixed {

@@ -112,6 +112,8 @@ class WebDavBackupProviderTest extends TestCase {
             ->has(FileVersion::factory(), 'versions')
             ->create();
 
+        $targetName = 'test-target-name.txt';
+
         $testContentStream = $this->createStream('test content');
 
         $this->webDavBackupProvider
@@ -128,7 +130,7 @@ class WebDavBackupProviderTest extends TestCase {
             ->once()
             ->with(
                 $this->webDavConfig['method'],
-                $this->webDavConfig['targetUrl'] . $file->name,
+                $this->webDavConfig['targetUrl'] . $targetName,
                 [
                     'auth' => [
                         $this->webDavConfig['username'],
@@ -139,7 +141,7 @@ class WebDavBackupProviderTest extends TestCase {
             )
             ->andReturn($response);
 
-        $this->webDavBackupProvider->backupFile($file);
+        $this->webDavBackupProvider->backupFile($file, $targetName);
 
         $this->assertIsClosedResource($testContentStream);
     }
@@ -181,7 +183,7 @@ class WebDavBackupProviderTest extends TestCase {
         $this->expectExceptionMessage('Error: Unauthorized');
 
         try {
-            $this->webDavBackupProvider->backupFile($file);
+            $this->webDavBackupProvider->backupFile($file, $file->name);
         } catch (Exception $e) {
             $this->assertIsClosedResource($testContentStream);
 
@@ -239,8 +241,8 @@ class WebDavBackupProviderTest extends TestCase {
 }
 
 class WebDavBackupProviderTestClass extends WebDavBackupProvider {
-    public function backupFile(File $file): void {
-        parent::backupFile($file);
+    public function backupFile(File $file, string $targetName): void {
+        parent::backupFile($file, $targetName);
     }
 
     public function getWebDavConfig(): array {

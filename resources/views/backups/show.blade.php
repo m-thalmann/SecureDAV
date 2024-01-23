@@ -14,6 +14,12 @@
         </x-slot>
 
         <x-slot name="suffix">
+            @if ($configuration->store_with_version)
+                <span class="tooltip" data-tip="{{ __('Stores version in file name') }}">
+                    <i class="fa-solid fa-clock-rotate-left text-primary text-lg"></i>
+                </span>
+            @endif
+
             @if (!$configuration->active)
                 <span class="tooltip" data-tip="{{ __('Inactive') }}">
                     <i class="fa-solid fa-ban text-error text-lg"></i>

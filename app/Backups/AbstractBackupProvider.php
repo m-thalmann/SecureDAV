@@ -7,12 +7,16 @@ use App\Models\File;
 use App\Models\User;
 use App\Services\FileVersionService;
 use Exception;
+use Illuminate\Support\Str;
 
 abstract class AbstractBackupProvider {
+    protected const STORE_WITH_VERSION_AMOUNT_DIGITS = 3;
+
     public function __construct(
         protected readonly BackupConfiguration $backupConfiguration,
         protected readonly FileVersionService $fileVersionService
     ) {
+        $this->backupConfiguration->load(['files.latestVersion']);
     }
 
     /**
@@ -54,14 +58,18 @@ abstract class AbstractBackupProvider {
     abstract public static function getSensitiveConfigKeys(): array;
 
     /**
-     * Uploads the latest version of the file to the provider.
+     * Uploads the latest version of the file to the provider. Stores the file with the given name.
      * If the backup did not succeed an exception should be thrown.
      *
      * @param \App\Models\File $file
+     * @param string $targetName The target file name to store
      *
      * @throws \Exception If the backup did not succeed. Will be stored in the database.
      */
-    abstract protected function backupFile(File $file): void;
+    abstract protected function backupFile(
+        File $file,
+        string $targetName
+    ): void;
 
     /**
      * Uploads the latest version of all files to the provider.
@@ -87,8 +95,20 @@ abstract class AbstractBackupProvider {
                 continue;
             }
 
+            $targetName = $file->name;
+
+            if ($this->backupConfiguration->store_with_version) {
+                $paddedVersion = Str::padLeft(
+                    $file->latestVersion->version,
+                    static::STORE_WITH_VERSION_AMOUNT_DIGITS,
+                    '0'
+                );
+
+                $targetName = "v{$paddedVersion}-{$targetName}";
+            }
+
             try {
-                $this->backupFile($file);
+                $this->backupFile($file, $targetName);
             } catch (Exception $e) {
                 $this->backupConfiguration
                     ->files()
@@ -172,7 +192,8 @@ abstract class AbstractBackupProvider {
     public static function createConfiguration(
         User $user,
         array $config,
-        string $label
+        string $label,
+        bool $storeWithVersion
     ): BackupConfiguration {
         $backupConfiguration = $user
             ->backupConfigurations()
@@ -180,6 +201,7 @@ abstract class AbstractBackupProvider {
             ->forceFill([
                 'provider_class' => static::class,
                 'label' => $label,
+                'store_with_version' => $storeWithVersion,
                 'config' => $config,
                 'active' => true,
             ]);

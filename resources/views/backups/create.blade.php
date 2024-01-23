@@ -24,6 +24,13 @@
                 <x-input name="label" :value="old('label')" placeholder="My Backup" autofocus />
             </x-form-field>
 
+            <div class="form-control w-fit">
+                <label class="label cursor-pointer gap-4">
+                    <span class="label-text">{{ __('Store version in file name') }}</span> 
+                    <input type="checkbox" @checked(old('store_with_version')) class="checkbox checkbox-secondary" name="store_with_version" />
+                </label>
+            </div>
+
             @if ($providerTemplate)
                 <div class="divider">{{ __('Config') }}</div>
 

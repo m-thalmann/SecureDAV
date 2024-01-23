@@ -37,7 +37,7 @@ class StubBackupProvider extends AbstractBackupProvider {
         return static::$customSensitiveConfigKeys;
     }
 
-    protected function backupFile(File $file): void {
+    protected function backupFile(File $file, string $targetName): void {
     }
 }
 

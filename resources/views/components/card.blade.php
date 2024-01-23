@@ -5,9 +5,8 @@
 
 <div
     {{ $attributes->merge(['class' => 'card bg-base-200 shadow-lg max-sm:rounded-none' . ($dialog ? ' md:w-2/3 md:mx-auto' : '')]) }}
-    x-data="{ collapsed: {{ $collapsible ? 'true' : 'false' }} }"
 >
-    <div class="card-body transition-[padding]" :class="collapsed ? 'py-4' : ''">
+    <div class="card-body transition-[padding]" :class="collapsed ? 'py-4' : ''" x-data="{ collapsed: {{ $collapsible ? 'true' : 'false' }} }">
         @isset ($title)
             <h2 {{ $title->attributes->merge(['class' => 'card-title flex gap-4 items-center']) }}>
                 @if ($collapsible)

@@ -46,13 +46,13 @@ class WebDavBackupProvider extends AbstractBackupProvider {
         return ['password'];
     }
 
-    protected function backupFile(File $file): void {
+    protected function backupFile(File $file, string $targetName): void {
         $response = processResource(
             $this->getFileContentStream($file),
-            function (mixed $body) use ($file) {
+            function (mixed $body) use ($targetName) {
                 $config = $this->getWebDavConfig();
 
-                $targetUrl = $config['targetUrl'] . $file->name;
+                $targetUrl = $config['targetUrl'] . $targetName;
 
                 return $this->httpClient->request(
                     $config['method'],

@@ -22,6 +22,7 @@ class BackupConfiguration extends Model {
 
     protected $casts = [
         'config' => EncryptedBackupConfig::class,
+        'store_with_version' => 'boolean',
         'started_at' => 'datetime',
         'last_run_at' => 'datetime',
         'active' => 'boolean',

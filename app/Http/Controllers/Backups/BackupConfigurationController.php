@@ -142,14 +142,22 @@ class BackupConfigurationController extends Controller {
 
         $data = $request->validate([
             'label' => ['required', 'string', 'max:128'],
+            'store_with_version' => ['nullable'],
         ]);
+
+        $data['store_with_version'] = !!Arr::get(
+            $data,
+            'store_with_version',
+            false
+        );
 
         $config = $provider::validateConfig($request->all());
 
         $backupConfiguration = $provider::createConfiguration(
             authUser(),
             $config,
-            $data['label']
+            $data['label'],
+            $data['store_with_version']
         );
 
         return redirect()

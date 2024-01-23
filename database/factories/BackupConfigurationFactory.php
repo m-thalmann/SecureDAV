@@ -20,6 +20,7 @@ class BackupConfigurationFactory extends Factory {
             // provider_class must be set explicitly
             'user_id' => User::factory(),
             'label' => fake()->words(2, true),
+            'store_with_version' => false,
             'config' => null,
             'active' => true,
         ];
