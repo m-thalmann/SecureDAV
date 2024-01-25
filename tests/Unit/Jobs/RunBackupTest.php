@@ -66,6 +66,22 @@ class RunBackupTest extends TestCase {
         $this->assertTrue(RunBackup::isRateLimited($this->backupConfiguration));
     }
 
+    public function testGetRateLimitedAvailableInReturnsCorrectValue(): void {
+        for ($i = 0; $i < RunBackup::RATE_LIMITER_ATTEMPTS; $i++) {
+            $this->assertEquals(
+                0,
+                RunBackup::getRateLimitedAvailableIn($this->backupConfiguration)
+            );
+
+            RunBackup::dispatchSync($this->backupConfiguration);
+        }
+
+        $this->assertGreaterThan(
+            0,
+            RunBackup::getRateLimitedAvailableIn($this->backupConfiguration)
+        );
+    }
+
     public function testEventIsDispatchedWhenRateLimited(): void {
         Event::fake([BackupFailed::class]);
 

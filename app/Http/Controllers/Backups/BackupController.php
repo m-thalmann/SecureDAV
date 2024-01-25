@@ -12,11 +12,16 @@ class BackupController extends Controller {
         $this->authorize('update', $backupConfiguration);
 
         if (RunBackup::isRateLimited($backupConfiguration)) {
+            $availableIn = RunBackup::getRateLimitedAvailableIn(
+                $backupConfiguration
+            );
+
             return back()->with(
                 'snackbar',
                 SessionMessage::error(
                     __(
-                        'You have exceeded the maximum number of allowed backup attempts. Please try again later.'
+                        'You have exceeded the maximum number of allowed backup attempts. Please try again in :seconds seconds.',
+                        ['seconds' => $availableIn]
                     )
                 )->forDuration()
             );

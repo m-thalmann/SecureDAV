@@ -60,6 +60,14 @@ class RunBackup implements ShouldQueue {
         );
     }
 
+    public static function getRateLimitedAvailableIn(
+        BackupConfiguration $backupConfiguration
+    ): int {
+        $rateLimiterKey = static::getRateLimiterKey($backupConfiguration);
+
+        return RateLimiter::availableIn($rateLimiterKey);
+    }
+
     public static function getRateLimiterKey(
         BackupConfiguration $backupConfiguration
     ): string {
