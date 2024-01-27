@@ -29,16 +29,18 @@ class LatestFileVersionTest extends TestCase {
     }
 
     /**
-     * @dataProvider isEncryptedProvider
+     * @dataProvider booleanProvider
      */
-    public function testShowLatestFileVersionDownloadsFile(bool $isEncrypted): void {
+    public function testShowLatestFileVersionDownloadsFile(
+        bool $isEncrypted
+    ): void {
         /**
          * @var FileVersionService|MockInterface
          */
         $fileVersionServiceSpy = $this->instance(
             FileVersionService::class,
             Mockery::spy(FileVersionService::class, [
-                Mockery::mock(EncryptionService::class),
+                $this->app->make(EncryptionService::class),
                 $this->storageFake,
             ])
         )->makePartial();
@@ -47,13 +49,9 @@ class LatestFileVersionTest extends TestCase {
             ->for($this->user)
             ->create();
 
-        $fileFactory = File::factory()->for($this->user);
-
-        if ($isEncrypted) {
-            $fileFactory->encrypted();
-        }
-
-        $file = $fileFactory->create();
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
 
         $otherVersion = FileVersion::factory()
             ->for($file)
@@ -64,7 +62,11 @@ class LatestFileVersionTest extends TestCase {
         $content = 'Test content';
         $resource = $this->createStream($content);
 
-        $latestVersion = $fileVersionServiceSpy->createNewVersion($file, $resource);
+        $latestVersion = $fileVersionServiceSpy->createNewVersion(
+            $file,
+            $resource,
+            $isEncrypted
+        );
 
         $response = $this->get("/files/{$file->uuid}/versions/latest");
 
@@ -72,10 +74,7 @@ class LatestFileVersionTest extends TestCase {
 
         $response->assertDownload($file->name);
 
-        $this->assertEquals(
-            $content,
-            $response->streamedContent()
-        );
+        $this->assertEquals($content, $response->streamedContent());
 
         $fileVersionServiceSpy
             ->shouldHaveReceived('createDownloadResponse')
@@ -295,10 +294,6 @@ class LatestFileVersionTest extends TestCase {
             SessionMessage::TYPE_ERROR,
             key: 'session-message'
         );
-    }
-
-    public static function isEncryptedProvider(): array {
-        return [[false], [true]];
     }
 }
 

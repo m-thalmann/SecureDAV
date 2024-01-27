@@ -49,6 +49,7 @@ class FileVersionServiceTest extends TestCase {
         $file = File::factory()->create();
         $latestVersion = FileVersion::factory()
             ->for($file)
+            ->encrypted()
             ->create();
 
         $newLabel = 'test-label';
@@ -60,9 +61,14 @@ class FileVersionServiceTest extends TestCase {
             ->withArgs(function (
                 File $file,
                 Closure $storeFileAction,
-                ?string $label,
+                ?string $encryptionKey,
+                ?string $label
             ) use ($latestVersion, $newLabel) {
                 $this->assertEquals($latestVersion->file_id, $file->id);
+                $this->assertEquals(
+                    $latestVersion->encryption_key,
+                    $encryptionKey
+                );
                 $this->assertEquals($newLabel, $label);
 
                 $newPath = 'test-path';
@@ -84,7 +90,10 @@ class FileVersionServiceTest extends TestCase {
                     $latestVersion->checksum,
                     $storedFileInfo->checksum
                 );
-                $this->assertEquals($latestVersion->bytes, $storedFileInfo->size);
+                $this->assertEquals(
+                    $latestVersion->bytes,
+                    $storedFileInfo->size
+                );
 
                 return true;
             })
@@ -115,7 +124,7 @@ class FileVersionServiceTest extends TestCase {
             ->withArgs(function (
                 File $file,
                 Closure $storeFileAction,
-                ?string $label,
+                ?string $label
             ) use ($latestVersion) {
                 $newPath = 'test-path';
 
@@ -135,14 +144,17 @@ class FileVersionServiceTest extends TestCase {
         $this->service->copyLatestVersion($file);
     }
 
-    public function testCreateNewVersionCreatesANewVersionFromTheGivenResource(): void {
+    /**
+     * @dataProvider booleanProvider
+     */
+    public function testCreateNewVersionCreatesANewVersionFromTheGivenResource(
+        bool $isEncrypted
+    ): void {
         $content = fake()->text();
 
         $resource = $this->createStream($content);
 
-        $file = File::factory()
-            ->encrypted()
-            ->create();
+        $file = File::factory()->create();
 
         $newLabel = 'test-label';
         $newPath = 'test-path';
@@ -156,22 +168,35 @@ class FileVersionServiceTest extends TestCase {
             md5($content)
         );
 
-        $this->service
-            ->shouldReceive('storeFile')
-            ->withArgs([$resource, $newPath, $file->encryption_key, false])
-            ->once()->andReturn($fileInfo);
+        $foundEncryptionKey = null;
 
         $this->service
             ->shouldReceive('createVersion')
             ->withArgs(function (
                 File $receivedFile,
                 Closure $storeFileAction,
-                ?string $label,
-            ) use ($file, $newLabel, $newPath, $fileInfo) {
+                ?string $encryptionKey,
+                ?string $label
+            ) use (
+                $file,
+                $newLabel,
+                $newPath,
+                $fileInfo,
+                $isEncrypted,
+                &$foundEncryptionKey
+            ) {
+                $foundEncryptionKey = $encryptionKey;
+
                 $this->assertEquals($file->id, $receivedFile->id);
                 $this->assertEquals($newLabel, $label);
 
-                $storedFileInfo = $storeFileAction($newPath);
+                if ($isEncrypted) {
+                    $this->assertNotNull($encryptionKey);
+                } else {
+                    $this->assertNull($encryptionKey);
+                }
+
+                $storedFileInfo = $storeFileAction($newPath, $encryptionKey);
 
                 $this->assertEquals($fileInfo, $storedFileInfo);
 
@@ -180,9 +205,38 @@ class FileVersionServiceTest extends TestCase {
             ->once()
             ->andReturn($createdVersion);
 
+        $this->service
+            ->shouldReceive('storeFile')
+            ->withArgs(function (
+                mixed $receivedResource,
+                string $receivedPath,
+                ?string $receivedEncryptionKey,
+                bool $useTemporaryFile
+            ) use ($resource, $newPath, $isEncrypted, &$foundEncryptionKey) {
+                $this->assertEquals($resource, $receivedResource);
+                $this->assertEquals($newPath, $receivedPath);
+
+                if ($isEncrypted) {
+                    $this->assertNotNull($receivedEncryptionKey);
+                    $this->assertEquals(
+                        $foundEncryptionKey,
+                        $receivedEncryptionKey
+                    );
+                } else {
+                    $this->assertNull($receivedEncryptionKey);
+                }
+
+                $this->assertFalse($useTemporaryFile);
+
+                return true;
+            })
+            ->once()
+            ->andReturn($fileInfo);
+
         $returnedVersion = $this->service->createNewVersion(
             $file,
             $resource,
+            $isEncrypted,
             $newLabel
         );
 
@@ -191,7 +245,14 @@ class FileVersionServiceTest extends TestCase {
         fclose($resource);
     }
 
-    public function testCreateVersionCreatesANewVersion(): void {
+    /**
+     * @dataProvider booleanProvider
+     */
+    public function testCreateVersionCreatesANewVersion(
+        bool $isEncrypted
+    ): void {
+        $encryptionKey = $isEncrypted ? 'test-key' : null;
+
         $nextVersion = 55;
 
         $file = File::factory()->create(['next_version' => $nextVersion]);
@@ -209,17 +270,21 @@ class FileVersionServiceTest extends TestCase {
         );
 
         $fileInfo = new FileInfo(
-                "test-path",
-                $uploadFile->getMimeType(),
-                $uploadFile->getSize(),
-                md5($uploadContent)
-            );
+            'test-path',
+            $uploadFile->getMimeType(),
+            $uploadFile->getSize(),
+            md5($uploadContent)
+        );
 
-        $storeFileAction = function (string $newPath) use (
+        $storeFileAction = function (
+            string $newPath,
+            ?string $receivedEncryptionKey
+        ) use (
             &$storeFileActionCalled,
             &$foundNewPath,
             $uploadFile,
-            $fileInfo
+            $fileInfo,
+            $encryptionKey
         ) {
             $storeFileActionCalled = true;
 
@@ -227,12 +292,15 @@ class FileVersionServiceTest extends TestCase {
 
             $this->storageFake->putFileAs('', $uploadFile, $foundNewPath);
 
+            $this->assertEquals($encryptionKey, $receivedEncryptionKey);
+
             return $fileInfo;
         };
 
         $createdVersion = $this->service->createVersion(
             $file,
             $storeFileAction,
+            $encryptionKey,
             $newLabel
         );
 
@@ -251,6 +319,7 @@ class FileVersionServiceTest extends TestCase {
         $this->assertInstanceOf(FileVersion::class, $createdVersion);
         $this->assertEquals($file->id, $createdVersion->file_id);
         $this->assertEquals($newLabel, $createdVersion->label);
+        $this->assertEquals($encryptionKey, $createdVersion->encryption_key);
 
         $file->refresh();
 
@@ -266,14 +335,11 @@ class FileVersionServiceTest extends TestCase {
         $file = File::factory()->create();
 
         try {
-            $this->service->createVersion(
-                $file,
-                function(string $path) {
-                    $this->storageFake->put($path, 'test');
+            $this->service->createVersion($file, function (string $path) {
+                $this->storageFake->put($path, 'test');
 
-                    return new FileInfo($path, 'text/plain', 4, md5('test'));
-                }
-            );
+                return new FileInfo($path, 'text/plain', 4, md5('test'));
+            });
         } catch (Exception $e) {
             Str::createUuidsNormally();
 
@@ -299,14 +365,11 @@ class FileVersionServiceTest extends TestCase {
         $file->updating(fn() => false);
 
         try {
-            $this->service->createVersion(
-                $file,
-                function(string $path) {
-                    $this->storageFake->put($path, 'test');
+            $this->service->createVersion($file, function (string $path) {
+                $this->storageFake->put($path, 'test');
 
-                    return new FileInfo($path, 'text/plain', 4, md5('test'));
-                }
-            );
+                return new FileInfo($path, 'text/plain', 4, md5('test'));
+            });
         } catch (Exception $e) {
             $this->assertDatabaseMissing('file_versions', [
                 'file_id' => $file->id,
@@ -339,12 +402,11 @@ class FileVersionServiceTest extends TestCase {
 
         $resource = $this->createStream($content);
 
-        $file = File::factory()
-            ->encrypted()
-            ->create();
+        $file = File::factory()->create();
 
         $version = FileVersion::factory()
             ->for($file)
+            ->encrypted()
             ->create(['mime_type' => 'application/json']);
 
         $fileInfo = new FileInfo(
@@ -359,10 +421,11 @@ class FileVersionServiceTest extends TestCase {
             ->withArgs([
                 $resource,
                 $version->storage_path,
-                $file->encryption_key,
-                true,
+                $version->encryption_key,
+                true, // useTemporaryFile
             ])
-            ->once()->andReturn($fileInfo);
+            ->once()
+            ->andReturn($fileInfo);
 
         $this->storageFake->put($version->storage_path, $content);
 
@@ -383,26 +446,35 @@ class FileVersionServiceTest extends TestCase {
         fclose($resource);
     }
 
-    public function testUpdateLatestVersionCreatesANewVersionIfAutoVersioningIsEnabledAndTheDelayHasPassed(): void {
+    /**
+     * @dataProvider booleanProvider
+     */
+    public function testUpdateLatestVersionCreatesANewVersionIfAutoVersioningIsEnabledAndTheDelayHasPassed(
+        bool $isEncrypted
+    ): void {
         $content = fake()->text();
         $autoVersionHours = 1.5;
 
         $resource = $this->createStream($content);
 
-        $file = File::factory()
-            ->encrypted()
-            ->create(['auto_version_hours' => $autoVersionHours]);
+        $file = File::factory()->create([
+            'auto_version_hours' => $autoVersionHours,
+        ]);
 
-        $version = FileVersion::factory()
-            ->for($file)
-            ->create([
-                'mime_type' => 'application/json',
-                'created_at' => now()->subRealHours($autoVersionHours + 0.01),
-            ]);
+        $versionFactory = FileVersion::factory()->for($file);
+
+        if ($isEncrypted) {
+            $versionFactory = $versionFactory->encrypted();
+        }
+
+        $version = $versionFactory->create([
+            'mime_type' => 'application/json',
+            'created_at' => now()->subRealHours($autoVersionHours + 0.01),
+        ]);
 
         $this->service
             ->shouldReceive('createNewVersion')
-            ->withArgs([$file, $resource])
+            ->withArgs([$file, $resource, $isEncrypted])
             ->once();
 
         $result = $this->service->updateLatestVersion($file, $resource);
@@ -418,12 +490,13 @@ class FileVersionServiceTest extends TestCase {
 
         $resource = $this->createStream($content);
 
-        $file = File::factory()
-            ->encrypted()
-            ->create(['auto_version_hours' => $autoVersionHours]);
+        $file = File::factory()->create([
+            'auto_version_hours' => $autoVersionHours,
+        ]);
 
         $version = FileVersion::factory()
             ->for($file)
+            ->encrypted()
             ->create([
                 'mime_type' => 'application/json',
                 'created_at' => now()->subRealHours($autoVersionHours - 0.01),
@@ -434,15 +507,18 @@ class FileVersionServiceTest extends TestCase {
             ->withArgs([
                 $resource,
                 $version->storage_path,
-                $file->encryption_key,
-                true,
+                $version->encryption_key,
+                true, // useTemporaryFile
             ])
-            ->once()->andReturn(new FileInfo(
-                $version->storage_path,
-                'text/plain',
-                strlen($content),
-                md5($content)
-            ));
+            ->once()
+            ->andReturn(
+                new FileInfo(
+                    $version->storage_path,
+                    'text/plain',
+                    strlen($content),
+                    md5($content)
+                )
+            );
 
         $this->storageFake->put($version->storage_path, $content);
 
@@ -742,17 +818,15 @@ class FileVersionServiceTest extends TestCase {
     public function testWriteContentsToStreamWritesTheContentsOfTheUnencryptedFileVersionToTheGivenStream(): void {
         $content = fake()->text();
 
-        $file = File::factory()->create();
-
-        $version = FileVersion::factory()
-            ->for($file)
-            ->create(['bytes' => strlen($content)]);
+        $version = FileVersion::factory()->create([
+            'bytes' => strlen($content),
+        ]);
 
         $this->storageFake->put($version->storage_path, $content);
 
         $stream = fopen('php://memory', 'r+');
 
-        $this->service->writeContentsToStream($file, $version, $stream);
+        $this->service->writeContentsToStream($version, $stream);
 
         rewind($stream);
 
@@ -764,12 +838,11 @@ class FileVersionServiceTest extends TestCase {
     public function testWriteContentsToStreamWritesTheContentsOfTheEncryptedFileVersionToTheGivenStream(): void {
         $content = fake()->text();
 
-        $file = File::factory()
-            ->encrypted()
-            ->create();
+        $file = File::factory()->create();
 
         $version = FileVersion::factory()
             ->for($file)
+            ->encrypted()
             ->create(['bytes' => strlen($content)]);
 
         $this->storageFake->put(
@@ -783,8 +856,8 @@ class FileVersionServiceTest extends TestCase {
                 string $key,
                 mixed $inputResource,
                 mixed $outputResource
-            ) use ($file, $content) {
-                $this->assertEquals($file->encryption_key, $key);
+            ) use ($version, $content) {
+                $this->assertEquals($version->encryption_key, $key);
 
                 fwrite($outputResource, $content);
 
@@ -794,23 +867,13 @@ class FileVersionServiceTest extends TestCase {
 
         $stream = fopen('php://memory', 'r+');
 
-        $this->service->writeContentsToStream($file, $version, $stream);
+        $this->service->writeContentsToStream($version, $stream);
 
         rewind($stream);
 
         $this->assertEquals($content, stream_get_contents($stream));
 
         fclose($stream);
-    }
-
-    public function testWriteContentsToStreamFailsIfTheFileVersionDoesNotBelongToTheFile(): void {
-        $this->expectException(InvalidArgumentException::class);
-
-        $file = File::factory()->create();
-
-        $version = FileVersion::factory()->create();
-
-        $this->service->writeContentsToStream($file, $version, null);
     }
 
     public function testCreateDownloadResponseDownloadsFileVersion(): void {
@@ -825,11 +888,9 @@ class FileVersionServiceTest extends TestCase {
         $this->service
             ->shouldReceive('writeContentsToStream')
             ->withArgs(function (
-                File $receivedFile,
                 FileVersion $receivedVersion,
                 mixed $resource
-            ) use ($file, $version, $content) {
-                $this->assertEquals($file, $receivedFile);
+            ) use ($version, $content) {
                 $this->assertEquals($version, $receivedVersion);
                 $this->assertIsResource($resource);
 
@@ -877,14 +938,14 @@ class FileVersionServiceTestClass extends FileVersionService {
     public function createVersion(
         File $file,
         Closure $storeFileAction,
-        ?string $label = null,
-        ?FileInfo $fileInfo = null
+        ?string $encryptionKey = null,
+        ?string $label = null
     ): FileVersion {
         return parent::createVersion(
             $file,
             $storeFileAction,
-            $label,
-            $fileInfo
+            $encryptionKey,
+            $label
         );
     }
 
@@ -906,3 +967,4 @@ class FileVersionServiceTestClass extends FileVersionService {
         return static::TMP_SUFFIX;
     }
 }
+

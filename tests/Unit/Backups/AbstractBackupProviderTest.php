@@ -244,11 +244,9 @@ class AbstractBackupProviderTest extends TestCase {
             ->shouldReceive('writeContentsToStream')
             ->once()
             ->withArgs(function (
-                File $receivedFile,
                 FileVersion $receivedFileVersion,
                 mixed $resource
             ) use ($file, $testContent) {
-                $this->assertEquals($file->id, $receivedFile->id);
                 $this->assertEquals(
                     $file->latestVersion->id,
                     $receivedFileVersion->id

@@ -41,7 +41,7 @@
         <x:slot name="title">
             {{ $file->name }}
 
-            @if ($file->isEncrypted)
+            @if ($file->isLatestVersionEncrypted)
                 <span class="tooltip" data-tip="{{ __('Encrypted') }}">
                     <i class="fa-solid fa-lock text-primary text-sm"></i>
                 </span>

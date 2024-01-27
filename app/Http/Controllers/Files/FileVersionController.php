@@ -11,6 +11,7 @@ use App\Support\SessionMessage;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rules\File as FileRule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -25,9 +26,12 @@ class FileVersionController extends Controller {
     public function create(File $file): View {
         $this->authorize('update', $file);
 
+        $latestVersion = $file->latestVersion;
+
         return view('file-versions.create', [
             'file' => $file,
-            'hasVersion' => $file->versions()->exists(),
+            'hasVersion' => $latestVersion !== null,
+            'latestVersion' => $latestVersion,
         ]);
     }
 
@@ -41,18 +45,22 @@ class FileVersionController extends Controller {
         $data = $request->validate([
             'label' => ['nullable', 'string', 'max:64'],
             'file' => ['nullable', FileRule::default()->max('1gb')],
+            'encrypt' => ['nullable'],
         ]);
 
         $uploadedFile = $request->file('file');
+
+        $doEncrypt = !!Arr::get($data, 'encrypt', false);
 
         try {
             if ($uploadedFile !== null) {
                 processResource(fopen($uploadedFile->path(), 'rb'), function (
                     mixed $fileResource
-                ) use ($fileVersionService, $file, $data) {
+                ) use ($fileVersionService, $file, $doEncrypt, $data) {
                     $fileVersionService->createNewVersion(
                         $file,
                         $fileResource,
+                        $doEncrypt,
                         $data['label'] ?? null
                     );
                 });

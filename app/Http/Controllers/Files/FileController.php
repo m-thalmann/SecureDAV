@@ -14,7 +14,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\File as FileRule;
 use Illuminate\View\View;
 
@@ -81,9 +80,7 @@ class FileController extends Controller {
             'description' => ['nullable', 'string', 'max:512'],
         ]);
 
-        $encryptionKey = Arr::get($data, 'encrypt', false)
-            ? Str::random(16)
-            : null;
+        $isEncrypted = !!Arr::get($data, 'encrypt', false);
 
         try {
             DB::beginTransaction();
@@ -95,15 +92,18 @@ class FileController extends Controller {
                     'directory_id' => $directory?->id,
                     'name' => $data['name'],
                     'description' => $data['description'] ?? null,
-                    'encryption_key' => $encryptionKey,
                 ]);
 
             $file->save();
 
             processResource(fopen($requestFile->path(), 'rb'), function (
                 mixed $fileResource
-            ) use ($fileVersionService, $file) {
-                $fileVersionService->createNewVersion($file, $fileResource);
+            ) use ($fileVersionService, $file, $isEncrypted) {
+                $fileVersionService->createNewVersion(
+                    $file,
+                    $fileResource,
+                    $isEncrypted
+                );
             });
 
             DB::commit();

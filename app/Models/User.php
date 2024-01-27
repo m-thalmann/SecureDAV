@@ -22,6 +22,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         'password' => 'hashed',
         'is_admin' => 'boolean',
         'is_webdav_suspended' => 'boolean',
+        'encryption_key' => 'encrypted',
     ];
 
     protected $attributes = [

@@ -59,6 +59,7 @@
                 <thead>
                     <tr>
                         <th class="text-center w-0"><i class="fa-solid fa-clock-rotate-left"></i></th>
+                        <th class="w-0"><i class="fa-solid fa-lock text-xs"></i></th>
                         <th>{{ __('Label') }}</th>
                         <th>{{ __('Size') }}</th>
                         <th>{{ __('MIME-Type') }}</th>
@@ -72,6 +73,17 @@
                     @foreach ($file->versions as $version)
                         <tr>
                             <td class="text-center">{{ $version->version }}</td>
+                            <td>
+                                @if ($version->isEncrypted)
+                                    <span class="tooltip" data-tip="{{ __('Encrypted') }}">
+                                        <i class="fa-solid fa-lock text-primary text-xs"></i>
+                                    </span>
+                                @else
+                                    <span class="tooltip" data-tip="{{ __('Not encrypted') }}">
+                                        <i class="fa-solid fa-lock-open text-warning text-xs"></i>
+                                    </span>
+                                @endif
+                            </td>
                             <td>{{ $version->label ?? '-' }}</td>
                             <td>{{ Illuminate\Support\Number::fileSize($version->bytes, maxPrecision: 2) }}</td>
                             <td>{{ $version->mime_type ?? '-' }}</td>

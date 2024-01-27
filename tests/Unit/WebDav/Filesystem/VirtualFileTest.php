@@ -59,12 +59,7 @@ class VirtualFileTest extends TestCase {
 
         $this->fileVersionService
             ->shouldReceive('writeContentsToStream')
-            ->withArgs(function (
-                File $file,
-                FileVersion $fileVersion,
-                mixed $stream
-            ) {
-                $this->assertEquals($this->file, $file);
+            ->withArgs(function (FileVersion $fileVersion, mixed $stream) {
                 $this->assertEquals($this->file->latestVersion, $fileVersion);
                 $this->assertIsResource($stream);
 
@@ -72,7 +67,6 @@ class VirtualFileTest extends TestCase {
             })
             ->once()
             ->andReturnUsing(function (
-                File $file,
                 FileVersion $fileVersion,
                 mixed $stream
             ) use ($contents) {
@@ -102,7 +96,7 @@ class VirtualFileTest extends TestCase {
 
         $this->fileVersionService
             ->shouldReceive('updateLatestVersion')
-            ->withArgs(function(File $file, mixed $resource) use ($contents) {
+            ->withArgs(function (File $file, mixed $resource) use ($contents) {
                 $this->assertEquals($this->file, $file);
                 $this->assertIsResource($resource);
 

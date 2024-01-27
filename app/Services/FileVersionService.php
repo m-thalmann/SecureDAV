@@ -70,7 +70,12 @@ class FileVersionService {
             );
         };
 
-        return $this->createVersion($file, $storeFileAction, $label);
+        return $this->createVersion(
+            $file,
+            $storeFileAction,
+            $version->encryption_key,
+            $label
+        );
     }
 
     /**
@@ -78,6 +83,7 @@ class FileVersionService {
      *
      * @param \App\Models\File $file
      * @param resource $resource
+     * @param bool $encrypted Whether the file should be encrypted
      * @param string|null $label The optional label for the new version
      *
      * @throws \App\Exceptions\FileAlreadyExistsException
@@ -89,16 +95,27 @@ class FileVersionService {
     public function createNewVersion(
         File $file,
         mixed $resource,
+        bool $encrypted,
         ?string $label = null
     ): FileVersion {
-        $storeFileAction = fn(string $newPath) => $this->storeFile(
+        $versionEncryptionKey = $encrypted ? Str::random(16) : null;
+
+        $storeFileAction = fn(
+            string $newPath,
+            ?string $encryptionKey
+        ) => $this->storeFile(
             $resource,
             $newPath,
-            $file->encryption_key,
+            $encryptionKey,
             useTemporaryFile: false
         );
 
-        return $this->createVersion($file, $storeFileAction, $label);
+        return $this->createVersion(
+            $file,
+            $storeFileAction,
+            $versionEncryptionKey,
+            $label
+        );
     }
 
     /**
@@ -108,6 +125,7 @@ class FileVersionService {
      *
      * @param \App\Models\File $file
      * @param \Closure $storeFileAction The action to store the file. It receives the new path (inside of the disk) as the first argument and has to return a FileInfo instance of the file.
+     * @param string|null $encryptionKey The optional encryption key for the new version
      * @param string|null $label The optional label for the new version
      *
      * @throws \App\Exceptions\FileAlreadyExistsException
@@ -118,6 +136,7 @@ class FileVersionService {
     protected function createVersion(
         File $file,
         Closure $storeFileAction,
+        ?string $encryptionKey,
         ?string $label = null
     ): FileVersion {
         $newPath = Str::uuid()->toString();
@@ -129,7 +148,7 @@ class FileVersionService {
         /**
          * @var FileInfo
          */
-        $fileInfo = $storeFileAction($newPath);
+        $fileInfo = $storeFileAction($newPath, $encryptionKey);
 
         try {
             DB::beginTransaction();
@@ -141,6 +160,7 @@ class FileVersionService {
                     'label' => $label,
                     'version' => $file->next_version,
                     'mime_type' => $fileInfo->mimeType,
+                    'encryption_key' => $encryptionKey,
                     'storage_path' => $newPath,
                     'checksum' => $fileInfo->checksum,
                     'bytes' => $fileInfo->size,
@@ -197,7 +217,12 @@ class FileVersionService {
                 ->isPast();
 
             if ($needsNewVersion) {
-                $this->createNewVersion($file, $resource);
+                $this->createNewVersion(
+                    $file,
+                    $resource,
+                    $latestVersion->isEncrypted
+                );
+
                 return false;
             }
         }
@@ -205,7 +230,7 @@ class FileVersionService {
         $fileInfo = $this->storeFile(
             $resource,
             $latestVersion->storage_path,
-            $file->encryption_key,
+            $latestVersion->encryption_key,
             useTemporaryFile: true
         );
 
@@ -262,7 +287,7 @@ class FileVersionService {
                         $resource,
                         $outputResource
                     );
-                } catch (StreamWriteException|EncryptionException $e) {
+                } catch (StreamWriteException | EncryptionException $e) {
                     throw new FileWriteException($e->getMessage());
                 }
             });
@@ -281,30 +306,21 @@ class FileVersionService {
     /**
      * Writes the contents of the given file version to the given stream.
      *
-     * @param \App\Models\File $file
      * @param \App\Models\FileVersion $version
      * @param resource $outputStream
      *
-     * @throws \InvalidArgumentException If the version does not belong to the file
      * @throws \App\Exceptions\EncryptionException
      * @throws \App\Exceptions\StreamWriteException
      */
     public function writeContentsToStream(
-        File $file,
         FileVersion $version,
         mixed $outputStream
     ): void {
-        if ($version->file_id !== $file->id) {
-            throw new InvalidArgumentException(
-                'Version does not belong to file'
-            );
-        }
-
         $readStream = $this->storage->readStream($version->storage_path);
 
-        if ($file->isEncrypted) {
+        if ($version->isEncrypted) {
             $this->encryptionService->decrypt(
-                $file->encryption_key,
+                $version->encryption_key,
                 $readStream,
                 $outputStream
             );
@@ -339,15 +355,11 @@ class FileVersionService {
 
         return response()
             ->streamDownload(
-                function () use ($file, $version) {
+                function () use ($version) {
                     processResource(fopen('php://output', 'w'), function (
                         mixed $outputStream
-                    ) use ($file, $version) {
-                        $this->writeContentsToStream(
-                            $file,
-                            $version,
-                            $outputStream
-                        );
+                    ) use ($version) {
+                        $this->writeContentsToStream($version, $outputStream);
                     });
                 },
                 $file->name,
@@ -359,3 +371,4 @@ class FileVersionService {
             ->setEtag($version->checksum);
     }
 }
+

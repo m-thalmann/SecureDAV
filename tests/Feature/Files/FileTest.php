@@ -63,7 +63,7 @@ class FileTest extends TestCase {
         $response->assertNotFound();
     }
 
-    public function testFileCanBeCreated(): void {
+    public function testFileCanBeCreatedwithcock(): void {
         $fileName = 'NewFile.txt';
         $content = fake()->text();
 
@@ -80,17 +80,17 @@ class FileTest extends TestCase {
                 ->shouldReceive('createNewVersion')
                 ->withArgs(function (
                     File $createdFile,
-                    mixed $receivedResource
+                    mixed $receivedResource,
+                    bool $encrypt
                 ) use ($fileName, $content) {
                     $this->assertEquals($fileName, $createdFile->name);
                     $this->assertIsResource($receivedResource);
+                    $this->assertTrue($encrypt);
 
                     $receivedContent = stream_get_contents($receivedResource);
                     rewind($receivedResource);
 
                     $this->assertEquals($content, $receivedContent);
-
-                    $this->assertIsString($createdFile->encryption_key);
 
                     return true;
                 })
@@ -114,7 +114,7 @@ class FileTest extends TestCase {
             ->where('name', $fileName)
             ->first();
 
-        $this->assertIsString($createdFile->encryption_key);
+        // version will not be created since the `createNewVersion` call is mocked
 
         $response->assertRedirect("/files/{$createdFile->uuid}");
 

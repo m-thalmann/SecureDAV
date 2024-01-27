@@ -41,7 +41,7 @@ class VirtualFile extends DAV\File {
      * Write the contents of the file to the given stream.
      *
      * @param resource $resource
-     * 
+     *
      * @throws \App\Exceptions\StreamWriteException
      * @throws \App\Exceptions\EncryptionException
      *
@@ -49,7 +49,6 @@ class VirtualFile extends DAV\File {
      */
     function writeToStream(mixed $resource): void {
         $this->fileVersionService->writeContentsToStream(
-            $this->file,
             $this->fileVersion,
             $resource
         );
@@ -65,10 +64,7 @@ class VirtualFile extends DAV\File {
         stream_copy_to_stream($updateResource, $resource);
         rewind($resource);
 
-        $this->fileVersionService->updateLatestVersion(
-            $this->file,
-            $resource
-        );
+        $this->fileVersionService->updateLatestVersion($this->file, $resource);
 
         $this->fileVersion->refresh();
 
@@ -95,3 +91,4 @@ class VirtualFile extends DAV\File {
         return $this->fileVersion->file_updated_at;
     }
 }
+

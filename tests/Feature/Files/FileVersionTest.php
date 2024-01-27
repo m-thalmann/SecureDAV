@@ -50,7 +50,10 @@ class FileVersionTest extends TestCase {
         $response->assertOk();
 
         $response->assertSee('data-file-input-is-shown="true"', escape: false);
-        $response->assertDontSee('input type="checkbox"', escape: false);
+        $response->assertDontSee(
+            'input type="checkbox" data-test="upload-new-file-checkbox"',
+            escape: false
+        );
     }
 
     public function testCreateFileVersionViewDoesNotShowFileInputIfFileHasVersion(): void {
@@ -254,7 +257,7 @@ class FileVersionTest extends TestCase {
     }
 
     /**
-     * @dataProvider isEncryptedProvider
+     * @dataProvider booleanProvider
      */
     public function testShowFileVersionDownloadsFile(bool $isEncrypted): void {
         /**
@@ -263,23 +266,23 @@ class FileVersionTest extends TestCase {
         $fileVersionServiceSpy = $this->instance(
             FileVersionService::class,
             Mockery::spy(FileVersionService::class, [
-                Mockery::mock(EncryptionService::class),
+                $this->app->make(EncryptionService::class),
                 $this->storageFake,
             ])
         )->makePartial();
 
-        $fileFactory = File::factory()->for($this->user);
-
-        if ($isEncrypted) {
-            $fileFactory->encrypted();
-        }
-
-        $file = $fileFactory->create();
+        $file = File::factory()
+            ->for($this->user)
+            ->create();
 
         $content = 'Test content';
         $resource = $this->createStream($content);
 
-        $version = $fileVersionServiceSpy->createNewVersion($file, $resource);
+        $version = $fileVersionServiceSpy->createNewVersion(
+            $file,
+            $resource,
+            $isEncrypted
+        );
 
         $otherVersions = FileVersion::factory(3)
             ->for($file)
@@ -493,8 +496,5 @@ class FileVersionTest extends TestCase {
 
         $response->assertNotFound();
     }
-
-    public static function isEncryptedProvider(): array {
-        return [[false], [true]];
-    }
 }
+

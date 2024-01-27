@@ -21,11 +21,18 @@
                 <x-input name="label" :value="old('label')" autofocus />
             </x-form-field>
 
+            <div class="form-control w-fit">
+                <label class="label cursor-pointer gap-4">
+                    <span class="label-text">{{ __('Encrypt file on the server') }}</span> 
+                    <input type="checkbox" @checked($latestVersion?->isEncrypted) class="checkbox checkbox-secondary" name="encrypt" />
+                </label>
+            </div>
+
             @if ($hasVersion)
                 <div class="form-control w-fit">
                     <label class="label cursor-pointer gap-4">
                         <span class="label-text">{{ __('Upload new file') }}</span> 
-                        <input type="checkbox" class="checkbox checkbox-secondary" name="new_file" x-model="uploadFile" />
+                        <input type="checkbox" data-test="upload-new-file-checkbox" class="checkbox checkbox-secondary" name="new_file" x-model="uploadFile" />
                     </label>
                 </div>
             @endif

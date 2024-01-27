@@ -114,10 +114,10 @@ class File extends Model {
         return $this->hasOne(FileVersion::class)->latestVersion();
     }
 
-    protected function isEncrypted(): Attribute {
+    protected function isLatestVersionEncrypted(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
-                return $attributes['encryption_key'] !== null;
+                return $this->latestVersion?->isEncrypted;
             }
         );
     }

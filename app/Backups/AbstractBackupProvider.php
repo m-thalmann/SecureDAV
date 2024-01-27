@@ -153,7 +153,6 @@ abstract class AbstractBackupProvider {
         $body = fopen('php://memory', 'rb+');
 
         $this->fileVersionService->writeContentsToStream(
-            $file,
             $file->latestVersion,
             $body
         );

@@ -99,4 +99,9 @@ abstract class TestCase extends BaseTestCase {
             return true;
         });
     }
+
+    public static function booleanProvider(): array {
+        return [[false], [true]];
+    }
 }
+

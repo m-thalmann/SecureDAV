@@ -41,7 +41,7 @@
             </ul>
         </div>
 
-        @if ($file->isEncrypted)
+        @if ($file->isLatestVersionEncrypted)
             <span class="tooltip" data-tip="{{ __('Encrypted') }}">
                 <i class="fa-solid fa-lock text-primary text-xs"></i>
             </span>

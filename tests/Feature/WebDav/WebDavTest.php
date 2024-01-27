@@ -96,26 +96,24 @@ class WebDavTest extends TestCase {
     }
 
     /**
-     * @dataProvider isEncryptedProvider
+     * @dataProvider booleanProvider
      */
-    public function testFilesContainsAccessibleFileWithVersionForUser(bool $isEncrypted): void {
+    public function testFilesContainsAccessibleFileWithVersionForUser(
+        bool $isEncrypted
+    ): void {
         $expectedContent = fake()->text(50);
 
-        $fileFactory = File::factory()
+        $file = File::factory()
             ->for($this->webDavUser->user)
-            ->hasAttached($this->webDavUser);
-
-        if ($isEncrypted) {
-            $fileFactory->encrypted();
-        }
-
-        $file = $fileFactory->create();
+            ->hasAttached($this->webDavUser)
+            ->create();
 
         $resource = $this->createStream($expectedContent);
 
         app(FileVersionService::class)->createNewVersion(
             $file,
-            $resource
+            $resource,
+            $isEncrypted
         );
 
         $response = $this->fetchWebDav(
@@ -378,8 +376,5 @@ XML;
     public static function webdavRouteProvider(): array {
         return [['webdav.files.base'], ['webdav.directories']];
     }
-
-    public static function isEncryptedProvider(): array {
-        return [[false], [true]];
-    }
 }
+

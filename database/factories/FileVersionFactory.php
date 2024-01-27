@@ -22,12 +22,24 @@ class FileVersionFactory extends Factory {
             'file_id' => File::factory(),
             'label' => null,
             'mime_type' => 'text/plain',
+            'encryption_key' => null,
             'version' => 1,
             'storage_path' => null,
             'checksum' => $this->faker->md5(),
             'bytes' => $this->faker->numberBetween(1, 1000000),
             'file_updated_at' => now(),
         ];
+    }
+
+    /**
+     * Indicate that the model's encryption_key should be set
+     */
+    public function encrypted(): static {
+        return $this->state(
+            fn(array $attributes) => [
+                'encryption_key' => Str::random(16),
+            ]
+        );
     }
 
     /**
