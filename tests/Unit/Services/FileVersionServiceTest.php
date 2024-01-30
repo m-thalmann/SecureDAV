@@ -45,12 +45,21 @@ class FileVersionServiceTest extends TestCase {
         $this->service->makePartial();
     }
 
-    public function testCopyLatestVersionCreatesANewVersionByCopyingTheLatestOne(): void {
+    /**
+     * @dataProvider booleanProvider
+     */
+    public function testCopyLatestVersionCreatesANewUnencryptedVersionByCopyingTheLatestOne(
+        bool $latestVersionEncrypted
+    ): void {
         $file = File::factory()->create();
-        $latestVersion = FileVersion::factory()
-            ->for($file)
-            ->encrypted()
-            ->create();
+
+        $latestVersionFactory = FileVersion::factory()->for($file);
+
+        if ($latestVersionEncrypted) {
+            $latestVersionFactory = $latestVersionFactory->encrypted();
+        }
+
+        $latestVersion = $latestVersionFactory->create();
 
         $newLabel = 'test-label';
 
@@ -63,21 +72,137 @@ class FileVersionServiceTest extends TestCase {
                 Closure $storeFileAction,
                 ?string $encryptionKey,
                 ?string $label
-            ) use ($latestVersion, $newLabel) {
+            ) use ($latestVersion, $newLabel, $latestVersionEncrypted) {
                 $this->assertEquals($latestVersion->file_id, $file->id);
-                $this->assertEquals(
-                    $latestVersion->encryption_key,
-                    $encryptionKey
-                );
                 $this->assertEquals($newLabel, $label);
 
                 $newPath = 'test-path';
 
-                $storedFileInfo = $storeFileAction($newPath);
+                $storedFileInfo = $storeFileAction($newPath, $encryptionKey);
 
                 $this->storageFake->assertExists($newPath);
 
+                $this->assertNull($encryptionKey);
+
+                if ($latestVersionEncrypted) {
+                    $this->assertNotEquals(
+                        $this->storageFake->get($latestVersion->storage_path),
+                        $this->storageFake->get($newPath)
+                    );
+                } else {
+                    $this->assertEquals(
+                        $this->storageFake->get($latestVersion->storage_path),
+                        $this->storageFake->get($newPath)
+                    );
+                }
+
                 $this->assertEquals(
+                    $latestVersion->mime_type,
+                    $storedFileInfo->mimeType
+                );
+                $this->assertEquals(
+                    $latestVersion->checksum,
+                    $storedFileInfo->checksum
+                );
+                $this->assertEquals(
+                    $latestVersion->bytes,
+                    $storedFileInfo->size
+                );
+
+                return true;
+            })
+            ->once()
+            ->andReturn($createdVersion);
+
+        if ($latestVersionEncrypted) {
+            $this->encryptionServiceMock
+                ->shouldReceive('decrypt')
+                ->withArgs(function (
+                    string $key,
+                    mixed $inputResource,
+                    mixed $outputResource
+                ) use ($latestVersion) {
+                    $this->assertEquals($latestVersion->encryption_key, $key);
+
+                    $this->assertIsResource($inputResource);
+                    $this->assertIsResource($outputResource);
+
+                    fwrite($outputResource, 'test-content');
+
+                    return true;
+                })
+                ->once();
+        } else {
+            $this->encryptionServiceMock->shouldReceive('decrypt')->never();
+        }
+
+        $returnedVersion = $this->service->copyLatestVersion(
+            $file,
+            encrypted: false,
+            label: $newLabel
+        );
+
+        $this->assertEquals($createdVersion, $returnedVersion);
+    }
+
+    /**
+     * @dataProvider booleanProvider
+     */
+    public function testCopyLatestVersionCreatesANewEncryptedVersionByCopyingTheLatestOne(
+        bool $latestVersionEncrypted
+    ): void {
+        $file = File::factory()->create();
+
+        $latestVersionFactory = FileVersion::factory()->for($file);
+
+        if ($latestVersionEncrypted) {
+            $latestVersionFactory = $latestVersionFactory->encrypted();
+        }
+
+        $latestVersion = $latestVersionFactory->create();
+
+        $testContent = 'test-content';
+
+        if ($latestVersionEncrypted) {
+            $this->storageFake->put(
+                $latestVersion->storage_path,
+                '==encrypted-content=='
+            );
+        } else {
+            $this->storageFake->put($latestVersion->storage_path, $testContent);
+        }
+
+        $newLabel = 'test-label';
+
+        $createdVersion = FileVersion::make();
+
+        $encryptionKey = null;
+
+        $this->service
+            ->shouldReceive('createVersion')
+            ->withArgs(function (
+                File $file,
+                Closure $storeFileAction,
+                ?string $receivedEncryptionKey,
+                ?string $label
+            ) use ($latestVersion, $newLabel, &$encryptionKey) {
+                $encryptionKey = $receivedEncryptionKey;
+
+                $this->assertEquals($latestVersion->file_id, $file->id);
+                $this->assertEquals($newLabel, $label);
+
+                $newPath = 'test-path';
+
+                $storedFileInfo = $storeFileAction(
+                    $newPath,
+                    $receivedEncryptionKey
+                );
+
+                $this->storageFake->assertExists($newPath);
+
+                $this->assertNotNull($receivedEncryptionKey);
+
+                $this->assertNotEquals(
                     $this->storageFake->get($latestVersion->storage_path),
                     $this->storageFake->get($newPath)
                 );
@@ -100,40 +225,104 @@ class FileVersionServiceTest extends TestCase {
             ->once()
             ->andReturn($createdVersion);
 
-        $returnedVersion = $this->service->copyLatestVersion($file, $newLabel);
+        if ($latestVersionEncrypted) {
+            $this->encryptionServiceMock
+                ->shouldReceive('decrypt')
+                ->withArgs(function (
+                    string $key,
+                    mixed $inputResource,
+                    mixed $outputResource
+                ) use ($latestVersion, $testContent) {
+                    $this->assertEquals($latestVersion->encryption_key, $key);
+
+                    $this->assertIsResource($inputResource);
+                    $this->assertIsResource($outputResource);
+
+                    fwrite($outputResource, $testContent);
+
+                    return true;
+                })
+                ->once();
+        } else {
+            $this->encryptionServiceMock->shouldReceive('decrypt')->never();
+        }
+
+        $this->encryptionServiceMock
+            ->shouldReceive('encrypt')
+            ->withArgs(function (
+                string $key,
+                mixed $inputResource,
+                mixed $outputResource
+            ) use (&$encryptionKey, $testContent) {
+                $this->assertEquals($encryptionKey, $key);
+
+                $this->assertIsResource($inputResource);
+                $this->assertIsResource($outputResource);
+
+                $this->assertEquals(
+                    $testContent,
+                    stream_get_contents($inputResource)
+                );
+
+                fwrite($outputResource, 'test-encrypted-content');
+
+                return true;
+            })
+            ->once();
+
+        $returnedVersion = $this->service->copyLatestVersion(
+            $file,
+            encrypted: true,
+            label: $newLabel
+        );
 
         $this->assertEquals($createdVersion, $returnedVersion);
     }
 
-    public function testCopyLatestVersionFailsIfFileHasNoVersions(): void {
+    /**
+     * @dataProvider booleanProvider
+     */
+    public function testCopyLatestVersionFailsIfFileHasNoVersions(
+        bool $encrypted
+    ): void {
         $this->expectException(NoVersionFoundException::class);
 
         $file = File::factory()->create();
 
-        $this->service->copyLatestVersion($file);
+        $this->service->copyLatestVersion($file, $encrypted);
     }
 
-    public function testCopyLatestVersionFailsIfFileCantBeCopied(): void {
+    /**
+     * @dataProvider booleanProvider
+     */
+    public function testCopyLatestVersionFailsIfFileCantBeCopied(
+        bool $encrypted
+    ): void {
         $file = File::factory()->create();
         $latestVersion = FileVersion::factory()
             ->for($file)
             ->create();
+
+        $this->storageFake->delete($latestVersion->storage_path);
 
         $this->service
             ->shouldReceive('createVersion')
             ->withArgs(function (
                 File $file,
                 Closure $storeFileAction,
+                ?string $encryptionKey,
                 ?string $label
-            ) use ($latestVersion) {
+            ) {
                 $newPath = 'test-path';
 
-                $this->storageFake->delete($latestVersion->storage_path);
-
                 try {
-                    $storeFileAction($newPath);
+                    $storeFileAction($newPath, $encryptionKey);
                 } catch (FileWriteException $e) {
                     $this->storageFake->assertMissing($newPath);
+                    $this->storageFake->assertMissing(
+                        $newPath . $this->service->getTmpSuffix()
+                    );
+
                     return true;
                 }
 
@@ -141,7 +330,7 @@ class FileVersionServiceTest extends TestCase {
             })
             ->once();
 
-        $this->service->copyLatestVersion($file);
+        $this->service->copyLatestVersion($file, $encrypted);
     }
 
     /**
@@ -967,4 +1156,3 @@ class FileVersionServiceTestClass extends FileVersionService {
         return static::TMP_SUFFIX;
     }
 }
-

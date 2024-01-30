@@ -10,3 +10,6 @@ end_of_line = crlf
 [*.md]
 trim_trailing_whitespace = false
 max_line_length = off
+
+[*.php,*.html]
+indent_size = 4

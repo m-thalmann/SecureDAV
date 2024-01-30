@@ -67,6 +67,7 @@ class FileVersionController extends Controller {
             } else {
                 $fileVersionService->copyLatestVersion(
                     $file,
+                    $doEncrypt,
                     $data['label'] ?? null
                 );
             }

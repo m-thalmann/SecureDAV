@@ -33,6 +33,7 @@ class FileVersionService {
      * Copies the file from the latest version to a new version for the given file.
      *
      * @param \App\Models\File $file
+     * @param bool $encrypted Whether the file should be encrypted
      * @param string|null $label The optional label for the new version
      *
      * @throws \App\Exceptions\NoVersionFoundException
@@ -44,6 +45,7 @@ class FileVersionService {
      */
     public function copyLatestVersion(
         File $file,
+        bool $encrypted,
         ?string $label = null
     ): FileVersion {
         $version = $file->latestVersion;
@@ -52,14 +54,64 @@ class FileVersionService {
             throw new NoVersionFoundException();
         }
 
-        $storeFileAction = function (string $newPath) use ($version) {
-            $fileCopiedSuccessfully = $this->storage->copy(
-                $version->storage_path,
-                $newPath
-            );
+        $encryptionKey = $encrypted ? Str::random(16) : null;
 
-            if (!$fileCopiedSuccessfully) {
-                throw new FileWriteException();
+        $storeFileAction = function (
+            string $newPath,
+            ?string $receivedEncryptionKey
+        ) use ($version) {
+            $decryptedPath = $this->storage->path($newPath);
+
+            try {
+                if ($version->isEncrypted) {
+                    if ($receivedEncryptionKey !== null) {
+                        $decryptedPath .= static::TMP_SUFFIX;
+                    }
+
+                    processResource(fopen($decryptedPath, 'wb'), function (
+                        mixed $outputStream
+                    ) use ($version) {
+                        $this->writeContentsToStream($version, $outputStream);
+                    });
+                } elseif ($receivedEncryptionKey === null) {
+                    if (
+                        !$this->storage->copy($version->storage_path, $newPath)
+                    ) {
+                        throw new FileWriteException();
+                    }
+                } else {
+                    // version is not encrypted; next version should be encrypted
+                    $decryptedPath = $this->storage->path(
+                        $version->storage_path
+                    );
+                }
+
+                if ($receivedEncryptionKey !== null) {
+                    processResources(
+                        [
+                            fopen($decryptedPath, 'rb'),
+                            fopen($this->storage->path($newPath), 'wb'),
+                        ],
+                        fn(
+                            array $resources
+                        ) => $this->encryptionService->encrypt(
+                            $receivedEncryptionKey,
+                            $resources[0],
+                            $resources[1]
+                        )
+                    );
+
+                    if ($version->isEncrypted) {
+                        // delete temporary decrypted file
+                        $this->storage->delete($decryptedPath);
+                    }
+                }
+            } catch (Exception $e) {
+                if ($receivedEncryptionKey !== null) {
+                    @unlink($decryptedPath);
+                }
+
+                throw new FileWriteException($e->getMessage(), previous: $e);
             }
 
             return new FileInfo(
@@ -73,7 +125,7 @@ class FileVersionService {
         return $this->createVersion(
             $file,
             $storeFileAction,
-            $version->encryption_key,
+            $encryptionKey,
             $label
         );
     }
@@ -316,19 +368,20 @@ class FileVersionService {
         FileVersion $version,
         mixed $outputStream
     ): void {
-        $readStream = $this->storage->readStream($version->storage_path);
-
-        if ($version->isEncrypted) {
-            $this->encryptionService->decrypt(
-                $version->encryption_key,
-                $readStream,
-                $outputStream
-            );
-        } else {
-            stream_copy_to_stream($readStream, $outputStream);
-        }
-
-        fclose($readStream);
+        processResource(
+            $this->storage->readStream($version->storage_path),
+            function (mixed $readStream) use ($version, $outputStream) {
+                if ($version->isEncrypted) {
+                    $this->encryptionService->decrypt(
+                        $version->encryption_key,
+                        $readStream,
+                        $outputStream
+                    );
+                } else {
+                    stream_copy_to_stream($readStream, $outputStream);
+                }
+            }
+        );
     }
 
     /**
@@ -371,4 +424,3 @@ class FileVersionService {
             ->setEtag($version->checksum);
     }
 }
-
