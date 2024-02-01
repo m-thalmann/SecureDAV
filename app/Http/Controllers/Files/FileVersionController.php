@@ -44,7 +44,10 @@ class FileVersionController extends Controller {
 
         $data = $request->validate([
             'label' => ['nullable', 'string', 'max:64'],
-            'file' => ['nullable', FileRule::default()->max('1gb')],
+            'file' => [
+                'nullable',
+                FileRule::default()->max(config('core.files.max_file_size')),
+            ],
             'encrypt' => ['nullable'],
         ]);
 
@@ -158,4 +161,3 @@ class FileVersionController extends Controller {
             );
     }
 }
-

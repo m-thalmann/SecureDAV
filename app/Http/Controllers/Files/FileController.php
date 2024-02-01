@@ -58,7 +58,10 @@ class FileController extends Controller {
         }
 
         $request->validate([
-            'file' => ['required', FileRule::default()->max('1gb')],
+            'file' => [
+                'required',
+                FileRule::default()->max(config('core.files.max_file_size')),
+            ],
         ]);
 
         $requestFile = $request->file('file');
@@ -210,4 +213,3 @@ class FileController extends Controller {
             );
     }
 }
-

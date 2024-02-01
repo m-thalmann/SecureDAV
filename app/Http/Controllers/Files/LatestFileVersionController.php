@@ -58,7 +58,10 @@ class LatestFileVersionController extends Controller {
         $this->authorize('update', $file->latestVersion);
 
         $request->validate([
-            'file' => ['required', FileRule::default()->max('1gb')],
+            'file' => [
+                'required',
+                FileRule::default()->max(config('core.files.max_file_size')),
+            ],
         ]);
 
         $uploadedFile = $request->file('file');
@@ -117,4 +120,3 @@ class LatestFileVersionController extends Controller {
             );
     }
 }
-

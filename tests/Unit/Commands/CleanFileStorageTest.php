@@ -13,7 +13,7 @@ class CleanFileStorageTest extends TestCase {
         $noVersionFiles = array_map(function (int $i) {
             $path = "no-version-file-$i";
 
-            $this->storageFake->put($path, 'content');
+            $this->putOldFile($path);
 
             return $path;
         }, range(1, 5));
@@ -37,6 +37,34 @@ class CleanFileStorageTest extends TestCase {
         }
     }
 
+    public function testDoesNotDeleteFileThatHaveNoVersionButHaveBeenModifiedInTheLast24Hours(): void {
+        $noVersionFiles = array_map(function (int $i) {
+            $path = "no-version-file-$i";
+
+            $this->storageFake->put($path, 'content');
+
+            return $path;
+        }, range(1, 5));
+
+        foreach ($noVersionFiles as $noVersionFile) {
+            $this->storageFake->assertExists($noVersionFile);
+        }
+
+        $version = FileVersion::factory()->create();
+
+        $versionFile = $version->storage_path;
+
+        $this->artisan('files:clean-storage')
+            ->expectsOutput('No files with no version found.')
+            ->assertExitCode(0);
+
+        $this->storageFake->assertExists($versionFile);
+
+        foreach ($noVersionFiles as $noVersionFile) {
+            $this->storageFake->assertExists($noVersionFile);
+        }
+    }
+
     public function testItWarnsAboutMissingFilesOnTheDisk(): void {
         $file = FileVersion::factory()->create();
 
@@ -53,7 +81,7 @@ class CleanFileStorageTest extends TestCase {
         $noVersionFiles = array_map(function (int $i) {
             $path = "no-version-file-$i";
 
-            $this->storageFake->put($path, 'content');
+            $this->putOldFile($path);
 
             return $path;
         }, range(1, 5));
@@ -76,5 +104,11 @@ class CleanFileStorageTest extends TestCase {
         foreach ($noVersionFiles as $noVersionFile) {
             $this->storageFake->assertExists($noVersionFile);
         }
+    }
+
+    protected function putOldFile(string $path): void {
+        $fullPath = $this->storageFake->path($path);
+
+        touch($fullPath, time() - 60 * 60 * 24);
     }
 }

@@ -10,6 +10,8 @@ return [
     'files' => [
         'max_name_length' => 30,
 
+        'max_file_size' => '1gb',
+
         'illegal_characters' => [
             '#',
             '%',
