@@ -63,7 +63,7 @@ class FileTest extends TestCase {
         $response->assertNotFound();
     }
 
-    public function testFileCanBeCreatedwithcock(): void {
+    public function testFileCanBeCreated(): void {
         $fileName = 'NewFile.txt';
         $content = fake()->text();
 
@@ -147,6 +147,42 @@ class FileTest extends TestCase {
         $createdFile = File::query()
             ->where('name', $fileName)
             ->first();
+
+        $response->assertRedirect("/files/{$createdFile->uuid}");
+
+        $this->assertResponseHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+    }
+
+    public function testFileCanBeCreatedWithoutInitialization(): void {
+        $fileName = 'NewFile.txt';
+
+        $this->mock(
+            FileVersionService::class,
+            fn(MockInterface $mock) => $mock->shouldNotReceive(
+                'createNewVersion'
+            )
+        );
+
+        $response = $this->post('/files', [
+            'name' => $fileName,
+            'initialize' => 'false',
+        ]);
+
+        $this->assertDatabaseHas('files', [
+            'name' => $fileName,
+            'user_id' => $this->user->id,
+        ]);
+
+        $createdFile = File::query()
+            ->where('name', $fileName)
+            ->first();
+
+        $this->assertDatabaseMissing('file_versions', [
+            'file_id' => $createdFile->id,
+        ]);
 
         $response->assertRedirect("/files/{$createdFile->uuid}");
 
@@ -576,4 +612,3 @@ class FileTest extends TestCase {
         ]);
     }
 }
-

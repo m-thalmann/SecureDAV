@@ -57,14 +57,21 @@ class FileController extends Controller {
             $this->authorize('update', $directory);
         }
 
-        $request->validate([
-            'file' => [
-                'required',
-                FileRule::default()->max(config('core.files.max_file_size')),
-            ],
-        ]);
+        $initialize = $request->get('initialize', 'true') === 'true';
+        $requestFile = null;
 
-        $requestFile = $request->file('file');
+        if ($initialize) {
+            $request->validate([
+                'file' => [
+                    'required',
+                    FileRule::default()->max(
+                        config('core.files.max_file_size')
+                    ),
+                ],
+            ]);
+
+            $requestFile = $request->file('file');
+        }
 
         $data = $request->validate([
             'name' => [
@@ -99,15 +106,17 @@ class FileController extends Controller {
 
             $file->save();
 
-            processResource(fopen($requestFile->path(), 'rb'), function (
-                mixed $fileResource
-            ) use ($fileVersionService, $file, $isEncrypted) {
-                $fileVersionService->createNewVersion(
-                    $file,
-                    $fileResource,
-                    $isEncrypted
-                );
-            });
+            if ($initialize) {
+                processResource(fopen($requestFile->path(), 'rb'), function (
+                    mixed $fileResource
+                ) use ($fileVersionService, $file, $isEncrypted) {
+                    $fileVersionService->createNewVersion(
+                        $file,
+                        $fileResource,
+                        $isEncrypted
+                    );
+                });
+            }
 
             DB::commit();
         } catch (Exception $e) {

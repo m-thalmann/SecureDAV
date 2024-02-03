@@ -7,6 +7,7 @@ use App\Models\File;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Js;
 use Tests\TestCase;
 
 class BrowseTest extends TestCase {
@@ -25,7 +26,7 @@ class BrowseTest extends TestCase {
     public function testBrowseViewCanBeRendered(): void {
         $response = $this->get('/browse');
 
-        $response->assertSee(route('webdav.directories'));
+        $response->assertSee(Js::from(route('webdav.directories')));
 
         $response->assertOk();
     }
@@ -38,11 +39,11 @@ class BrowseTest extends TestCase {
         $response = $this->get("/browse/$directory->uuid");
 
         $response->assertSee(
-            route('webdav.directories', [
+            Js::from(route('webdav.directories', [
                 collect($directory->breadcrumbs)
                     ->map(fn(Directory $directory) => $directory->name)
                     ->join('/'),
-            ])
+            ]))
         );
 
         $response->assertOk();

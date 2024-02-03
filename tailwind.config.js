@@ -48,6 +48,11 @@ export default {
           success: '#a3e635',
           warning: '#fde047',
           error: '#ef4444',
+
+          'input:disabled, input[disabled]': {
+            'background-color': 'hsl(var(--b1))',
+            'opacity': '0.5'
+          }
         },
       },
     ],

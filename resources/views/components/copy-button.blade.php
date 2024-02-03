@@ -5,13 +5,12 @@
 ])
 
 @php
-    $data = str_replace('\\', '\\\\', $data);
-    $data = str_replace('`', '\\`', $data);
-
-    $copyAction = "navigator.clipboard.writeText(`$data`)";
-
     if($inputId !== null) {
         $copyAction = "document.getElementById('$inputId').select(); document.execCommand('copy')";
+    }else{
+        $data = Js::from($data);
+
+        $copyAction = "navigator.clipboard.writeText($data)";
     }
 @endphp
 
@@ -19,7 +18,7 @@
     {{ $attributes->merge(['class' => !$attributes->has('plain') ? 'btn btn-circle btn-sm btn-ghost' : '']) }}
     x-data="{ success: false }"
     x-on:click="
-        {{ $copyAction }};
+        {!! $copyAction !!};
         success = true;
         setTimeout(() => { success = false }, 1000)
     "
