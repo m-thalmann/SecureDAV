@@ -22,6 +22,7 @@ class ProfileSettingsController extends Controller {
 
         return view('settings.profile.show', [
             'user' => authUser(),
+            'availableTimezones' => timezone_identifiers_list(),
             'twoFactorEnabled' => $twoFactorEnabled,
             'twoFactorConfirmed' => $twoFactorConfirmed,
             'sessions' => $this->getSessions($request)?->all(),

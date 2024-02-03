@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\AuthManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -20,12 +22,14 @@ class AppServiceProvider extends ServiceProvider {
     public function boot(): void {
         $this->definePasswordRules();
 
+        $this->setTimezone();
+
         Model::preventSilentlyDiscardingAttributes(!app()->isProduction());
 
         Paginator::defaultView('components.pagination');
     }
 
-    protected function definePasswordRules() {
+    protected function definePasswordRules(): void {
         Password::defaults(function () {
             if (app()->isProduction()) {
                 return Password::min(8)
@@ -36,6 +40,19 @@ class AppServiceProvider extends ServiceProvider {
             } else {
                 return Password::min(3);
             }
+        });
+    }
+
+    protected function setTimezone(): void {
+        Auth::resolved(function (AuthManager $auth) {
+            $user = $auth->user();
+
+            if ($user === null || $user->timezone === null) {
+                return;
+            }
+
+            config(['app.timezone' => $user->timezone]);
+            date_default_timezone_set($user->timezone);
         });
     }
 }

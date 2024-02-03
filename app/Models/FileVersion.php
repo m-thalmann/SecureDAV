@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Storage;
 class FileVersion extends Model {
     use HasFactory;
 
+    protected $dateFormat = 'c';
+
     protected $hidden = ['storage_path'];
 
     protected $fillable = ['file_id', 'label', 'mime_type'];

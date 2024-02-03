@@ -18,6 +18,8 @@ use Illuminate\Support\Arr;
 class BackupConfiguration extends Model {
     use HasFactory, HasUuids;
 
+    protected $dateFormat = 'c';
+
     protected $fillable = ['label', 'config', 'cron_schedule', 'active'];
 
     protected $casts = [

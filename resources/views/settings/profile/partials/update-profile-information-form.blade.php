@@ -42,6 +42,21 @@
 
             <x-input name="email" type="email" errorBag="updateProfileInformation" required :value="$user->email" />
         </x-form-field>
+
+        <x-form-field name="timezone" errorBag="updateProfileInformation" class="col-span-6 md:col-span-4">
+            <x-slot name="label">{{ __('Timezone') }}</x-slot>
+
+            <select name="timezone" @class([
+                'select',
+                'input-error' => $errors->getBag('updateProfileInformation')->get('timezone')
+            ])>
+                <option value="default" @selected($user->timezone === null)>{{ __('Default') }} ({{ config('app.default_timezone') }})</option>
+
+                @foreach ($availableTimezones as $timezone)
+                    <option value="{{ $timezone }}" @selected($timezone === $user->timezone)>{{ $timezone }}</option>
+                @endforeach
+            </select>
+        </x-form-field>
     </form>
 
     <x-slot name="actions" class="mt-6">

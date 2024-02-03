@@ -12,6 +12,9 @@ use Laravel\Fortify\Contracts\UpdatesUserProfileInformation as UpdatesUserProfil
 class UpdatesUserProfileInformation implements
     UpdatesUserProfileInformationContract {
     public function update(User $user, array $input): void {
+        $allowedTimezones = timezone_identifiers_list();
+        $allowedTimezones[] = 'default';
+
         try {
             Validator::make($input, [
                 'name' => ['required', 'string', 'max:255'],
@@ -22,6 +25,12 @@ class UpdatesUserProfileInformation implements
                     'email',
                     'max:255',
                     Rule::unique('users')->ignore($user->id),
+                ],
+
+                'timezone' => [
+                    'required',
+                    'string',
+                    Rule::in($allowedTimezones),
                 ],
             ])->validateWithBag('updateProfileInformation');
         } catch (ValidationException $e) {
@@ -39,6 +48,8 @@ class UpdatesUserProfileInformation implements
         $user->forceFill([
             'name' => $input['name'],
             'email' => $input['email'],
+            'timezone' =>
+                $input['timezone'] === 'default' ? null : $input['timezone'],
         ]);
 
         if (config('app.email_verification_enabled') && $newEmail) {
@@ -58,4 +69,3 @@ class UpdatesUserProfileInformation implements
         }
     }
 }
-

@@ -13,7 +13,9 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 class User extends Authenticatable implements MustVerifyEmail {
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
-    protected $fillable = ['name', 'email', 'password'];
+    protected $dateFormat = 'c';
+
+    protected $fillable = ['name', 'email', 'password', 'timezone'];
 
     protected $hidden = ['password', 'remember_token', 'encryption_key'];
 
@@ -73,4 +75,3 @@ class User extends Authenticatable implements MustVerifyEmail {
         });
     }
 }
-

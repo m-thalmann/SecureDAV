@@ -19,6 +19,7 @@ class BackupsRunScheduled extends Command {
          */
         $backups = BackupConfiguration::query()
             ->withSchedule()
+            ->with('user')
             ->get();
 
         /**
@@ -28,7 +29,7 @@ class BackupsRunScheduled extends Command {
             ->filter(
                 fn(BackupConfiguration $backup) => (new CronExpression(
                     $backup->cron_schedule
-                ))->isDue()
+                ))->isDue(timeZone: $backup->user->timezone)
             )
             ->all();
 

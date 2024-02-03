@@ -21,6 +21,8 @@ use Illuminate\Support\Str;
 class File extends Model {
     use HasFactory, HasUuids, SoftDeletes, Prunable;
 
+    protected $dateFormat = 'c';
+
     /**
      * Possible options for the auto version hours.
      *
@@ -206,7 +208,9 @@ class File extends Model {
         return static::query()->where(
             'deleted_at',
             '<=',
-            now()->subDays(config('core.files.trash.auto_delete_days'))
+            now()
+                ->subDays(config('core.files.trash.auto_delete_days'))
+                ->toIso8601String()
         );
     }
 
@@ -218,4 +222,3 @@ class File extends Model {
         });
     }
 }
-

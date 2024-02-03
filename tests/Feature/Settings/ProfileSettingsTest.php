@@ -51,6 +51,7 @@ class ProfileSettingsTest extends TestCase {
         $response = $this->put('/user/profile-information', [
             'name' => 'Test User',
             'email' => $this->user->email,
+            'timezone' => 'default',
         ]);
 
         $response->assertRedirect('/settings/profile#update-information');
@@ -63,6 +64,7 @@ class ProfileSettingsTest extends TestCase {
             'id' => $this->user->id,
             'name' => 'Test User',
             'email' => $this->user->email,
+            'timezone' => null,
         ]);
 
         Event::assertNothingDispatched();
@@ -76,6 +78,7 @@ class ProfileSettingsTest extends TestCase {
         $response = $this->put('/user/profile-information', [
             'name' => 'Test User',
             'email' => $newEmail,
+            'timezone' => 'America/New_York',
         ]);
 
         $response->assertRedirect('/settings/profile#update-information');
@@ -88,6 +91,7 @@ class ProfileSettingsTest extends TestCase {
             'id' => $this->user->id,
             'name' => 'Test User',
             'email' => $newEmail,
+            'timezone' => 'America/New_York',
         ]);
 
         Event::assertDispatched(EmailUpdated::class, function (
@@ -105,6 +109,7 @@ class ProfileSettingsTest extends TestCase {
         $response = $this->put('/user/profile-information', [
             'name' => 'Test User',
             'email' => $otherUser->email,
+            'timezone' => 'America/New_York',
         ]);
 
         $response->assertRedirect('/settings/profile#update-information');
@@ -123,6 +128,7 @@ class ProfileSettingsTest extends TestCase {
         $response = $this->put('/user/profile-information', [
             'name' => 'Test User',
             'email' => 'new-email@example.com',
+            'timezone' => 'America/New_York',
         ]);
 
         $response->assertRedirect('/settings/profile#update-information');
@@ -287,4 +293,3 @@ class ProfileSettingsTest extends TestCase {
         }
     }
 }
-

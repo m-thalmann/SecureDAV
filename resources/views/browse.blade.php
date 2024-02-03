@@ -21,7 +21,7 @@
             </li>
         </x-dropdown>
 
-        
+
         <span class="flex-1"></span>
 
         <x-dropdown align="end" width="w-52">
@@ -47,7 +47,7 @@
                 <form method="POST" action="{{ route('directories.destroy', [$currentDirectory]) }}">
                     @method('DELETE')
                     @csrf
-                    
+
                     <li>
                         <button class="hover:bg-error hover:text-error-content">
                             <i class="fas fa-trash w-6"></i>
@@ -75,7 +75,7 @@
                             <form method="POST" action="{{ route('directories.destroy', [$directory]) }}">
                                 @method('DELETE')
                                 @csrf
-                                
+
                                 <li>
                                     <button class="hover:bg-error hover:text-error-content">
                                         <i class="fas fa-trash w-6"></i>
@@ -119,7 +119,7 @@
                             >
                                 @method('DELETE')
                                 @csrf
-                                
+
                                 <li>
                                     <button class="hover:bg-error hover:text-error-content">
                                         <i class="fas fa-trash w-6"></i>

@@ -36,6 +36,7 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="APP_REGISTRATION_ENABLED" value="false"/>
         <env name="APP_EMAIL_VERIFICATION_ENABLED" value="false"/>
+        <env name="APP_DEFAULT_TIMEZONE" value="UTC"/>
         <env name="WEBDAV_CORS_ENABLED" value="false"/>
     </php>
 </phpunit>
