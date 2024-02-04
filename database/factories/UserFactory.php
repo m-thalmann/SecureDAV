@@ -23,7 +23,7 @@ class UserFactory extends Factory {
                 ->safeEmail(),
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
-            'timezone' => config('app.timezone'),
+            'timezone' => null,
             'remember_token' => Str::random(10),
             'is_admin' => false,
             'is_webdav_suspended' => false,
