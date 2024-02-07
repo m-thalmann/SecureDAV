@@ -8,6 +8,7 @@ use App\Models\WebDavUser;
 use App\Services\FileVersionService;
 use App\WebDav\AuthBackend;
 use App\WebDav\Filesystem\VirtualFile;
+use Exception;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Mockery;
 use Mockery\MockInterface;
@@ -132,9 +133,44 @@ class VirtualFileTest extends TestCase {
 
         $this->expectException(DAV\Exception\Forbidden::class);
 
-        $this->virtualFile->put($resource);
+        try {
+            $this->virtualFile->put($resource);
+        } catch (Exception $e) {
+            throw $e;
+        } finally {
+            fclose($resource);
+        }
+    }
 
-        fclose($resource);
+    public function testPutFailsIfTheUploadedFileIsTooLarge(): void {
+        config(['core.files.max_file_size_bytes' => 1]);
+
+        $contents = 'test contents';
+
+        $resource = $this->createStream($contents);
+
+        $webDavUser = WebDavUser::factory()->create([
+            'readonly' => false,
+        ]);
+
+        $this->authBackend
+            ->shouldReceive('getAuthenticatedWebDavUser')
+            ->once()
+            ->andReturn($webDavUser);
+
+        $this->fileVersionService
+            ->shouldReceive('updateLatestVersion')
+            ->never();
+
+        $this->expectException(DAV\Exception\InsufficientStorage::class);
+
+        try {
+            $this->virtualFile->put($resource);
+        } catch (Exception $e) {
+            throw $e;
+        } finally {
+            fclose($resource);
+        }
     }
 
     public function testGetSizeReturnsTheFileSizeOfTheVersion(): void {

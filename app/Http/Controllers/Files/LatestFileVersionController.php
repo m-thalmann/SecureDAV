@@ -60,7 +60,9 @@ class LatestFileVersionController extends Controller {
         $request->validate([
             'file' => [
                 'required',
-                FileRule::default()->max(config('core.files.max_file_size')),
+                FileRule::default()->max(
+                    config('core.files.max_file_size_bytes') / 1000 // must be KB
+                ),
             ],
         ]);
 

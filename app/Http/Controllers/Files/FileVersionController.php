@@ -46,7 +46,9 @@ class FileVersionController extends Controller {
             'label' => ['nullable', 'string', 'max:64'],
             'file' => [
                 'nullable',
-                FileRule::default()->max(config('core.files.max_file_size')),
+                FileRule::default()->max(
+                    config('core.files.max_file_size_bytes') / 1000 // must be KB
+                ),
             ],
             'encrypt' => ['nullable'],
         ]);

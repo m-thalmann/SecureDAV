@@ -6,6 +6,7 @@
 /public/storage
 /coverage
 /coverage.xml
+/bootstrap/cache
 
 composer.lock
 package-lock.json

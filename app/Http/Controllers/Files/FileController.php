@@ -65,7 +65,7 @@ class FileController extends Controller {
                 'file' => [
                     'required',
                     FileRule::default()->max(
-                        config('core.files.max_file_size')
+                        config('core.files.max_file_size_bytes') / 1000 // must be KB
                     ),
                 ],
             ]);

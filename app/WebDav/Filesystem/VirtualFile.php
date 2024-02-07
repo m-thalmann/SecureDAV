@@ -7,6 +7,7 @@ use App\Models\FileVersion;
 use App\Services\FileVersionService;
 use App\WebDav\AuthBackend;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Number;
 use Sabre\DAV;
 
 /**
@@ -64,6 +65,20 @@ class VirtualFile extends DAV\File {
         stream_copy_to_stream($updateResource, $resource);
         rewind($resource);
 
+        $fstat = fstat($resource);
+        $size = $fstat['size'];
+
+        if ($size > config('core.files.max_file_size_bytes')) {
+            $maximumFileSize = Number::fileSize(
+                config('core.files.max_file_size_bytes'),
+                precision: 2
+            );
+
+            throw new DAV\Exception\InsufficientStorage(
+                "File is too large. Maximum file size is $maximumFileSize."
+            );
+        }
+
         $this->fileVersionService->updateLatestVersion($this->file, $resource);
 
         $this->fileVersion->refresh();
@@ -91,4 +106,3 @@ class VirtualFile extends DAV\File {
         return $this->fileVersion->file_updated_at;
     }
 }
-
