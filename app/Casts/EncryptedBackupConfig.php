@@ -93,4 +93,3 @@ class EncryptedBackupConfig implements CastsAttributes {
         }
     }
 }
-

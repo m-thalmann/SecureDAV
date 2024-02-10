@@ -432,4 +432,3 @@ class DirectoryTest extends TestCase {
         $response->assertNotFound();
     }
 }
-

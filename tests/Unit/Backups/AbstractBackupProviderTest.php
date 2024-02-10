@@ -361,4 +361,3 @@ class TestBackupProvider extends AbstractBackupProvider {
         return parent::getConfig($key, $default);
     }
 }
-

@@ -8,7 +8,7 @@ use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Http\Responses\RegisterResponse as BaseRegisterResponse;
 
 class RegisterResponse extends BaseRegisterResponse {
-    public function toResponse($request): RedirectResponse {
+    public function toResponse(mixed $request): RedirectResponse {
         $redirect = Fortify::redirects('register');
 
         if (config('app.email_verification_enabled')) {

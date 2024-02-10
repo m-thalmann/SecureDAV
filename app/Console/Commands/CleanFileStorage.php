@@ -21,7 +21,7 @@ class CleanFileStorage extends Command {
         $this->storage = Storage::disk('files');
     }
 
-    public function handle() {
+    public function handle(): int {
         $dryRun = $this->option('dry-run');
 
         $uncheckedFiles = $this->storage->allFiles();

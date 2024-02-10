@@ -6,10 +6,11 @@ use App\Events\WebDavResumed;
 use App\Events\WebDavSuspended;
 use App\Http\Controllers\Controller;
 use App\Support\SessionMessage;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class WebDavSuspensionController extends Controller {
-    public function __invoke(Request $request) {
+    public function __invoke(Request $request): RedirectResponse {
         $suspended = $request->boolean('suspended');
 
         $user = authUser();
@@ -34,4 +35,3 @@ class WebDavSuspensionController extends Controller {
         );
     }
 }
-

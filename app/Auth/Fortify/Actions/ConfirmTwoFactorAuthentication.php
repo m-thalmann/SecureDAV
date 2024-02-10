@@ -7,7 +7,7 @@ use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication as BaseConfirmTwoFact
 
 class ConfirmTwoFactorAuthentication extends
     BaseConfirmTwoFactorAuthentication {
-    public function __invoke($user, $code) {
+    public function __invoke(mixed $user, mixed $code): void {
         try {
             parent::__invoke($user, $code);
         } catch (ValidationException $e) {

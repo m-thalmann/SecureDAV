@@ -41,4 +41,3 @@ class WebDavResumedNotification extends Notification implements ShouldQueue {
         ];
     }
 }
-

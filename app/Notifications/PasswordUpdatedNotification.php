@@ -42,4 +42,3 @@ class PasswordUpdatedNotification extends Notification implements ShouldQueue {
         ];
     }
 }
-

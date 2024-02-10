@@ -404,4 +404,3 @@ class HelpersTest extends TestCase {
         ];
     }
 }
-

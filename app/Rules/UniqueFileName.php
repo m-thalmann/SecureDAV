@@ -59,4 +59,3 @@ class UniqueFileName implements ValidationRule {
             ->exists();
     }
 }
-

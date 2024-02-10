@@ -259,4 +259,3 @@ class FileMoveTest extends TestCase {
         $this->assertEquals($directoryId, $file->directory_id);
     }
 }
-

@@ -92,4 +92,3 @@ class BackupConfigurationScheduleController extends Controller {
             );
     }
 }
-

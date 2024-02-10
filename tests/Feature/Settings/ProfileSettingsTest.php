@@ -202,7 +202,7 @@ class ProfileSettingsTest extends TestCase {
         });
     }
 
-    public function testUserCanBeLoggedOutFromAllSessions() {
+    public function testUserCanBeLoggedOutFromAllSessions(): void {
         config(['session.driver' => 'database']);
 
         $this->passwordConfirmed();

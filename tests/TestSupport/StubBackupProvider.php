@@ -40,4 +40,3 @@ class StubBackupProvider extends AbstractBackupProvider {
     protected function backupFile(File $file, string $targetName): void {
     }
 }
-

@@ -15,7 +15,7 @@ class FileVersionServiceProvider extends ServiceProvider implements
      *
      * @return void
      */
-    public function register() {
+    public function register(): void {
         $this->app->singleton(FileVersionService::class, function ($app) {
             return new FileVersionService(
                 $app->make(EncryptionService::class),
@@ -29,8 +29,7 @@ class FileVersionServiceProvider extends ServiceProvider implements
      *
      * @return array
      */
-    public function provides() {
+    public function provides(): array {
         return [FileVersionService::class];
     }
 }
-

@@ -106,10 +106,10 @@ class EncryptionServiceTest extends TestCase {
     public function testEncryptThrowsAnExceptionIfTheEncryptedDataCantBeWritten(): void {
         $this->expectException(StreamWriteException::class);
 
-        stream_wrapper_register("singleWrite", SingleWriteStreamWrapper::class);
+        stream_wrapper_register('singleWrite', SingleWriteStreamWrapper::class);
 
         $inputResource = fopen($this->inputPath, 'rb');
-        $encryptedResource = fopen("singleWrite://test", 'w');
+        $encryptedResource = fopen('singleWrite://test', 'w');
 
         try {
             $this->service->encrypt(
@@ -118,7 +118,7 @@ class EncryptionServiceTest extends TestCase {
                 $encryptedResource
             );
         } catch (Exception $e) {
-            stream_wrapper_unregister("singleWrite");
+            stream_wrapper_unregister('singleWrite');
 
             fclose($inputResource);
             fclose($encryptedResource);
@@ -126,7 +126,7 @@ class EncryptionServiceTest extends TestCase {
             throw $e;
         }
 
-        stream_wrapper_unregister("singleWrite");
+        stream_wrapper_unregister('singleWrite');
 
         fclose($inputResource);
         fclose($encryptedResource);
@@ -212,13 +212,13 @@ class EncryptionServiceTest extends TestCase {
         $encryptedResource = fopen($this->encryptedPath, 'rb');
         $decryptedResource = fopen($this->decryptedPath, 'w');
 
-        try{
+        try {
             $this->service->decrypt(
                 Str::random(16),
                 $encryptedResource,
                 $decryptedResource
             );
-        }catch(Exception $e){
+        } catch (Exception $e) {
             fclose($encryptedResource);
             fclose($decryptedResource);
 
@@ -229,7 +229,6 @@ class EncryptionServiceTest extends TestCase {
 
         fclose($encryptedResource);
         fclose($decryptedResource);
-
     }
 
     public function testDecryptThrowsAnExceptionIfOutputIsNotWritable(): void {
@@ -300,15 +299,13 @@ class EncryptionServiceTest extends TestCase {
         fclose($encryptedResource);
         fclose($decryptedResource);
 
-        $this->assertEquals(
-            $testData,
-            file_get_contents($this->decryptedPath)
-        );
+        $this->assertEquals($testData, file_get_contents($this->decryptedPath));
     }
 }
 
 class EncryptionServiceTestClass extends EncryptionService {
     public function getEncryptionBlockBytes(): int {
-        return static::ENCRYPTION_BLOCKS * openssl_cipher_iv_length($this->cipher);
+        return static::ENCRYPTION_BLOCKS *
+            openssl_cipher_iv_length($this->cipher);
     }
 }

@@ -296,4 +296,3 @@ class LatestFileVersionTest extends TestCase {
         );
     }
 }
-

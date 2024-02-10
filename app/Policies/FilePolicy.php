@@ -41,4 +41,3 @@ class FilePolicy {
             : Response::denyAsNotFound();
     }
 }
-

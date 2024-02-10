@@ -63,8 +63,8 @@ class WebDavController extends Controller {
     /**
      * Executes the webdav server.
      *
-     * @param WebDav\Server $server
-     * @param Request $request
+     * @param \App\WebDav\Server $server
+     * @param \Illuminate\Http\Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response|\Symfony\Component\HttpFoundation\StreamedResponse
      */
@@ -100,4 +100,3 @@ class WebDavController extends Controller {
         return $server;
     }
 }
-

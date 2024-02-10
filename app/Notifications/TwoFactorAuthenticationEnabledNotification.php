@@ -43,4 +43,3 @@ class TwoFactorAuthenticationEnabledNotification extends Notification implements
         ];
     }
 }
-

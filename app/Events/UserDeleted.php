@@ -14,4 +14,3 @@ class UserDeleted {
         $this->userData = $user->only(['id', 'name', 'email']);
     }
 }
-

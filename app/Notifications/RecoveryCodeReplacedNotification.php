@@ -43,4 +43,3 @@ class RecoveryCodeReplacedNotification extends Notification implements
         ];
     }
 }
-

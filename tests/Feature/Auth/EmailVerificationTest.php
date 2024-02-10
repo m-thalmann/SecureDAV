@@ -102,4 +102,3 @@ class EmailVerificationTest extends TestCase {
         );
     }
 }
-

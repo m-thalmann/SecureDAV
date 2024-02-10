@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Jobs\RunBackup;
 use App\Models\BackupConfiguration;
 use App\Support\SessionMessage;
+use Illuminate\Http\RedirectResponse;
 
 class BackupController extends Controller {
-    public function __invoke(BackupConfiguration $backupConfiguration) {
+    public function __invoke(
+        BackupConfiguration $backupConfiguration
+    ): RedirectResponse {
         $this->authorize('update', $backupConfiguration);
 
         if (RunBackup::isRateLimited($backupConfiguration)) {
@@ -37,4 +40,3 @@ class BackupController extends Controller {
         );
     }
 }
-

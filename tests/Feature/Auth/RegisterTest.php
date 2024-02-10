@@ -99,4 +99,3 @@ class RegisterTest extends TestCase {
         $response->assertSessionHasErrors(['email']);
     }
 }
-

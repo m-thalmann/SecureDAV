@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Auth\SessionGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -60,7 +61,7 @@ class ProfileSettingsController extends Controller {
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Support\Collection|null
      */
-    protected function getSessions(Request $request) {
+    protected function getSessions(Request $request): ?Collection {
         if (config('session.driver') !== 'database') {
             return null;
         }
@@ -90,4 +91,3 @@ class ProfileSettingsController extends Controller {
             });
     }
 }
-

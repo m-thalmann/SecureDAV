@@ -29,4 +29,3 @@ class DirectoryPolicy {
             : Response::denyAsNotFound();
     }
 }
-

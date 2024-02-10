@@ -32,4 +32,3 @@ return new class extends Migration {
         // files in storage are intentionally not deleted to prevent data loss
     }
 };
-

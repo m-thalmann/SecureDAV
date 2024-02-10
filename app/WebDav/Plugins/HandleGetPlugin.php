@@ -74,7 +74,7 @@ class HandleGetPlugin extends DAV\ServerPlugin {
         return false;
     }
 
-    public function getPluginInfo() {
+    public function getPluginInfo(): array {
         return [
             'name' => $this->getPluginName(),
             'description' => 'Adds custom handling for GET requests',

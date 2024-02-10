@@ -74,4 +74,3 @@ class RunBackup implements ShouldQueue {
         return static::RATE_LIMITER_KEY . ':' . $backupConfiguration->id;
     }
 }
-

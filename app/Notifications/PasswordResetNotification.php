@@ -42,4 +42,3 @@ class PasswordResetNotification extends Notification implements ShouldQueue {
         ];
     }
 }
-

@@ -386,4 +386,3 @@ class WebDavUserTest extends TestCase {
         ]);
     }
 }
-

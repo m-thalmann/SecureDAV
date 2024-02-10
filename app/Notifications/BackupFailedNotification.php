@@ -57,4 +57,3 @@ class BackupFailedNotification extends Notification implements ShouldQueue {
         ];
     }
 }
-

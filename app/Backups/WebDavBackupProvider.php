@@ -105,4 +105,3 @@ class WebDavBackupProvider extends AbstractBackupProvider {
         ];
     }
 }
-

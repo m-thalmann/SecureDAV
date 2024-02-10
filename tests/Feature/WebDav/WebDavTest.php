@@ -377,4 +377,3 @@ XML;
         return [['webdav.files.base'], ['webdav.directories']];
     }
 }
-

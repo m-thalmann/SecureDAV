@@ -10,18 +10,23 @@ class SingleWriteStreamWrapper {
     protected int $writeCount = 0;
     public mixed $context;
 
-    public function stream_open(string $path, string $mode, int $options, mixed &$opened_path): bool {
+    public function stream_open(
+        string $path,
+        string $mode,
+        int $options,
+        mixed &$opened_path
+    ): bool {
         $this->pos = 0;
         return true;
     }
 
     public function stream_read(int $count): string {
         $this->pos += $count;
-        return "";
+        return '';
     }
 
     public function stream_write(string $data): int|false {
-        if($this->writeCount >= 1) {
+        if ($this->writeCount >= 1) {
             return false;
         }
 

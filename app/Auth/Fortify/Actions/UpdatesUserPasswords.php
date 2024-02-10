@@ -50,4 +50,3 @@ class UpdatesUserPasswords implements UpdatesUserPasswordsContract {
         event(new PasswordUpdated($user));
     }
 }
-

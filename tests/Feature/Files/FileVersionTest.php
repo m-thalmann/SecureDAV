@@ -497,4 +497,3 @@ class FileVersionTest extends TestCase {
         $response->assertNotFound();
     }
 }
-

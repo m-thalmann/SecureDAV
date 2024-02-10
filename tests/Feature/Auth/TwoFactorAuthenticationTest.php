@@ -258,4 +258,3 @@ class TwoFactorAuthenticationTest extends TestCase {
             ->save();
     }
 }
-

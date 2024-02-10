@@ -136,4 +136,3 @@ class DirectoryController extends Controller {
             );
     }
 }
-

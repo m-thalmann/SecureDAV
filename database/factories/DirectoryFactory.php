@@ -23,4 +23,3 @@ class DirectoryFactory extends Factory {
         ];
     }
 }
-

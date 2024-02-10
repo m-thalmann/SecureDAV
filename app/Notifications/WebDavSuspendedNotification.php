@@ -41,4 +41,3 @@ class WebDavSuspendedNotification extends Notification implements ShouldQueue {
         ];
     }
 }
-

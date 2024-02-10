@@ -47,4 +47,3 @@ class NotificationPolicy {
         return $notifiable instanceof User && $notifiable->id === $user->id;
     }
 }
-

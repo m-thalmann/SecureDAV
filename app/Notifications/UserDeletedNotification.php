@@ -34,4 +34,3 @@ class UserDeletedNotification extends Notification implements ShouldQueue {
         ];
     }
 }
-

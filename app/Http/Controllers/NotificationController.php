@@ -83,4 +83,3 @@ class NotificationController extends Controller {
         return back();
     }
 }
-

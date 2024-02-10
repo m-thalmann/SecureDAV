@@ -11,4 +11,3 @@ class EmailUpdated {
     public function __construct(public readonly User $user) {
     }
 }
-

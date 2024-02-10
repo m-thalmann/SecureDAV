@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Files;
 use App\Http\Controllers\Controller;
 use App\Models\File;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class SearchFileController extends Controller {
-    public function __invoke(Request $request) {
+    public function __invoke(Request $request): View {
         $search = $request->get('q', default: null);
 
         $files =
@@ -24,4 +25,3 @@ class SearchFileController extends Controller {
         return view('files.search', ['search' => $search, 'files' => $files]);
     }
 }
-

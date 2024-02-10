@@ -17,7 +17,7 @@ use Sabre\DAV;
 class VirtualFile extends DAV\File {
     protected FileVersion $fileVersion;
 
-    function __construct(
+    public function __construct(
         protected AuthBackend $authBackend,
         protected FileVersionService $fileVersionService,
         public readonly File $file
@@ -25,11 +25,11 @@ class VirtualFile extends DAV\File {
         $this->fileVersion = $file->latestVersion;
     }
 
-    function getName(): string {
+    public function getName(): string {
         return $this->file->name;
     }
 
-    function get(): mixed {
+    public function get(): mixed {
         $stream = fopen('php://memory', 'rb+');
 
         $this->writeToStream($stream);
@@ -48,14 +48,14 @@ class VirtualFile extends DAV\File {
      *
      * @return void
      */
-    function writeToStream(mixed $resource): void {
+    public function writeToStream(mixed $resource): void {
         $this->fileVersionService->writeContentsToStream(
             $this->fileVersion,
             $resource
         );
     }
 
-    function put(mixed $updateResource): string {
+    public function put(mixed $updateResource): string {
         if ($this->authBackend->getAuthenticatedWebDavUser()->readonly) {
             throw new DAV\Exception\Forbidden();
         }
@@ -86,23 +86,23 @@ class VirtualFile extends DAV\File {
         return $this->getETag();
     }
 
-    function getSize(): int {
+    public function getSize(): int {
         return $this->fileVersion->bytes;
     }
 
-    function getETag(): string {
+    public function getETag(): string {
         return "\"{$this->fileVersion->checksum}\"";
     }
 
-    function getContentType(): string {
+    public function getContentType(): string {
         return $this->fileVersion->mime_type;
     }
 
-    function getLastModified(): int {
+    public function getLastModified(): int {
         return $this->fileVersion->file_updated_at->timestamp;
     }
 
-    function getLastModifiedDateTime(): CarbonInterface {
+    public function getLastModifiedDateTime(): CarbonInterface {
         return $this->fileVersion->file_updated_at;
     }
 }

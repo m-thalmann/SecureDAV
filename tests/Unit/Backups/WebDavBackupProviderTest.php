@@ -249,4 +249,3 @@ class WebDavBackupProviderTestClass extends WebDavBackupProvider {
         return parent::getWebDavConfig();
     }
 }
-

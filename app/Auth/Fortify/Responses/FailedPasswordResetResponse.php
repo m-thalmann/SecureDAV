@@ -3,11 +3,12 @@
 namespace App\Auth\Fortify\Responses;
 
 use App\Support\SessionMessage;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Password;
 use Laravel\Fortify\Http\Responses\FailedPasswordResetResponse as BaseFailedPasswordResetResponse;
 
 class FailedPasswordResetResponse extends BaseFailedPasswordResetResponse {
-    public function toResponse($request) {
+    public function toResponse(mixed $request): RedirectResponse {
         if ($this->status === Password::INVALID_USER) {
             return back()
                 ->withInput($request->only('email'))

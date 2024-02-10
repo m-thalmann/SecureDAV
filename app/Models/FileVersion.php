@@ -51,4 +51,3 @@ class FileVersion extends Model {
         });
     }
 }
-

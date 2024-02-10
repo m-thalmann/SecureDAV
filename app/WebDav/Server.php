@@ -51,7 +51,7 @@ class Server extends DAV\Server {
 
     /**
      * Set request from Laravel.
-     * @param Request $request
+     * @param \Illuminate\Http\Request $request
      */
     public function setRequest(Request $request): void {
         // set url with trailing slash

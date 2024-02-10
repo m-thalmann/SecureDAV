@@ -154,7 +154,7 @@ if (!function_exists('authUser')) {
      *
      * @param string|null $guard The guard to use
      *
-     * @return User|null
+     * @return \App\Models\User|null
      */
     function authUser(?string $guard = null): ?User {
         return auth($guard)->user();
@@ -270,4 +270,3 @@ if (!function_exists('createStream')) {
         return $stream;
     }
 }
-

@@ -76,4 +76,3 @@ class FileTrashController extends Controller {
         );
     }
 }
-

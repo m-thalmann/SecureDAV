@@ -12,3 +12,4 @@ composer.lock
 package-lock.json
 
 *.blade.php
+artisan

@@ -13,7 +13,7 @@ class EncryptionServiceProvider extends ServiceProvider implements
      *
      * @return void
      */
-    public function register() {
+    public function register(): void {
         $this->app->singleton(EncryptionService::class, function ($app) {
             return new EncryptionService();
         });
@@ -24,8 +24,7 @@ class EncryptionServiceProvider extends ServiceProvider implements
      *
      * @return array
      */
-    public function provides() {
+    public function provides(): array {
         return [EncryptionService::class];
     }
 }
-

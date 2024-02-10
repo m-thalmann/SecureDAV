@@ -44,4 +44,3 @@ class WebDavUser extends Model {
         )->ordered();
     }
 }
-

@@ -42,4 +42,3 @@ class EmailUpdatedNotification extends Notification implements ShouldQueue {
         ];
     }
 }
-

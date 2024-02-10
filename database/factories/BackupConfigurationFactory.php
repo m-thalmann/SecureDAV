@@ -26,4 +26,3 @@ class BackupConfigurationFactory extends Factory {
         ];
     }
 }
-

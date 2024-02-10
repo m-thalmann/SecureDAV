@@ -25,4 +25,3 @@ class Conditional {
         return $next($request);
     }
 }
-

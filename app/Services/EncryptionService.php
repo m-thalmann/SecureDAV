@@ -65,7 +65,7 @@ class EncryptionService {
                 $iv
             );
 
-            if($cipherText === false) {
+            if ($cipherText === false) {
                 throw new EncryptionException(
                     'Could not encrypt the given stream.'
                 );
@@ -73,7 +73,7 @@ class EncryptionService {
 
             $iv = substr($cipherText, 0, $ivLength);
 
-            if(@fwrite($outputResource, $cipherText) === false) {
+            if (@fwrite($outputResource, $cipherText) === false) {
                 throw new StreamWriteException();
             }
         }
@@ -119,7 +119,7 @@ class EncryptionService {
                 $iv
             );
 
-            if($plainText === false) {
+            if ($plainText === false) {
                 throw new EncryptionException(
                     'Could not decrypt the given stream.'
                 );
@@ -133,4 +133,3 @@ class EncryptionService {
         }
     }
 }
-

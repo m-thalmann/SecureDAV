@@ -179,7 +179,7 @@ class File extends Model {
      * Moves the file to the given directory.
      * Does **not** save the changes automatically.
      *
-     * @param Directory|null $directory The directory to move the file to.
+     * @param \App\Models\Directory|null $directory The directory to move the file to.
      *
      * @throws \Illuminate\Validation\ValidationException If the file name already exists in the directory.
      */

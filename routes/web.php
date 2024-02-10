@@ -314,4 +314,3 @@ Route::prefix('settings')
             WebDavSuspensionController::class
         )->name('webdav-suspension');
     });
-

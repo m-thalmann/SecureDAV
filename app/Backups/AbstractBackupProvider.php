@@ -186,7 +186,7 @@ abstract class AbstractBackupProvider {
      * @param array $config
      * @param string $label
      *
-     * @return BackupConfiguration
+     * @return \App\Models\BackupConfiguration
      */
     public static function createConfiguration(
         User $user,
@@ -210,4 +210,3 @@ abstract class AbstractBackupProvider {
         return $backupConfiguration;
     }
 }
-

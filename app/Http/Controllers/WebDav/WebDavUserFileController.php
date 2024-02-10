@@ -122,4 +122,3 @@ class WebDavUserFileController extends Controller {
         );
     }
 }
-

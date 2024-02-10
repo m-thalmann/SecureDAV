@@ -41,4 +41,3 @@ class BrowseController extends Controller {
         ]);
     }
 }
-

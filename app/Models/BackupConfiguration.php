@@ -89,4 +89,3 @@ class BackupConfiguration extends Model {
         ]);
     }
 }
-

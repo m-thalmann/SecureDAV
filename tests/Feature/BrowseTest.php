@@ -39,11 +39,13 @@ class BrowseTest extends TestCase {
         $response = $this->get("/browse/$directory->uuid");
 
         $response->assertSee(
-            Js::from(route('webdav.directories', [
-                collect($directory->breadcrumbs)
-                    ->map(fn(Directory $directory) => $directory->name)
-                    ->join('/'),
-            ]))
+            Js::from(
+                route('webdav.directories', [
+                    collect($directory->breadcrumbs)
+                        ->map(fn(Directory $directory) => $directory->name)
+                        ->join('/'),
+                ])
+            )
         );
 
         $response->assertOk();
@@ -176,4 +178,3 @@ class BrowseTest extends TestCase {
         });
     }
 }
-

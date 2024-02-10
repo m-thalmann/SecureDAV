@@ -42,4 +42,3 @@ class BackupsRunScheduled extends Command {
         return static::SUCCESS;
     }
 }
-
