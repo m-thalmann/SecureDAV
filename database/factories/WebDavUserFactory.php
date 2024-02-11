@@ -19,7 +19,7 @@ class WebDavUserFactory extends Factory {
         return [
             'username' => fake()->uuid(),
             'password' => Hash::make('password'),
-            'label' => $this->faker->firstName(),
+            'label' => $this->faker->userName(),
             'user_id' => User::factory(),
             'active' => true,
             'readonly' => $this->faker->boolean(),

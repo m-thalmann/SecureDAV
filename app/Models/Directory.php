@@ -73,7 +73,7 @@ class Directory extends Model {
     protected function breadcrumbs(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
-                if ($this->computedBreadcrumbs) {
+                if ($this->computedBreadcrumbs !== null) {
                     return $this->computedBreadcrumbs;
                 }
 

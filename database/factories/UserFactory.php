@@ -25,7 +25,6 @@ class UserFactory extends Factory {
             'password' => Hash::make('password'),
             'timezone' => null,
             'remember_token' => Str::random(10),
-            'is_admin' => false,
             'is_webdav_suspended' => false,
             'encryption_key' => Str::random(16),
         ];

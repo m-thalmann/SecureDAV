@@ -119,7 +119,7 @@ class File extends Model {
     protected function isLatestVersionEncrypted(): Attribute {
         return Attribute::make(
             get: function (mixed $value, array $attributes) {
-                return $this->latestVersion?->isEncrypted;
+                return $this->latestVersion?->isEncrypted ?? false;
             }
         );
     }
