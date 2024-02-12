@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Backups\BackupConfigurationController;
 use App\Http\Controllers\Backups\BackupConfigurationFileController;
 use App\Http\Controllers\Backups\BackupConfigurationScheduleController;
@@ -285,6 +286,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'update',
         'destroy',
     ]);
+
+    Route::prefix('admin')
+        ->as('admin.')
+        ->middleware(['password.confirm', 'admin'])
+        ->group(function () {
+            Route::get('/', [AdminController::class, 'index'])->name('index');
+        });
 });
 
 Route::prefix('settings')

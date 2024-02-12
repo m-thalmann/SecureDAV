@@ -5,8 +5,8 @@
                 <label for="navigation-drawer" class="btn btn-square btn-ghost">
                     <i class="fa-solid fa-bars"></i>
                 </label>
-            </div> 
-    
+            </div>
+
             <h1>
                 <a href="{{ route('browse.index') }}" class="flex items-center gap-2 text-xl sm:text-2xl">
                     <img src="{{ asset('images/icon.png') }}" alt="SecureDAV Icon" class="h-10 w-auto" />
@@ -57,12 +57,21 @@
                         </a>
                     </li>
 
+                    @if ($user->is_admin)
+                        <li>
+                            <a href="{{ route('admin.index') }}">
+                                <i class="fa-solid fa-screwdriver-wrench w-6"></i>
+                                {{ __('Admin area') }}
+                            </a>
+                        </li>
+                    @endif
+
                     <form method="POST" action="{{ route('settings.webdav-suspension') }}">
                         @method('PUT')
                         @csrf
 
                         <input type="hidden" name="suspended" value="{{ !$user->is_webdav_suspended }}">
-                        
+
                         <li>
                             <button @class([
                                 'hover:bg-error hover:text-error-content' => !$user->is_webdav_suspended,
@@ -81,7 +90,7 @@
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        
+
                         <li>
                             <button class="hover:bg-error hover:text-error-content">
                                 <i class="fa-solid fa-arrow-right-from-bracket w-6"></i>

@@ -22,11 +22,13 @@ class User extends Authenticatable implements MustVerifyEmail {
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_admin' => 'boolean',
         'is_webdav_suspended' => 'boolean',
         'encryption_key' => 'encrypted',
     ];
 
     protected $attributes = [
+        'is_admin' => false,
         'is_webdav_suspended' => false,
     ];
 
