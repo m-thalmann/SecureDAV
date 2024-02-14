@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -25,5 +26,17 @@ class AdminUsersController extends Controller {
             'users' => $users,
             'search' => $search,
         ]);
+    }
+
+    public function create(): View {
+    }
+
+    public function store(Request $request): RedirectResponse {
+    }
+
+    public function edit(User $user): View {
+    }
+
+    public function update(Request $request, User $user): RedirectResponse {
     }
 }

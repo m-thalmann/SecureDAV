@@ -1,5 +1,6 @@
 <?php
 
+use App\Backups\LogBackupProvider;
 use App\Backups\WebDavBackupProvider;
 
 return [
@@ -11,10 +12,10 @@ return [
 
     'providers' => [
         WebDavBackupProvider::class => [],
+        LogBackupProvider::class => [],
     ],
 
     'aliases' => [
         'webdav' => WebDavBackupProvider::class,
     ],
 ];
-

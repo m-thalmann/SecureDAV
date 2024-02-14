@@ -48,6 +48,7 @@ class CleanFileStorage extends Command {
             fn(string $filePath) => $this->canFileBeDeleted($filePath)
         );
 
+        // TODO: add option to display list of missing files
         if (!empty($missingFiles)) {
             $this->error(
                 'Found ' .
