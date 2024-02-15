@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\User;
+use App\Support\SessionMessage;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -68,5 +69,77 @@ class AdminUsersTest extends TestCase {
         $response = $this->get('/admin/users');
 
         $response->assertForbidden();
+    }
+
+    public function testCreateUserViewConfirmsPassword(): void {
+        $response = $this->get('/admin/users/create');
+
+        $response->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testCreateUserViewCanBeRendered(): void {
+        $this->passwordConfirmed();
+
+        $response = $this->get('/admin/users/create');
+
+        $response->assertOk();
+    }
+
+    public function testCreateUserViewCantBeRenderedForNonAdmins(): void {
+        $this->user->forceFill(['is_admin' => false])->save();
+
+        $this->passwordConfirmed();
+
+        $response = $this->get('/admin/users/create');
+
+        $response->assertForbidden();
+    }
+
+    public function testStoreUserConfirmsPassword(): void {
+        $response = $this->post('/admin/users');
+
+        $response->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testStoreUserCanBeCreated(): void {
+        $this->passwordConfirmed();
+
+        $response = $this->post('/admin/users', [
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertRedirectToRoute('admin.users.index');
+
+        $this->assertDatabaseHas('users', [
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+        ]);
+
+        $this->assertResponseHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_SUCCESS
+        );
+    }
+
+    public function testStoreUserCantBeCreatedForNonAdmins(): void {
+        $this->user->forceFill(['is_admin' => false])->save();
+
+        $this->passwordConfirmed();
+
+        $response = $this->post('/admin/users', [
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseMissing('users', [
+            'name' => 'John Doe',
+        ]);
     }
 }
