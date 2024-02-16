@@ -5,6 +5,26 @@
         </x:slot>
     </x-header-title>
 
+    @if (session('generated-password'))
+        <div class="alert max-sm:rounded-none md:w-fit !mt-1">
+            <i class="fa-solid fa-key text-success"></i>
+            <span>
+                {{ __('Password of user reset') }}: <span class="font-mono ml-2 inline-block blur" id="generated-password">{{ session('generated-password') }}</span>
+            </span>
+
+            <div>
+                <button
+                    class="btn btn-circle btn-sm"
+                    onclick="document.getElementById('generated-password').classList.toggle('blur')"
+                >
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+
+                <x-copy-button :data="session('generated-password')" />
+            </div>
+        </div>
+    @endif
+
     <x-card>
         <x-slot name="title" icon="fa-solid fa-user-group" :amount="$users->total()">
             {{ __('Manage users') }}

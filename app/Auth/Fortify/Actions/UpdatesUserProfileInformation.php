@@ -24,7 +24,7 @@ class UpdatesUserProfileInformation implements
                     'string',
                     'email',
                     'max:255',
-                    Rule::unique('users')->ignore($user->id),
+                    Rule::unique(User::class)->ignore($user->id),
                 ],
 
                 'timezone' => [

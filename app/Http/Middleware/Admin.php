@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class Admin {
     /**
@@ -17,9 +18,8 @@ class Admin {
             return $next($request);
         }
 
-        return abort(
-            Response::HTTP_FORBIDDEN,
-            'You are not allowed to access this page.'
+        throw new AccessDeniedHttpException(
+            __('You are not allowed to access this page.')
         );
     }
 }
