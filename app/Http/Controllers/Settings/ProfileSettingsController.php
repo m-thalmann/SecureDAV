@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Events\UserDeleted;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Support\SessionMessage;
 use Carbon\Carbon;
 use Illuminate\Auth\SessionGuard;
@@ -32,6 +33,24 @@ class ProfileSettingsController extends Controller {
 
     public function destroy(): RedirectResponse {
         $user = authUser();
+
+        if (
+            $user->is_admin &&
+            User::query()
+                ->whereNot('id', $user->id)
+                ->where('is_admin', true)
+                ->count() === 0
+        ) {
+            return back()
+                ->withFragment('delete-account')
+                ->with(
+                    'session-message[delete-account]',
+                    SessionMessage::error(
+                        __('You cannot delete the last admin account.')
+                    )
+                );
+        }
+
         $user->delete();
 
         /**

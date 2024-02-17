@@ -74,7 +74,7 @@
                                 @if ($user->id !== auth()->id())
                                     <x-dropdown
                                         :position-aligned="getTableLoopDropdownPositionAligned($loop->index, $loop->count, 2)"
-                                        width="w-36"
+                                        width="w-52"
                                     >
                                         <li>
                                             <a href="{{ route('admin.users.edit', [$user]) }}">
@@ -82,6 +82,22 @@
                                                 {{ __('Edit') }}
                                             </a>
                                         </li>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ route('admin.users.destroy', [$user]) }}"
+                                            onsubmit="return confirm(`{{ __('Are you sure you want to delete this user with all of it\'s files?') }}`)"
+                                        >
+                                            @method('DELETE')
+                                            @csrf
+
+                                            <li>
+                                                <button class="hover:bg-error hover:text-error-content">
+                                                    <i class="fa-solid fa-trash w-6"></i>
+                                                    {{ __('Permanently delete') }}
+                                                </button>
+                                            </li>
+                                        </form>
                                     </x-dropdown>
                                 @else
                                     <i class="fa-solid fa-ban text-lg text-error"></i>

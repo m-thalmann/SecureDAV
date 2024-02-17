@@ -292,4 +292,22 @@ class ProfileSettingsTest extends TestCase {
             );
         }
     }
+
+    public function testAccountCantBeDeletedIfIsLastAdmin(): void {
+        $this->user->forceFill(['is_admin' => true])->save();
+
+        $response = $this->from(static::REDIRECT_TEST_ROUTE)->delete(
+            '/settings/profile'
+        );
+
+        $response->assertRedirect(
+            static::REDIRECT_TEST_ROUTE . '#delete-account'
+        );
+
+        $this->assertResponseHasSessionMessage(
+            $response,
+            SessionMessage::TYPE_ERROR,
+            key: 'session-message[delete-account]'
+        );
+    }
 }

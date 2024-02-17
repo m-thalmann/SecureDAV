@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Events\EmailUpdated;
+use App\Events\UserDeleted;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\SessionMessage;
@@ -59,6 +60,10 @@ class AdminUsersController extends Controller {
         $user->forceFill($data);
         $user->encryption_key = Str::random(16);
         $user->save();
+
+        if (config('app.email_verification_enabled')) {
+            $user->sendEmailVerificationNotification();
+        }
 
         return redirect()
             ->route('admin.users.index')
@@ -146,5 +151,23 @@ class AdminUsersController extends Controller {
     }
 
     public function destroy(User $user): RedirectResponse {
+        if ($user->id === auth()->id()) {
+            throw new AccessDeniedHttpException(
+                __('You cannot delete your own user account.')
+            );
+        }
+
+        $user->delete();
+
+        event(new UserDeleted($user));
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with(
+                'snackbar',
+                SessionMessage::success(
+                    __('User deleted successfully')
+                )->forDuration()
+            );
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Events\EmailUpdated;
+use App\Events\UserDeleted;
 use App\Models\User;
 use App\Support\SessionMessage;
 use Illuminate\Auth\Events\PasswordReset;
@@ -117,7 +118,7 @@ class AdminUsersTest extends TestCase {
             'password_confirmation' => 'password',
         ]);
 
-        $response->assertRedirectToRoute('admin.users.index');
+        $response->assertRedirect('/admin/users');
 
         $this->assertDatabaseHas('users', [
             'name' => 'John Doe',
@@ -128,6 +129,29 @@ class AdminUsersTest extends TestCase {
             $response,
             SessionMessage::TYPE_SUCCESS
         );
+    }
+
+    public function testStoreSendsEmailVerificationNotificationIfEnabled(): void {
+        Notification::fake();
+
+        config(['app.email_verification_enabled' => true]);
+
+        $this->passwordConfirmed();
+
+        $response = $this->post('/admin/users', [
+            'name' => 'John Doe',
+            'email' => 'john.doe@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertRedirect('/admin/users');
+
+        $user = User::query()
+            ->where('email', 'john.doe@example.com')
+            ->first();
+
+        Notification::assertSentTo($user, VerifyEmail::class);
     }
 
     public function testStoreUserCantBeCreatedForNonAdmins(): void {
@@ -266,11 +290,16 @@ class AdminUsersTest extends TestCase {
         Event::assertDispatched(PasswordReset::class);
     }
 
-    public function testUpdateUserCanBeUpdatedWithNewEmail(): void {
+    /**
+     * @dataProvider booleanProvider
+     */
+    public function testUpdateUserCanBeUpdatedWithNewEmail(
+        bool $emailVerificationEnabled
+    ): void {
         Event::fake();
         Notification::fake();
 
-        config(['app.email_verification_enabled' => true]);
+        config(['app.email_verification_enabled' => $emailVerificationEnabled]);
 
         $this->passwordConfirmed();
 
@@ -294,7 +323,12 @@ class AdminUsersTest extends TestCase {
         );
 
         Event::assertDispatched(EmailUpdated::class);
-        Notification::assertSentTo($user, VerifyEmail::class);
+
+        if ($emailVerificationEnabled) {
+            Notification::assertSentTo($user, VerifyEmail::class);
+        } else {
+            Notification::assertNothingSent();
+        }
     }
 
     public function testUpdateUserCantBeUpdatedForNonAdmins(): void {
@@ -325,6 +359,52 @@ class AdminUsersTest extends TestCase {
             'email' => $this->user->email,
             'is_admin' => false,
         ]);
+
+        $response->assertForbidden();
+    }
+
+    public function testDestroyUserConfirmsPassword(): void {
+        $user = User::factory()->create();
+
+        $response = $this->delete("/admin/users/{$user->id}");
+
+        $response->assertRedirectToRoute('password.confirm');
+    }
+
+    public function testDestroyDeletesUser(): void {
+        Event::fake();
+
+        $this->passwordConfirmed();
+
+        $user = User::factory()->create();
+
+        $response = $this->delete("/admin/users/{$user->id}");
+
+        $response->assertRedirect('/admin/users');
+
+        $this->assertDatabaseMissing('users', [
+            'id' => $user->id,
+        ]);
+
+        Event::assertDispatched(UserDeleted::class);
+    }
+
+    public function testDestroyCantDeleteUserForNonAdmin(): void {
+        $this->user->forceFill(['is_admin' => false])->save();
+
+        $this->passwordConfirmed();
+
+        $user = User::factory()->create();
+
+        $response = $this->delete("/admin/users/{$user->id}");
+
+        $response->assertForbidden();
+    }
+
+    public function testDestroyCantDeleteOwnUser(): void {
+        $this->passwordConfirmed();
+
+        $response = $this->delete("/admin/users/{$this->user->id}");
 
         $response->assertForbidden();
     }

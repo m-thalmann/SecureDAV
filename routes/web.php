@@ -296,7 +296,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             Route::resource('users', AdminUsersController::class)->except([
                 'show',
-                'destroy',
             ]);
         });
 });
