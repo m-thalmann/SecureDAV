@@ -1,10 +1,6 @@
-<x-app-layout :title="__('Manage users') . ' - ' . __('Admin area')">
-    <x-header-title iconClass="fa-solid fa-screwdriver-wrench">
-        <x:slot name="title">
-            {{ __('Admin area') }}
-        </x:slot>
-    </x-header-title>
+@extends('admin._layout')
 
+@section('content')
     @if (session('generated-password'))
         <div class="alert max-sm:rounded-none md:w-fit !mt-1">
             <i class="fa-solid fa-key text-success"></i>
@@ -42,7 +38,7 @@
                 <i class="fa-solid fa-search"></i>
             </label>
 
-            <input value="{{ $search }}" placeholder="{{ __('Search users...') }}" name="q" class="input bg-base-300 w-full pl-10 max-sm:rounded-none shadow-md" id="search-input" />
+            <input value="{{ $search }}" placeholder="{{ __('Search users...') }}" name="q" class="input bg-base-300 w-full pl-10 shadow-md" id="search-input" />
         </form>
 
         <div class="overflow-auto w-full bg-base-100 rounded-md">
@@ -51,6 +47,9 @@
                     <tr>
                         <th>{{ __('Email') }}</th>
                         <th>{{ __('Name') }}</th>
+                        <th>{{ __('Files') }}</th>
+                        <th>{{ __('WebDav users') }}</th>
+                        <th>{{ __('Configured backups') }}</th>
                         <th class="w-0">{{ __('Admin') }}</th>
                         <th class="w-0"></th>
                     </tr>
@@ -64,6 +63,15 @@
                             </td>
                             <td>
                                 {{ $user->name }}
+                            </td>
+                            <td>
+                                {{ $user->files_count }}
+                            </td>
+                            <td>
+                                {{ $user->web_dav_users_count }}
+                            </td>
+                            <td>
+                                {{ $user->backup_configurations_count }}
                             </td>
                             <td class="text-center">
                                 @if ($user->is_admin)
@@ -111,4 +119,4 @@
     </x-card>
 
     {{ $users->links() }}
-</x-app-layout>
+@endsection

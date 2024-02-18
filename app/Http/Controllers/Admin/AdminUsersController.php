@@ -28,6 +28,9 @@ class AdminUsersController extends Controller {
                     ->where('name', 'like', "%$search%")
                     ->orWhere('email', 'like', "%$search%");
             })
+            ->withCount('files')
+            ->withCount('webDavUsers')
+            ->withCount('backupConfigurations')
             ->paginate(perPage: 10)
             ->appends(['q' => $search]);
 
