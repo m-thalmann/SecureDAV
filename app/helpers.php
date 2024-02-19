@@ -91,7 +91,7 @@ if (!function_exists('getFileIconForExtension')) {
             return 'fa-solid fa-file-audio';
         }
 
-        if (in_array($extension, ['doc', 'docx', 'odt', 'rtf', 'txt'])) {
+        if (in_array($extension, ['doc', 'docx', 'odt', 'rtf', 'txt', 'md'])) {
             return 'fa-solid fa-file-word text-blue-600';
         }
 

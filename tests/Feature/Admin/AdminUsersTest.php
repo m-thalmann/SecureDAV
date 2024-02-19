@@ -7,6 +7,7 @@ use App\Events\UserDeleted;
 use App\Models\User;
 use App\Support\SessionMessage;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
@@ -108,7 +109,9 @@ class AdminUsersTest extends TestCase {
         $response->assertRedirectToRoute('password.confirm');
     }
 
-    public function testStoreUserCanBeCreated(): void {
+    public function testUserCanBeCreated(): void {
+        Event::fake([Registered::class]);
+
         $this->passwordConfirmed();
 
         $response = $this->post('/admin/users', [
@@ -129,6 +132,8 @@ class AdminUsersTest extends TestCase {
             $response,
             SessionMessage::TYPE_SUCCESS
         );
+
+        Event::assertDispatched(Registered::class);
     }
 
     public function testStoreSendsEmailVerificationNotificationIfEnabled(): void {

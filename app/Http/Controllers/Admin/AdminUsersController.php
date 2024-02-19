@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\SessionMessage;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -64,9 +65,7 @@ class AdminUsersController extends Controller {
         $user->encryption_key = Str::random(16);
         $user->save();
 
-        if (config('app.email_verification_enabled')) {
-            $user->sendEmailVerificationNotification();
-        }
+        event(new Registered($user));
 
         return redirect()
             ->route('admin.users.index')

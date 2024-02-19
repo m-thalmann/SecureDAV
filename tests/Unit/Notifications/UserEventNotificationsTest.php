@@ -20,7 +20,9 @@ use App\Notifications\TwoFactorAuthenticationEnabledNotification;
 use App\Notifications\UserDeletedNotification;
 use App\Notifications\WebDavResumedNotification;
 use App\Notifications\WebDavSuspendedNotification;
+use App\Notifications\WelcomeNotification;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Notification;
@@ -189,6 +191,27 @@ class UserEventNotificationsTest extends TestCase {
 
                 $this->assertArrayHasKey('database', $viaConnections);
                 $this->assertEquals('sync', $viaConnections['database']);
+
+                return true;
+            }
+        );
+    }
+
+    public function testRegisteredEventSendsNotification(): void {
+        Notification::fake();
+
+        event(new Registered($this->user));
+
+        Notification::assertSentTo(
+            $this->user,
+            WelcomeNotification::class,
+            function (WelcomeNotification $notification) {
+                $this->assertEquals($this->user->id, $notification->user->id);
+
+                $data = $notification->toArray($this->user);
+
+                $this->assertArrayHasKey('title', $data);
+                $this->assertArrayHasKey('body', $data);
 
                 return true;
             }

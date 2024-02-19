@@ -18,7 +18,9 @@ use App\Notifications\TwoFactorAuthenticationEnabledNotification;
 use App\Notifications\UserDeletedNotification;
 use App\Notifications\WebDavResumedNotification;
 use App\Notifications\WebDavSuspendedNotification;
+use App\Notifications\WelcomeNotification;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Events\RecoveryCodeReplaced;
@@ -91,6 +93,14 @@ class UserEventNotificationSubscriber {
         );
     }
 
+    public function handleRegistered(Registered $event): void {
+        /**
+         * @var \App\Models\User
+         */
+        $user = $event->user;
+        $user->notify(new WelcomeNotification($event->user));
+    }
+
     public function subscribe(Dispatcher $events): array {
         return [
             EmailUpdated::class => 'handleEmailUpdated',
@@ -105,6 +115,7 @@ class UserEventNotificationSubscriber {
             WebDavSuspended::class => 'handleWebDavSuspended',
             WebDavResumed::class => 'handleWebDavResumed',
             BackupFailed::class => 'handleBackupFailed',
+            Registered::class => 'handleRegistered',
         ];
     }
 }
