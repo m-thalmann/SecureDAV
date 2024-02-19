@@ -57,15 +57,6 @@
                         </a>
                     </li>
 
-                    @if ($user->is_admin)
-                        <li>
-                            <a href="{{ route('admin.index') }}">
-                                <i class="fa-solid fa-screwdriver-wrench w-6"></i>
-                                {{ __('Admin area') }}
-                            </a>
-                        </li>
-                    @endif
-
                     <form method="POST" action="{{ route('settings.webdav-suspension') }}">
                         @method('PUT')
                         @csrf
@@ -87,6 +78,19 @@
                             </button>
                         </li>
                     </form>
+
+                    <div class="divider m-0"></div>
+
+                    @if ($user->is_admin)
+                        <li>
+                            <a href="{{ route('admin.index') }}">
+                                <i class="fa-solid fa-screwdriver-wrench w-6"></i>
+                                {{ __('Admin area') }}
+                            </a>
+                        </li>
+                    @endif
+
+                    <div class="divider m-0"></div>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
