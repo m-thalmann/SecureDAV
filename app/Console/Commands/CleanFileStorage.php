@@ -5,11 +5,12 @@ namespace App\Console\Commands;
 use App\Models\FileVersion;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
 
 class CleanFileStorage extends Command {
-    protected $signature = 'files:clean-storage {--dry-run}';
+    protected $signature = 'files:clean-storage {--dry-run} {--list-missing}';
 
     protected $description = 'Cleans unused files from the storage.';
 
@@ -23,10 +24,11 @@ class CleanFileStorage extends Command {
 
     public function handle(): int {
         $dryRun = $this->option('dry-run');
+        $listMissing = $this->option('list-missing');
 
         $uncheckedFiles = $this->storage->allFiles();
 
-        $missingFiles = [];
+        $missingFileVersionFiles = [];
 
         $versions = FileVersion::query()
             ->select(['id', 'file_id', 'storage_path'])
@@ -40,7 +42,7 @@ class CleanFileStorage extends Command {
                 continue;
             }
 
-            $missingFiles[] = $version->storage_path;
+            $missingFileVersionFiles[] = $version;
         }
 
         $missingVersions = array_filter(
@@ -48,12 +50,29 @@ class CleanFileStorage extends Command {
             fn(string $filePath) => $this->canFileBeDeleted($filePath)
         );
 
-        if (!empty($missingFiles)) {
+        if (!empty($missingFileVersionFiles)) {
             $this->error(
                 'Found ' .
-                    count($missingFiles) .
-                    ' missing files from storage! These files can not be recovered.'
+                    count($missingFileVersionFiles) .
+                    ' missing files from storage! These files can not be recovered. ' .
+                    ($listMissing
+                        ? 'See list:'
+                        : 'Run with `--list-missing` to see the list.')
             );
+
+            if ($listMissing) {
+                $this->table(
+                    ['File Id', 'Version Id', 'Storage Path'],
+                    array_map(
+                        fn(FileVersion $missingFileVersion) => [
+                            $missingFileVersion->file_id,
+                            $missingFileVersion->id,
+                            $missingFileVersion->storage_path,
+                        ],
+                        $missingFileVersionFiles
+                    )
+                );
+            }
         }
 
         if (!empty($missingVersions)) {
@@ -95,7 +114,15 @@ class CleanFileStorage extends Command {
             "Done. Deleted $amountDeletedFiles files, freed $amountMemoryFreed."
         );
 
-        return empty($missingFiles) ? static::SUCCESS : static::FAILURE;
+        if (!$dryRun && $amountDeletedFiles > 0) {
+            Log::info(
+                "Ran files:clean-storage. Deleted $amountDeletedFiles files, freed $amountMemoryFreed."
+            );
+        }
+
+        return empty($missingFileVersionFiles)
+            ? static::SUCCESS
+            : static::FAILURE;
     }
 
     protected function canFileBeDeleted(string $fileName): bool {

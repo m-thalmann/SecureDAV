@@ -4,12 +4,25 @@ namespace Tests\Unit\Commands;
 
 use App\Models\FileVersion;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class CleanFileStorageTest extends TestCase {
     use LazilyRefreshDatabase;
 
-    public function testItDeletesFilesThatHaveNoVersion(): void {
+    public function testItDeletesFilesThatHaveNoVersionAndWritesLog(): void {
+        $logMock = Log::partialMock();
+
+        $logMock
+            ->shouldReceive('info')
+            ->once()
+            ->withArgs(function (string $message) {
+                return str_contains(
+                    $message,
+                    'Ran files:clean-storage. Deleted 5 files'
+                );
+            });
+
         $noVersionFiles = array_map(function (int $i) {
             $path = "no-version-file-$i";
 
@@ -28,7 +41,7 @@ class CleanFileStorageTest extends TestCase {
 
         $this->artisan('files:clean-storage')
             ->expectsOutput('Found 5 files with no version! Deleting...')
-            ->assertExitCode(0);
+            ->assertSuccessful();
 
         $this->storageFake->assertExists($versionFile);
 
@@ -56,7 +69,7 @@ class CleanFileStorageTest extends TestCase {
 
         $this->artisan('files:clean-storage')
             ->expectsOutput('No files with no version found.')
-            ->assertExitCode(0);
+            ->assertSuccessful();
 
         $this->storageFake->assertExists($versionFile);
 
@@ -72,9 +85,22 @@ class CleanFileStorageTest extends TestCase {
 
         $this->artisan('files:clean-storage')
             ->expectsOutput(
-                'Found 1 missing files from storage! These files can not be recovered.'
+                'Found 1 missing files from storage! These files can not be recovered. Run with `--list-missing` to see the list.'
             )
-            ->assertExitCode(1);
+            ->assertFailed();
+    }
+
+    public function testItShowsListOfMissingFilesOnTheDiskWhenOptionIsPassed(): void {
+        $file = FileVersion::factory()->create();
+
+        $this->storageFake->delete($file->storage_path);
+
+        $this->artisan('files:clean-storage --list-missing')
+            ->expectsTable(
+                ['File Id', 'Version Id', 'Storage Path'],
+                [[$file->file_id, $file->id, $file->storage_path]]
+            )
+            ->assertFailed();
     }
 
     public function testDoesNotDeleteFilesOnDryRun(): void {
@@ -97,7 +123,7 @@ class CleanFileStorageTest extends TestCase {
         $this->artisan('files:clean-storage --dry-run')
             ->expectsOutput('Found 5 files with no version! Deleting...')
             ->expectsOutput('Dry run, not deleting files.')
-            ->assertExitCode(0);
+            ->assertSuccessful();
 
         $this->storageFake->assertExists($versionFile);
 

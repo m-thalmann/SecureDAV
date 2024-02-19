@@ -13,6 +13,8 @@ class Kernel extends ConsoleKernel {
         $schedule->command('model:prune')->daily();
 
         $schedule->command('backups:run-scheduled')->hourly();
+
+        $schedule->command('files:clean-storage')->daily();
     }
 
     /**

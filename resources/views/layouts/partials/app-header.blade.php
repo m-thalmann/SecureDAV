@@ -88,9 +88,9 @@
                                 {{ __('Admin area') }}
                             </a>
                         </li>
-                    @endif
 
-                    <div class="divider m-0"></div>
+                        <div class="divider m-0"></div>
+                    @endif
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
