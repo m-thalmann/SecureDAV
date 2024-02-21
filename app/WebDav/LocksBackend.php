@@ -12,8 +12,8 @@ use stdClass;
  * WebDAV locks backend for Laravel
  */
 class LocksBackend extends DAV\Locks\Backend\AbstractBackend {
-    protected const TABLE_NAME = 'webdav_locks';
-    protected const TIMEOUT = 30 * 60;
+    public const TABLE_NAME = 'webdav_locks';
+    public const TIMEOUT = 30 * 60;
 
     public function __construct(protected AuthBackend $authBackend) {
     }

@@ -23,7 +23,7 @@
                 <div>
                     <span class="flex gap-2 items-center">
                         {{ $title }}
-    
+
                         @if ($title->attributes->has('amount'))
                             <small class="font-normal">({{ $title->attributes->get('amount') }})</small>
                         @endif

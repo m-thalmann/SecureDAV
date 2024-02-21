@@ -138,7 +138,7 @@ class LocksBackendTest extends TestCase {
     }
 
     public function testLockInsertsNewLockEntry(): void {
-        $this->assertDatabaseEmpty($this->locksBackend->getTableName());
+        $this->assertDatabaseEmpty($this->locksBackend::TABLE_NAME);
 
         $lockInfo = new LockInfo();
 
@@ -156,18 +156,18 @@ class LocksBackendTest extends TestCase {
 
         $this->assertTrue($result);
 
-        $this->assertDatabaseHas($this->locksBackend->getTableName(), [
+        $this->assertDatabaseHas($this->locksBackend::TABLE_NAME, [
             'user_id' => $this->user->id,
             'uri' => $lockInfo->uri,
             'owner' => $lockInfo->owner,
             'scope' => $lockInfo->scope,
             'depth' => $lockInfo->depth,
             'token' => $lockInfo->token,
-            'timeout' => $this->locksBackend->getTimeout(),
+            'timeout' => $this->locksBackend::TIMEOUT,
         ]);
 
         // no entries with these values, since they are overwritten
-        $this->assertDatabaseMissing($this->locksBackend->getTableName(), [
+        $this->assertDatabaseMissing($this->locksBackend::TABLE_NAME, [
             'timeout' => $lockInfo->timeout,
             'created' => $lockInfo->created,
         ]);
@@ -189,17 +189,17 @@ class LocksBackendTest extends TestCase {
 
         $this->assertTrue($result);
 
-        $this->assertDatabaseHas($this->locksBackend->getTableName(), [
+        $this->assertDatabaseHas($this->locksBackend::TABLE_NAME, [
             'user_id' => $this->user->id,
             'uri' => $lockInfo->uri,
             'owner' => $lockInfo->owner,
             'scope' => $lockInfo->scope,
             'depth' => $lockInfo->depth,
             'token' => $lockInfo->token,
-            'timeout' => $this->locksBackend->getTimeout(),
+            'timeout' => $this->locksBackend::TIMEOUT,
         ]);
 
-        $this->assertDatabaseCount($this->locksBackend->getTableName(), 1);
+        $this->assertDatabaseCount($this->locksBackend::TABLE_NAME, 1);
     }
 
     public function testLockDoesNotUpdateLockOfOtherUser(): void {
@@ -220,7 +220,7 @@ class LocksBackendTest extends TestCase {
 
         $this->assertTrue($result);
 
-        $this->assertDatabaseCount($this->locksBackend->getTableName(), 2);
+        $this->assertDatabaseCount($this->locksBackend::TABLE_NAME, 2);
     }
 
     public function testLockReturnsFalseWhenEntryCantBeCreated(): void {
@@ -263,7 +263,7 @@ class LocksBackendTest extends TestCase {
 
         $this->assertTrue($result);
 
-        $this->assertDatabaseMissing($this->locksBackend->getTableName(), [
+        $this->assertDatabaseMissing($this->locksBackend::TABLE_NAME, [
             'uri' => $path,
             'token' => $token,
             'user_id' => $this->user->id,
@@ -283,7 +283,7 @@ class LocksBackendTest extends TestCase {
 
         $this->assertFalse($result);
 
-        $this->assertDatabaseHas($this->locksBackend->getTableName(), [
+        $this->assertDatabaseHas($this->locksBackend::TABLE_NAME, [
             'uri' => $path,
             'token' => $token,
             'user_id' => $otherUser->id,
@@ -294,7 +294,7 @@ class LocksBackendTest extends TestCase {
         $query = $this->locksBackend->query();
 
         $this->assertInstanceOf(Builder::class, $query);
-        $this->assertEquals($this->locksBackend->getTableName(), $query->from);
+        $this->assertEquals($this->locksBackend::TABLE_NAME, $query->from);
     }
 
     protected function insertTestRow(
@@ -327,14 +327,6 @@ class LocksBackendTestClass extends LocksBackend {
         protected ?Builder $testQuery = null
     ) {
         parent::__construct($authBackend);
-    }
-
-    public function getTableName(): string {
-        return self::TABLE_NAME;
-    }
-
-    public function getTimeout(): int {
-        return self::TIMEOUT;
     }
 
     public function query(): Builder {
