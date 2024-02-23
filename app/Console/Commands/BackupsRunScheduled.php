@@ -18,6 +18,7 @@ class BackupsRunScheduled extends Command {
          * @var Collection
          */
         $backups = BackupConfiguration::query()
+            ->active()
             ->withSchedule()
             ->with('user')
             ->get();

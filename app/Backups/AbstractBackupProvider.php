@@ -77,6 +77,10 @@ abstract class AbstractBackupProvider {
      * @return bool True if all files were uploaded successfully, false otherwise.
      */
     public function backup(): bool {
+        if (!$this->backupConfiguration->active) {
+            return false;
+        }
+
         $success = true;
 
         $this->backupConfiguration

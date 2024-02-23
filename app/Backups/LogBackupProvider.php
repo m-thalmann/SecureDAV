@@ -30,7 +30,7 @@ class LogBackupProvider extends AbstractBackupProvider {
 
     protected function backupFile(File $file, string $targetName): void {
         Log::info(
-            "Backup \"{$this->backupConfiguration->name}\" ({$this->backupConfiguration->id}) " .
+            "Backup \"{$this->backupConfiguration->label}\" ({$this->backupConfiguration->id}) " .
                 "running for file \"{$file->name}\" ($file->id) " .
                 "with version {$file->latestVersion->version} " .
                 "to target \"{$targetName}\""

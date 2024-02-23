@@ -20,12 +20,6 @@
                 </span>
             @endif
 
-            @if (!$configuration->active)
-                <span class="tooltip" data-tip="{{ __('Inactive') }}">
-                    <i class="fa-solid fa-ban text-error text-lg"></i>
-                </span>
-            @endif
-
             <span class="flex-1"></span>
 
             <x-dropdown align="end" width="w-36">
@@ -43,7 +37,7 @@
                 >
                     @method('DELETE')
                     @csrf
-                    
+
                     <li>
                         <button class="hover:bg-error hover:text-error-content">
                             <i class="fas fa-trash w-6"></i>
@@ -59,10 +53,17 @@
         @csrf
 
         <div class="flex gap-4 items-center px-4 sm:px-0">
-            <button class="btn btn-primary">
+            <button class="btn btn-primary" @if (!$configuration->active) disabled @endif>
                 <i class="fa-solid fa-play"></i>
                 {{ __('Run backup') }}
             </button>
+
+            @if (!$configuration->active)
+                <span class="text-error">
+                    <i class="fa-solid fa-ban mr-2"></i>
+                    {{ __('This backup is currently inactive.') }}
+                </span>
+            @endif
 
             @if ($configuration->started_at !== null)
                 <div class="alert w-fit">
@@ -176,7 +177,7 @@
                                                     <i class="fas fa-home"></i>
                                                 @endif
                                             </a>
-                                        </li> 
+                                        </li>
                                         <li>
                                             <a
                                                 href="{{ route('files.show', [$file]) }}"

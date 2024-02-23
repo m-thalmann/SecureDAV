@@ -54,6 +54,27 @@ class RunBackupTest extends TestCase {
         });
     }
 
+    public function testBackupFailsIfInactive(): void {
+        Event::fake([BackupFailed::class]);
+
+        $this->backupConfiguration->update(['active' => false]);
+
+        RunBackup::dispatchSync($this->backupConfiguration);
+
+        Event::assertDispatched(BackupFailed::class, function (
+            BackupFailed $event
+        ) {
+            $this->assertEquals(
+                $this->backupConfiguration->id,
+                $event->backupConfiguration->id
+            );
+
+            $this->assertFalse($event->rateLimited);
+
+            return true;
+        });
+    }
+
     public function testBackupIsRateLimited(): void {
         for ($i = 0; $i < RunBackup::RATE_LIMITER_ATTEMPTS; $i++) {
             $this->assertFalse(
@@ -124,6 +145,6 @@ class TestBackupProvider extends StubBackupProvider {
 
         static::$backupWasRun = true;
 
-        return true;
+        return parent::backup();
     }
 }

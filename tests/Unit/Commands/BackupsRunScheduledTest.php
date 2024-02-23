@@ -27,7 +27,7 @@ class BackupsRunScheduledTest extends TestCase {
             'cron_schedule' => "* {$nextHour} * * *",
         ]);
 
-        $this->artisan('backups:run-scheduled')->assertExitCode(0);
+        $this->artisan('backups:run-scheduled')->assertSuccessful();
 
         Queue::assertPushed(function (RunBackup $job) use ($dueBackup) {
             $this->assertEquals($dueBackup->id, $job->backupConfiguration->id);
@@ -47,7 +47,21 @@ class BackupsRunScheduledTest extends TestCase {
             'provider_class' => StubBackupProvider::class,
         ]);
 
-        $this->artisan('backups:run-scheduled')->assertExitCode(0);
+        $this->artisan('backups:run-scheduled')->assertSuccessful();
+
+        Queue::assertNotPushed(RunBackup::class);
+    }
+
+    public function testItDoesNotDispatchBackupJobsThatAreNotActive(): void {
+        Queue::fake();
+
+        $backup = BackupConfiguration::factory()->create([
+            'provider_class' => StubBackupProvider::class,
+            'cron_schedule' => '* * * * *',
+            'active' => false,
+        ]);
+
+        $this->artisan('backups:run-scheduled')->assertSuccessful();
 
         Queue::assertNotPushed(RunBackup::class);
     }

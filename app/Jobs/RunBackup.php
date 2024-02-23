@@ -20,6 +20,8 @@ class RunBackup implements ShouldQueue {
 
     public BackupConfiguration $backupConfiguration;
 
+    public int $tries = 1;
+
     public function __construct(BackupConfiguration $backupConfiguration) {
         $this->backupConfiguration = $backupConfiguration->withoutRelations();
     }

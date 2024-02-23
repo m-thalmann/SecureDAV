@@ -229,6 +229,20 @@ class AbstractBackupProviderTest extends TestCase {
         );
     }
 
+    public function testBackupReturnsFalseIfBackupConfigurationIsNotActive(): void {
+        $this->backupConfiguration
+            ->forceFill([
+                'active' => false,
+            ])
+            ->save();
+
+        $this->backupConfiguration->refresh();
+
+        $success = $this->abstractBackupProvider->backup();
+
+        $this->assertFalse($success);
+    }
+
     public function testGetFileContentsStreamReturnsStreamWithLatestFileVersionContents(): void {
         $file = File::factory()
             ->for($this->backupConfiguration->user)

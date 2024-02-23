@@ -77,7 +77,7 @@ class LogBackupProviderTest extends TestCase {
             ->once()
             ->withArgs(function (string $message) use ($file, $targetName) {
                 $this->assertStringContainsString(
-                    "Backup \"{$this->backupConfiguration->name}\" ({$this->backupConfiguration->id})",
+                    "Backup \"{$this->backupConfiguration->label}\" ({$this->backupConfiguration->id})",
                     $message
                 );
                 $this->assertStringContainsString(

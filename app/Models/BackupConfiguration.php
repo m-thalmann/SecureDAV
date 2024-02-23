@@ -42,6 +42,10 @@ class BackupConfiguration extends Model {
         return $query->whereNot('cron_schedule', null);
     }
 
+    public function scopeActive(Builder $query): Builder {
+        return $query->where('active', true);
+    }
+
     public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
