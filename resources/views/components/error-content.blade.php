@@ -1,4 +1,4 @@
-<div class="w-fit max-w-md flex flex-col gap-6 px-4 m-auto @auth mt-10 @endauth">
+<div class="w-fit max-w-md flex flex-col overflow-auto gap-6 px-4 m-auto @auth mt-10 @endauth">
     <h2 class="text-6xl sm:text-9xl font-bold">
         {{ __('Oops!') }}
     </h2>

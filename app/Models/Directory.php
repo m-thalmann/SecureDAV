@@ -13,8 +13,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Directory extends Model {
     use HasFactory, HasUuids;
 
-    protected $dateFormat = 'c';
-
     protected $fillable = ['parent_directory_id', 'name'];
 
     protected ?array $computedBreadcrumbs = null;

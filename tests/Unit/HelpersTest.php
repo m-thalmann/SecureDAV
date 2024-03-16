@@ -340,6 +340,23 @@ class HelpersTest extends TestCase {
         $this->assertEquals($content2, stream_get_contents($stream2));
     }
 
+    public function testGetTimezoneListReturnsTheTimezonesWithTheirOffsets(): void {
+        $timezones = getTimezonesList();
+
+        $availableTimezones = timezone_identifiers_list();
+
+        $this->assertIsArray($timezones);
+
+        foreach ($timezones as $timezone) {
+            $this->assertIsString($timezone['timezone']);
+            $this->assertIsString($timezone['offset']);
+
+            $this->assertStringStartsWith('UTC', $timezone['offset']);
+
+            $this->assertContains($timezone['timezone'], $availableTimezones);
+        }
+    }
+
     public static function formatHoursProvider(): array {
         return [
             [0.5, '30 minutes'],

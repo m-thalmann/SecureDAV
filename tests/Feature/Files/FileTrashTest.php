@@ -117,7 +117,7 @@ class FileTrashTest extends TestCase {
 
         $this->assertDatabaseHas('files', [
             'id' => $file->id,
-            'deleted_at' => $file->deleted_at->toIso8601String(),
+            'deleted_at' => $file->deleted_at,
         ]);
     }
 
@@ -150,7 +150,7 @@ class FileTrashTest extends TestCase {
 
         $this->assertDatabaseHas('files', [
             'id' => $file->id,
-            'deleted_at' => $file->deleted_at->toIso8601String(),
+            'deleted_at' => $file->deleted_at,
         ]);
     }
 
@@ -180,7 +180,7 @@ class FileTrashTest extends TestCase {
 
         $this->assertDatabaseHas('files', [
             'id' => $file->id,
-            'deleted_at' => $file->deleted_at->toIso8601String(),
+            'deleted_at' => $file->deleted_at,
         ]);
     }
 

@@ -37,7 +37,7 @@ class AdminController extends Controller {
             'settings' => [
                 'environment' => config('app.env'),
                 'debug' => config('app.debug'),
-                'timezone' => config('app.timezone'),
+                'default_timezone' => config('app.default_timezone'),
                 'registration_enabled' => config('app.registration_enabled'),
                 'email_verification_enabled' => config(
                     'app.email_verification_enabled'

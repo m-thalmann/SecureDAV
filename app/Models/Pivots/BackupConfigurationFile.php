@@ -5,8 +5,6 @@ namespace App\Models\Pivots;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class BackupConfigurationFile extends Pivot {
-    protected $dateFormat = 'c';
-
     public const PIVOT_COLUMNS = [
         'last_backup_checksum',
         'last_backup_at',

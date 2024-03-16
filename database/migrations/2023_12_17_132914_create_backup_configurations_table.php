@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('label');
             $table->boolean('store_with_version');
             $table->text('config')->nullable();
-            $table->integer('cron_schedule')->nullable();
+            $table->string('cron_schedule')->nullable();
             $table->boolean('active');
             $table->timestamp('started_at')->nullable();
             $table->timestamp('last_run_at')->nullable();

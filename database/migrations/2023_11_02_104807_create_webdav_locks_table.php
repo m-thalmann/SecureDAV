@@ -14,7 +14,7 @@ return new class extends Migration {
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
             $table->string('owner', 100);
-            $table->unsignedInteger('timeout');
+            $table->integer('timeout');
             $table->integer('created');
             $table->string('token', 100);
             $table->tinyInteger('scope');

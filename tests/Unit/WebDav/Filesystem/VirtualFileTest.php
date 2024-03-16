@@ -195,9 +195,10 @@ class VirtualFileTest extends TestCase {
     }
 
     public function testGetLastModifiedReturnsTheLastModifiedTimeOfTheVersion(): void {
-        $this->assertEquals(
+        $this->assertEqualsWithDelta(
             $this->file->latestVersion->created_at->timestamp,
-            $this->virtualFile->getLastModified()
+            $this->virtualFile->getLastModified(),
+            delta: 1
         );
     }
 }

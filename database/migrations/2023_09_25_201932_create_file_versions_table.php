@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('label')->nullable();
             $table->integer('version');
             $table->string('mime_type')->nullable();
-            $table->string('encryption_key', 16)->nullable();
+            $table->string('encryption_key')->nullable();
             $table->string('storage_path');
             $table->string('checksum', 32);
             $table->unsignedBigInteger('bytes');

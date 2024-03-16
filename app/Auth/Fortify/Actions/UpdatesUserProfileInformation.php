@@ -4,6 +4,7 @@ namespace App\Auth\Fortify\Actions;
 
 use App\Events\EmailUpdated;
 use App\Models\User;
+use DateTimeZone;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -12,7 +13,7 @@ use Laravel\Fortify\Contracts\UpdatesUserProfileInformation as UpdatesUserProfil
 class UpdatesUserProfileInformation implements
     UpdatesUserProfileInformationContract {
     public function update(User $user, array $input): void {
-        $allowedTimezones = timezone_identifiers_list();
+        $allowedTimezones = DateTimeZone::listIdentifiers();
         $allowedTimezones[] = 'default';
 
         try {

@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\File as FileRule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -86,6 +87,8 @@ class FileVersionController extends Controller {
                 )
             );
         } catch (Exception $e) {
+            Log::error($e->getMessage(), ['exception' => $e]);
+
             return back()
                 ->withInput()
                 ->with(

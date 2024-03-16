@@ -270,3 +270,28 @@ if (!function_exists('createStream')) {
         return $stream;
     }
 }
+
+if (!function_exists('getTimezonesList')) {
+    /**
+     * Returns a list of timezones with their offsets.
+     * @return array An array of timezones with their offsets.
+     */
+    function getTimezonesList(): array {
+        return collect(DateTimeZone::listIdentifiers())
+            ->map(function (string $timezone) {
+                $offset = (new DateTimeZone($timezone))->getOffset(
+                    new DateTime()
+                );
+                $offsetPrefix = $offset < 0 ? '-' : '+';
+
+                $offset = gmdate('H:i', abs($offset));
+
+                return [
+                    'timezone' => $timezone,
+                    'offset' => "UTC$offsetPrefix$offset",
+                ];
+            })
+            ->sortBy('offset')
+            ->toArray();
+    }
+}

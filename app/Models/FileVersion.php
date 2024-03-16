@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Storage;
 class FileVersion extends Model {
     use HasFactory;
 
-    protected $dateFormat = 'c';
-
     protected $hidden = ['storage_path'];
 
     protected $fillable = ['file_id', 'label', 'mime_type'];
@@ -27,7 +25,7 @@ class FileVersion extends Model {
     public function scopeLatestVersion(Builder $query): Builder {
         return $query->where('version', function (QueryBuilder $query) {
             $query
-                ->selectRaw('max("fv"."version")')
+                ->selectRaw('max(fv.version)')
                 ->from('file_versions as fv')
                 ->whereColumn('fv.file_id', 'file_versions.file_id');
         });

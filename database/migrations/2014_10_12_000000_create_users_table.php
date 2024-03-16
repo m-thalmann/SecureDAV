@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('timezone')->nullable();
             $table->boolean('is_admin');
             $table->boolean('is_webdav_suspended');
-            $table->string('encryption_key', 16);
+            $table->string('encryption_key');
             $table->rememberToken();
             $table->timestamps();
         });

@@ -64,4 +64,55 @@ class UserTest extends TestCase {
 
         Notification::assertSentTo($user, VerifyEmail::class);
     }
+
+    public function testFormatDateUsesTheUsersTimezone(): void {
+        $user = User::factory()->make(['timezone' => 'Europe/Berlin']);
+
+        $date = now();
+
+        $expectedDate = $date->clone()->setTimezone($user->timezone);
+
+        $this->assertEquals(
+            $expectedDate->toDateTimeString(),
+            $user->formatDate($date)
+        );
+    }
+
+    public function testFormatDateClonesTheDateBeforeChangingTheTimezone(): void {
+        $user = User::factory()->make(['timezone' => 'Europe/Berlin']);
+
+        $date = now();
+
+        $user->formatDate($date);
+
+        $this->assertEquals(
+            now()
+                ->getTimezone()
+                ->getName(),
+            $date->getTimezone()->getName()
+        );
+    }
+
+    public function testFormatDateUsesTheDefaultTimezoneWhenNoUserTimezoneIsSet(): void {
+        config(['app.default_timezone' => 'Europe/Rome']);
+
+        $user = User::factory()->make(['timezone' => null]);
+
+        $date = now();
+
+        $expectedDate = $date
+            ->clone()
+            ->setTimezone(config('app.default_timezone'));
+
+        $this->assertEquals(
+            $expectedDate->toDateTimeString(),
+            $user->formatDate($date)
+        );
+    }
+
+    public function testFormatDateReturnsNullWhenDateIsNull(): void {
+        $user = User::factory()->make();
+
+        $this->assertNull($user->formatDate(null));
+    }
 }

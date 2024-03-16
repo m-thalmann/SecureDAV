@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,8 +13,6 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable implements MustVerifyEmail {
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
-
-    protected $dateFormat = 'c';
 
     protected $fillable = ['name', 'email', 'password', 'timezone'];
 
@@ -65,6 +64,26 @@ class User extends Authenticatable implements MustVerifyEmail {
         if (config('app.email_verification_enabled')) {
             parent::sendEmailVerificationNotification();
         }
+    }
+
+    /**
+     * Format the given date to the user's timezone
+     *
+     * @param \Carbon\CarbonInterface|null $date
+     *
+     * @return string
+     */
+    public function formatDate(?CarbonInterface $date): ?string {
+        if ($date === null) {
+            return null;
+        }
+
+        $outputDate = $date->clone();
+        $outputDate->setTimezone(
+            $this->timezone ?? config('app.default_timezone')
+        );
+
+        return $outputDate->toDateTimeString();
     }
 
     protected static function booted(): void {

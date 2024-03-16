@@ -50,8 +50,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="font-bold w-0 whitespace-nowrap pr-8">{{ __('Timezone') }}</td>
-                        <td>{{ $settings['timezone'] }}</td>
+                        <td class="font-bold w-0 whitespace-nowrap pr-8">{{ __('Default timezone') }}</td>
+                        <td>{{ $settings['default_timezone'] }}</td>
                     </tr>
                     <tr>
                         <td colspan="2"><div class="divider"></div></td>

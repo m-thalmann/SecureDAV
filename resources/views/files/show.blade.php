@@ -26,7 +26,7 @@
             >
                 @method('DELETE')
                 @csrf
-                
+
                 <li>
                     <button class="hover:bg-error hover:text-error-content">
                         <i class="fas fa-trash w-6"></i>
@@ -55,11 +55,11 @@
         <x-slot name="subtitle">
             @if ($file->latestVersion?->mime_type)
                 <span class="tooltip" data-tip="{{ __('MIME-Type') }}">{{ $file->latestVersion->mime_type }}</span>
-                
+
                 <span class="mx-1">&CenterDot;</span>
             @endif
 
-            <span class="tooltip" data-tip="{{ __('Created') }}">{{ $file->created_at }}</span>
+            <span class="tooltip" data-tip="{{ __('Created') }}">{{ authUser()->formatDate($file->created_at) }}</span>
         </x-slot>
     </x-header-title>
 
@@ -69,7 +69,7 @@
 
             <div class="flex gap-2 items-center">
                 <x-input name="web-dav-url" class="input-sm bg-base-200" :value="$file->webdavUrl" readonly />
-        
+
                 <x-copy-button inputId="web-dav-url" plain class="btn btn-sm btn-neutral" />
 
                 <x-card-dropdown>

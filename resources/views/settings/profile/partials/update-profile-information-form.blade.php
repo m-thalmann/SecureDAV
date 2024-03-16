@@ -53,7 +53,9 @@
                 <option value="default" @selected($user->timezone === null)>{{ __('Default') }} ({{ config('app.default_timezone') }})</option>
 
                 @foreach ($availableTimezones as $timezone)
-                    <option value="{{ $timezone }}" @selected($timezone === $user->timezone)>{{ $timezone }}</option>
+                    <option value="{{ $timezone['timezone'] }}" @selected($timezone['timezone'] === $user->timezone)>
+                        {{ $timezone['timezone'] }} ({{ $timezone['offset'] }})
+                    </option>
                 @endforeach
             </select>
         </x-form-field>

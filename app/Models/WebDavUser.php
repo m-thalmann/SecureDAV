@@ -12,8 +12,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class WebDavUser extends Model {
     use HasFactory, HasUuids;
 
-    protected $dateFormat = 'c';
-
     protected $fillable = ['label', 'active', 'readonly'];
 
     protected $hidden = ['password'];

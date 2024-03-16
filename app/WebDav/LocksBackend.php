@@ -82,7 +82,7 @@ class LocksBackend extends DAV\Locks\Backend\AbstractBackend {
                 'token' => $lockInfo->token,
             ],
             ['user_id', 'token']
-        ) === 1;
+        ) > 0;
     }
 
     public function unlock(mixed $uri, LockInfo $lockInfo): bool {

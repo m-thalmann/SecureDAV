@@ -22,8 +22,6 @@ class AppServiceProvider extends ServiceProvider {
     public function boot(): void {
         $this->definePasswordRules();
 
-        $this->setTimezone();
-
         Model::preventSilentlyDiscardingAttributes(!app()->isProduction());
 
         Paginator::defaultView('components.pagination');
@@ -40,19 +38,6 @@ class AppServiceProvider extends ServiceProvider {
             } else {
                 return Password::min(3);
             }
-        });
-    }
-
-    protected function setTimezone(): void {
-        Auth::resolved(function (AuthManager $auth) {
-            $user = $auth->user();
-
-            if ($user === null || $user->timezone === null) {
-                return;
-            }
-
-            config(['app.timezone' => $user->timezone]);
-            date_default_timezone_set($user->timezone);
         });
     }
 }

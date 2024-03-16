@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\File as FileRule;
 use Illuminate\View\View;
 
@@ -121,6 +122,8 @@ class FileController extends Controller {
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
+
+            Log::error($e->getMessage(), ['exception' => $e]);
 
             return back()
                 ->withInput()

@@ -21,8 +21,6 @@ use Illuminate\Support\Str;
 class File extends Model {
     use HasFactory, HasUuids, SoftDeletes, Prunable;
 
-    protected $dateFormat = 'c';
-
     /**
      * Possible options for the auto version hours.
      *
