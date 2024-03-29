@@ -24,6 +24,12 @@
         "trailingCommaPHP": true,
         "braceStyle": "1tbs"
       }
+    },
+    {
+      "files": "*.sh",
+      "options": {
+        "endOfLine": "lf"
+      }
     }
   ]
 }

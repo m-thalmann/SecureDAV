@@ -34,11 +34,16 @@ Versions can be created manually by copying the latest one or uploading a new ve
 EOT;
 
     public function run(): void {
-        $user = User::factory()->create([
-            'email' => 'john.doe@example.com',
-            'name' => 'John Doe',
+        $user = User::make([
+            'email' => 'admin@example.com',
+            'name' => 'Administrator',
+            'password' => 'password',
+        ])->forceFill([
             'is_admin' => true,
+            'encryption_key' => Str::random(16),
         ]);
+
+        $user->save();
 
         foreach (static::DIRECTORIES as $directory) {
             $user->directories()->create([
