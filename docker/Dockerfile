@@ -14,11 +14,13 @@ RUN set -ex; \
     apt-get update && \
     apt-get install -y --no-install-recommends \
       bash \
+      cron \
       git \
       libcurl4-openssl-dev \
       libpq-dev \
       libxml2-dev \
       libzip-dev \
+      sudo \
       supervisor \
       wait-for-it \
       zip; \
@@ -68,13 +70,9 @@ RUN set -ex; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     rm -rf /var/lib/apt/lists/*
 
-# Set crontab for schedules
+# Setup cronjob for schedules
 
-RUN set -ex; \
-    \
-    mkdir -p /var/spool/cron/crontabs; \
-    rm -f /var/spool/cron/crontabs/root; \
-    echo '* * * * * php /var/www/html/artisan schedule:run -v' > /var/spool/cron/crontabs/www-data
+COPY docker/cron.conf /etc/cron.d/securedav
 
 # Setup Apache
 
@@ -132,7 +130,7 @@ RUN set -ex; \
 
 # Run application
 
-VOLUME ["storage/app/files", "storage/logs"]
+VOLUME ["/var/www/html/storage/app/files", "/var/www/html/storage/logs"]
 
 ENTRYPOINT ["/var/www/html/docker/entrypoint.sh"]
 CMD ["apache2-foreground"]

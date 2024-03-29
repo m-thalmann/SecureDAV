@@ -15,5 +15,5 @@ max_line_length = off
 [*.{html,php}]
 indent_size = 4
 
-[*.sh]
+[*.{sh,conf}]
 end_of_line = lf

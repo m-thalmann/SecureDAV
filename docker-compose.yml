@@ -21,7 +21,7 @@ services:
       - CACHE_DRIVER=redis
       - QUEUE_CONNECTION=redis
     volumes:
-      - ./files:/var/www/html/storage/files
+      - ./files:/var/www/html/storage/app/files
       - ./logs:/var/www/html/storage/logs
       - ./.env:/var/www/html/.env
     restart: always

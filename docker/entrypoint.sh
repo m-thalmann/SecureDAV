@@ -11,6 +11,7 @@ if [ -z "$appKey" ]; then
 fi
 
 php artisan route:cache --no-interaction
+php artisan event:cache --no-interaction
 php artisan config:cache --no-interaction
 php artisan view:cache --no-interaction
 
@@ -19,7 +20,7 @@ databasePort=$(php artisan tinker --execute="echo config('database.connections.m
 
 wait-for-it $databaseHost:$databasePort -t 90 -- php artisan migrate --force
 
-supervisord -c docker/supervisord.conf
+supervisord --configuration docker/supervisord.conf
 
 echo "running docker-php-entrypoint with arguments $@"
 docker-php-entrypoint $@
