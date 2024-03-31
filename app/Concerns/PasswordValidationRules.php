@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Auth\Fortify\Concerns;
+namespace App\Concerns;
 
 use Illuminate\Validation\Rules;
 

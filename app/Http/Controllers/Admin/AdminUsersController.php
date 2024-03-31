@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\CreateUser;
 use App\Events\EmailUpdated;
 use App\Events\UserDeleted;
 use App\Http\Controllers\Controller;
@@ -15,7 +16,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -45,25 +45,27 @@ class AdminUsersController extends Controller {
         return view('admin.users.create');
     }
 
-    public function store(Request $request): RedirectResponse {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'password' => [
-                'required',
-                'string',
-                'confirmed',
-                Rules\Password::defaults(),
-            ],
-            'is_admin' => ['nullable'],
+    public function store(
+        Request $request,
+        CreateUser $createUserAction
+    ): RedirectResponse {
+        $data = $request->only([
+            'name',
+            'email',
+            'password',
+            'password_confirmation',
+            'is_admin',
         ]);
 
         $data['is_admin'] = !!Arr::get($data, 'is_admin', false);
 
-        $user = new User();
-        $user->forceFill($data);
-        $user->encryption_key = Str::random(16);
-        $user->save();
+        $user = $createUserAction->handle(
+            $data['name'],
+            $data['email'],
+            $data['password'],
+            $data['password_confirmation'],
+            $data['is_admin']
+        );
 
         event(new Registered($user));
 

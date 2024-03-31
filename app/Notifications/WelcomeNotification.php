@@ -20,6 +20,10 @@ class WelcomeNotification extends Notification {
                 "Welcome to SecureDav, we're glad to have you on board! " .
                     'To finish setting up make sure you set your correct timezone in the settings and enable 2FA for better security.'
             ),
+            'action' => [
+                'name' => __('Go to settings'),
+                'url' => route('settings.index'),
+            ],
         ];
     }
 }

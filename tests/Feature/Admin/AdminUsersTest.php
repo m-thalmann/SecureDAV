@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Actions\CreateUser;
 use App\Events\EmailUpdated;
 use App\Events\UserDeleted;
 use App\Models\User;
+use App\Services\FileVersionService;
 use App\Support\SessionMessage;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Registered;
@@ -13,6 +15,7 @@ use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Mockery;
 use Tests\TestCase;
 
 class AdminUsersTest extends TestCase {
@@ -114,14 +117,33 @@ class AdminUsersTest extends TestCase {
 
         $this->passwordConfirmed();
 
+        $name = 'John Doe';
+        $email = 'john.doe@example.com';
+        $password = 'password';
+
+        $createUserSpy = Mockery::spy(
+            new CreateUser($this->app->make(FileVersionService::class))
+        )->makePartial();
+        $this->instance(CreateUser::class, $createUserSpy);
+
         $response = $this->post('/admin/users', [
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
+            'password_confirmation' => $password,
         ]);
 
         $response->assertRedirect('/admin/users');
+
+        $createUserSpy
+            ->shouldHaveReceived('handle', [
+                $name,
+                $email,
+                $password,
+                $password,
+                false, // isAdmin
+            ])
+            ->once();
 
         $this->assertDatabaseHas('users', [
             'name' => 'John Doe',

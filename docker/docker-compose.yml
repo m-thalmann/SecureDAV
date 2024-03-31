@@ -49,3 +49,4 @@ volumes:
   logs:
   database:
   redis:
+

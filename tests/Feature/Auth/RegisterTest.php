@@ -2,13 +2,16 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Actions\CreateUser;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use App\Services\FileVersionService;
 use App\Support\SessionMessage;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
+use Mockery;
 use Tests\TestCase;
 
 class RegisterTest extends TestCase {
@@ -37,18 +40,35 @@ class RegisterTest extends TestCase {
     public function testUserCanRegister(): void {
         Event::fake([Registered::class]);
 
+        $name = 'Test User';
         $email = 'jane.doe@example.com';
+        $password = 'password';
+
+        $createUserSpy = Mockery::spy(
+            new CreateUser($this->app->make(FileVersionService::class))
+        )->makePartial();
+        $this->instance(CreateUser::class, $createUserSpy);
 
         $response = $this->post('/register', [
-            'name' => 'Test User',
+            'name' => $name,
             'email' => $email,
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => $password,
+            'password_confirmation' => $password,
         ]);
 
         $response->assertRedirect(RouteServiceProvider::HOME);
 
         $this->assertAuthenticated();
+
+        $createUserSpy
+            ->shouldHaveReceived('handle', [
+                $name,
+                $email,
+                $password,
+                $password,
+                false, // isAdmin
+            ])
+            ->once();
 
         Event::assertDispatched(Registered::class);
 
