@@ -6,11 +6,11 @@ use App\Actions\CreateUser;
 use App\Events\EmailUpdated;
 use App\Events\UserDeleted;
 use App\Models\User;
+use App\Notifications\VerifyEmailNotification;
 use App\Services\FileVersionService;
 use App\Support\SessionMessage;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
@@ -178,7 +178,7 @@ class AdminUsersTest extends TestCase {
             ->where('email', 'john.doe@example.com')
             ->first();
 
-        Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertSentTo($user, VerifyEmailNotification::class);
     }
 
     public function testStoreUserCantBeCreatedForNonAdmins(): void {
@@ -352,7 +352,7 @@ class AdminUsersTest extends TestCase {
         Event::assertDispatched(EmailUpdated::class);
 
         if ($emailVerificationEnabled) {
-            Notification::assertSentTo($user, VerifyEmail::class);
+            Notification::assertSentTo($user, VerifyEmailNotification::class);
         } else {
             Notification::assertNothingSent();
         }

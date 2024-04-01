@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Notifications\VerifyEmailNotification;
 use App\Providers\RouteServiceProvider;
 use App\Support\SessionMessage;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
@@ -72,7 +72,7 @@ class EmailVerificationTest extends TestCase {
             key: 'session-message'
         );
 
-        Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertSentTo($user, VerifyEmailNotification::class);
     }
 
     public function testEmailVerificationSucceeds(): void {

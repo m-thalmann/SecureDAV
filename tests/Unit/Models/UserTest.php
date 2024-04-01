@@ -3,7 +3,7 @@
 namespace Tests\Unit\Models;
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -62,7 +62,7 @@ class UserTest extends TestCase {
 
         $user->sendEmailVerificationNotification();
 
-        Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertSentTo($user, VerifyEmailNotification::class);
     }
 
     public function testFormatDateUsesTheUsersTimezone(): void {

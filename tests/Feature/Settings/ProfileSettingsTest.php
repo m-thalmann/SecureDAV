@@ -8,8 +8,8 @@ use App\Events\UserDeleted;
 use App\Models\File;
 use App\Models\FileVersion;
 use App\Models\User;
+use App\Notifications\VerifyEmailNotification;
 use App\Support\SessionMessage;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
@@ -133,7 +133,7 @@ class ProfileSettingsTest extends TestCase {
 
         $response->assertRedirect('/settings/profile#update-information');
 
-        Notification::assertSentTo($this->user, VerifyEmail::class);
+        Notification::assertSentTo($this->user, VerifyEmailNotification::class);
 
         Event::assertDispatched(EmailUpdated::class, function (
             EmailUpdated $event

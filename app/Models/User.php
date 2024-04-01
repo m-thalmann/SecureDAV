@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\VerifyEmailNotification;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -62,7 +63,7 @@ class User extends Authenticatable implements MustVerifyEmail {
 
     public function sendEmailVerificationNotification(): void {
         if (config('app.email_verification_enabled')) {
-            parent::sendEmailVerificationNotification();
+            $this->notify(new VerifyEmailNotification());
         }
     }
 
