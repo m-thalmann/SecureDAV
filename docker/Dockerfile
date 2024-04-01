@@ -36,6 +36,17 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 RUN set -ex; \
     \
+    { \
+        echo ""; \
+        echo ";see https://sabre.io/dav/webservers/"; \
+        echo "output_buffering=off"; \
+        echo "always_populate_raw_post_data=off"; \
+        echo "magic_quotes_gpc=off"; \
+        echo "mbstring.func_overload=off"; \
+    } >> $PHP_INI_DIR/php.ini;
+
+RUN set -ex; \
+    \
     savedAptMark="$(apt-mark showmanual)"; \
     \
     docker-php-ext-install -j$(nproc) \
