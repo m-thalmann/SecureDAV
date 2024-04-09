@@ -44,6 +44,12 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
 
+      - name: Copy environment file
+        run: cp .env.example .env
+
+      - name: Generate app key
+        run: php artisan key:generate
+
       - name: Execute tests
         run: composer test-coverage
         if: matrix.use-mariadb == false
