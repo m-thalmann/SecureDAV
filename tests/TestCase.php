@@ -19,12 +19,12 @@ abstract class TestCase extends BaseTestCase {
 
     protected const REDIRECT_TEST_ROUTE = '/redirect-test-route';
 
-    protected FilesystemAdapter $storageFake;
+    protected FilesystemAdapter|MockInterface $storageFake;
 
     protected function setUp(): void {
         parent::setUp();
 
-        $this->storageFake = Storage::fake('files');
+        $this->storageFake = Mockery::mock(Storage::fake('files'));
 
         $this->withoutVite();
     }

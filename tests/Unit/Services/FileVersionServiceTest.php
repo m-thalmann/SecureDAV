@@ -949,12 +949,12 @@ class FileVersionServiceTest extends TestCase {
     public function testStoreFileFailsIfTemporaryFileCantBeMoved(): void {
         $this->expectException(FileWriteException::class);
 
+        $this->storageFake->shouldReceive('move')->andReturnFalse();
+
         $path = 'test-path';
         $tmpPath = $path . $this->service->getTmpSuffix();
 
         $resource = $this->createStream(fake()->text());
-
-        $lockFile = fopen($this->storageFake->path($path), 'w');
 
         try {
             $this->service->storeFile(
@@ -967,23 +967,21 @@ class FileVersionServiceTest extends TestCase {
             $this->storageFake->assertMissing($tmpPath);
 
             fclose($resource);
-            fclose($lockFile);
 
-            $this->assertEmpty(
-                file_get_contents($this->storageFake->path($path))
-            );
+            $this->assertFalse($this->storageFake->exists($path));
 
             throw $e;
         }
 
         fclose($resource);
-        fclose($lockFile);
     }
 
     public function testStoreFileFailsIfFileCantBeStoredWithoutEncryption(): void {
         $this->expectException(FileWriteException::class);
 
-        $path = '<illegal-path>';
+        $this->storageFake->shouldReceive('writeStream')->andReturnFalse();
+
+        $path = 'test-path';
 
         $resource = $this->createStream(fake()->text());
 
