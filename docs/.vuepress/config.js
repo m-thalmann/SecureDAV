@@ -1,6 +1,20 @@
 import { viteBundler } from '@vuepress/bundler-vite';
 import { defaultTheme } from '@vuepress/theme-default';
 import { defineUserConfig } from 'vuepress';
+import { fs } from 'vuepress/utils';
+
+let version = 'v';
+let changelogLink = '';
+
+if (fs.existsSync(__dirname + '/version.txt')) {
+  const _version = fs.readFileSync(__dirname + '/version.txt', 'utf8').trim();
+
+  version += v;
+  changelogLink = 'https://github.com/m-thalmann/SecureDAV/releases/tag/' + _version;
+} else {
+  version += '0.0.0';
+  changelogLink = 'https://github.com/m-thalmann/SecureDAV/releases/latest';
+}
 
 export default defineUserConfig({
   bundler: viteBundler(),
@@ -26,6 +40,18 @@ export default defineUserConfig({
         },
       ],
     },
+
+    navbar: [
+      {
+        text: version,
+        children: [
+          {
+            text: 'Changelog',
+            link: changelogLink,
+          },
+        ],
+      },
+    ],
   }),
 
   lang: 'en-US',

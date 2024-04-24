@@ -2,11 +2,32 @@
 
 There are some options to modify the behavior of the application in the `.env` file. You can copy the `.env.example` file to `.env` and adjust the settings to your needs.
 
-:::tip Legend
-| Symbol | Description |
+:::warning
+When updating the configuration you have to run the following command in order for the changes to take effect:
+
+<CodeGroup>
+  <CodeGroupItem title="Docker" active>
+
+```bash
+docker exec -it <container name> php artisan config:cache
+```
+
+  </CodeGroupItem>
+  <CodeGroupItem title="Source">
+
+```bash
+php artisan config:cache
+```
+
+  </CodeGroupItem>
+</CodeGroup>
+:::
+
+**Legend**
+
+|    Symbol     | Description                                                                                                       |
 | :-----------: | ----------------------------------------------------------------------------------------------------------------- |
 | :exclamation: | Update of the value is required for the application to work properly (when starting from the `.env.example` file) |
-:::
 
 ## General
 

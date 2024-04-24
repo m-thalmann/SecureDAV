@@ -50,11 +50,11 @@ jobs:
       - name: Generate app key
         run: php artisan key:generate
 
-      - name: Execute tests
+      - name: Execute tests (without MariaDB)
         run: composer test-coverage
         if: matrix.use-mariadb == false
 
-      - name: Execute tests
+      - name: Execute tests (with MariaDB)
         run: composer test-coverage
         if: matrix.use-mariadb == true
         env:
