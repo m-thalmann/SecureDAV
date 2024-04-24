@@ -52,15 +52,15 @@ jobs:
 
       - name: Bundle release
         run: |
-          mkdir -p release/securedav
-          cp -r * ./release/securedav
-          cp .env.example ./release/securedav/.env.example
-          cp .dockerignore ./release/securedav/.dockerignore
-          cd release/securedav
+          mkdir -p ../release/securedav
+          cp -r * ../release/securedav
+          cp .env.example ../release/securedav/.env.example
+          cp .dockerignore ../release/securedav/.dockerignore
+          cd ../release/securedav
           rm -rf tests phpunit.xml
           rm -rf `find . -name '.git*'`
           cd ..
-          zip -r ../SecureDAV-${{ VERSION }}.zip *
+          zip -r ../SecureDAV/SecureDAV-${{ env.VERSION }}.zip *
 
       - name: Release
         uses: actions/create-release@v1
@@ -68,8 +68,8 @@ jobs:
         with:
           draft: false
           prerelease: false
-          release_name: SecureDAV v${{ VERSION }}
-          tag_name: ${{ VERSION }}
+          release_name: SecureDAV v${{ env.VERSION }}
+          tag_name: ${{ env.VERSION }}
           body_path: CHANGELOG
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -79,13 +79,13 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./SecureDAV-${{ VERSION }}.zip
-          asset_name: SecureDAV-${{ VERSION }}.zip
+          asset_path: ./SecureDAV-${{ env.VERSION }}.zip
+          asset_name: SecureDAV-${{ env.VERSION }}.zip
           asset_content_type: application/zip
 
       - name: Build docs
         run: |
-          echo ${{ VERSION }} > ./docs/.vuepress/version.txt
+          echo ${{ env.VERSION }} > ./docs/.vuepress/version.txt
           npm run docs:build
           echo "" > ./docs/.vuepress/dist/.nojekyll
       - name: Setup Pages
