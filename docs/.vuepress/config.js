@@ -9,7 +9,7 @@ let changelogLink = '';
 if (fs.existsSync(__dirname + '/version.txt')) {
   const _version = fs.readFileSync(__dirname + '/version.txt', 'utf8').trim();
 
-  version += v;
+  version += _version;
   changelogLink = 'https://github.com/m-thalmann/SecureDAV/releases/tag/' + _version;
 } else {
   version += '0.0.0';
