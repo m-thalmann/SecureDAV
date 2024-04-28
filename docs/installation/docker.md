@@ -87,6 +87,30 @@ docker run -d --name securedav \
 If you don't want a Redis container, you can remove the environment variables and the `-e CACHE_DRIVER=redis -e QUEUE_CONNECTION=redis` part from the `docker run` command.
 :::
 
+## Using a proxy
+
+You can use a reverse proxy in front of the SecureDAV application to handle SSL termination, load balancing, etc. The following example shows how to use a reverse proxy through Apache2:
+
+```apache
+<VirtualHost *:443>
+    ServerName securedav.example.com
+
+    SSLEngine on
+    SSLCertificateFile /path/to/cert.pem
+    SSLCertificateKeyFile /path/to/key.pem
+
+    ProxyPreserveHost On
+    ProxyRequests off
+    AllowEncodedSlashes NoDecode
+    ProxyPass / http://localhost:8080/ nocanon
+    ProxyPassReverse / http://localhost:8080/
+</VirtualHost>
+```
+
+::: tip IMPORTANT
+When using a proxy with SSL in front of the SecureDAV application, you have to adjust the `APP_FORCE_HTTPS` environment variable in the `.env` file to `true`
+:::
+
 ## First run
 
 Check the [Quick start after installation](../introduction.md#quick-start-after-installation) section to get started with the SecureDAV application.

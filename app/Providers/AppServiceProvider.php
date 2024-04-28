@@ -2,10 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Auth\AuthManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -25,6 +24,10 @@ class AppServiceProvider extends ServiceProvider {
         Model::preventSilentlyDiscardingAttributes(!app()->isProduction());
 
         Paginator::defaultView('components.pagination');
+
+        if (config('app.force_https', false)) {
+            URL::forceScheme('https');
+        }
     }
 
     protected function definePasswordRules(): void {
