@@ -123,6 +123,8 @@ RUN set -ex; \
 
 COPY --chown=www-data:www-data docker/.env.docker .env
 
+RUN ["chmod", "+x", "/var/www/html/docker/entrypoint.sh"]
+
 # Install composer dependencies
 
 RUN set -ex; \
@@ -131,7 +133,7 @@ RUN set -ex; \
     composer clear-cache; \
     chown -R www-data:www-data vendor
 
-# Install node dependencies
+# Build client assets
 
 RUN set -ex; \
     \
