@@ -45,7 +45,7 @@ use Laravel\Fortify\Http\Controllers\VerifyEmailController;
 */
 
 Route::permanentRedirect('/', RouteServiceProvider::HOME);
-Route::permanentRedirect('/files', RouteServiceProvider::HOME);
+Route::get('/files', fn() => redirect(RouteServiceProvider::HOME));
 
 Route::controller(AuthenticatedSessionController::class)->group(function () {
     Route::get('login', 'create')

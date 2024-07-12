@@ -14,7 +14,7 @@ First you have to create a `.env` file by copying the `docker/.env.example` file
 
 The `docker-compose.yml` file inside of the `docker` directory provides an easy way to start the SecureDAV application with a MariaDB database and a Redis instance for caching.
 
-Simply copy the file to the directory where your `.env` file is located and run the following command:
+Simply copy the file to the directory where your `.env` file is located, update the port mapping, update the `TZ` environment variable to your timezone and run the following command:
 
 ```bash
 docker-compose up -d
@@ -39,7 +39,7 @@ docker network create --attachable securedav-net
 Create a database container:
 
 ::: tip NOTE
-SecureDAV was currently tests using SQLite and MariaDB. Other databases may work, but support is not guaranteed.
+SecureDAV was currently tested using SQLite and MariaDB. Other database systems may work, but support is not guaranteed.
 :::
 
 ```bash

@@ -20,6 +20,8 @@ services:
 
       - CACHE_DRIVER=redis
       - QUEUE_CONNECTION=redis
+
+      - TZ=UTC
     volumes:
       - ./files:/var/www/html/storage/app/files
       - ./logs:/var/www/html/storage/logs

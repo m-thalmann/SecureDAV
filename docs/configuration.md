@@ -21,6 +21,25 @@ php artisan config:cache
 
   </CodeGroupItem>
 </CodeGroup>
+
+When using the docker image or a process manager (like `supervisor`) for your queue worker, you have to restart the worker after updating the configuration:
+
+<CodeGroup>
+  <CodeGroupItem title="Docker" active>
+
+```bash
+docker exec -it <container name> php artisan queue:restart
+```
+
+  </CodeGroupItem>
+  <CodeGroupItem title="Source">
+
+```bash
+php artisan queue:restart
+```
+
+  </CodeGroupItem>
+</CodeGroup>
 :::
 
 **Legend**
