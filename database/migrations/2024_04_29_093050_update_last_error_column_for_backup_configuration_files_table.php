@@ -9,7 +9,10 @@ return new class extends Migration {
         Schema::table('backup_configuration_files', function (
             Blueprint $table
         ) {
-            $table->text('last_error')->change();
+            $table
+                ->text('last_error')
+                ->nullable()
+                ->change();
         });
     }
 
@@ -17,8 +20,10 @@ return new class extends Migration {
         Schema::table('backup_configuration_files', function (
             Blueprint $table
         ) {
-            $table->string('last_error')->change();
+            $table
+                ->string('last_error')
+                ->nullable()
+                ->change();
         });
     }
 };
-

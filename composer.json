@@ -13,16 +13,15 @@
     "guzzlehttp/guzzle": "^7.8",
     "jenssegers/agent": "^2.6",
     "laravel/fortify": "^1.19",
-    "laravel/framework": "^10.39",
+    "laravel/framework": "^11.15",
     "laravel/tinker": "^2.8.2",
     "sabre/dav": "^4.5.1"
   },
   "require-dev": {
     "fakerphp/faker": "^1.23.0",
     "itsgoingd/clockwork": "^5.1",
-    "laravel/sail": "^1.26.1",
     "mockery/mockery": "^1.6.6",
-    "nunomaduro/collision": "^7.10",
+    "nunomaduro/collision": "^8.1",
     "phpunit/phpunit": "^10.4.2",
     "spatie/laravel-ignition": "^2.3.1"
   },
