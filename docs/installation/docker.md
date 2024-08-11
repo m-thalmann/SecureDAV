@@ -110,10 +110,19 @@ You can use a reverse proxy in front of the SecureDAV application to handle SSL 
 ```
 
 ::: tip IMPORTANT
-When using a proxy with SSL in front of the SecureDAV application, make sure to set the `APP_TRUSTED_PROXIES` environment variable in the `.env` file accordingly (comma separated)!
-It must include the host or ip address of the proxied server (see `ProxyPass` and `ProxyPassReverse`)!
+When using a proxy with SSL in front of the SecureDAV application, make sure to set the `APP_TRUSTED_PROXIES` environment variable in the `.env` file accordingly (comma separated).
+See the [Laravel docs](https://laravel.com/docs/11.x/requests#configuring-trusted-proxies) for more information.
 
-Example for the virtual host configuration above: `APP_TRUSTED_PROXIES=localhost`
+Make sure you set the environment variable to the correct IP address of your proxy server. When using Docker it is important to set it to the correct IP address of the container's network:
+
+```bash
+# get network name
+docker network ls
+
+# get network details
+docker network inspect --format='{{ (index .IPAM.Config 0).Gateway }}' <network name>
+```
+
 :::
 
 ## First run

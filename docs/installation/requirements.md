@@ -27,4 +27,4 @@ Additionally you can install the following software for a better experience:
 - [Redis](https://redis.io/) for caching and queueing
 
 When using Redis you have to either install the `PhpRedis` extension or the `Predis` library. The `PhpRedis` extension is recommended for better performance.
-See the [Laravel documentation](https://laravel.com/docs/10.x/redis#introduction) for more information.
+See the [Laravel documentation](https://laravel.com/docs/11.x/redis#introduction) for more information.

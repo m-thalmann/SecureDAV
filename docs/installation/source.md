@@ -69,7 +69,7 @@ REDIS_PASSWORD=<redis password>
 
 When using Redis for the queue you have to use a queue worker to process the jobs.
 
-You should use a process manager like `supervisord` to keep the worker running. Check the [Laravel documentation](https://laravel.com/docs/10.x/queues#supervisor-configuration) for more information.
+You should use a process manager like `supervisord` to keep the worker running. Check the [Laravel documentation](https://laravel.com/docs/11.x/queues#supervisor-configuration) for more information.
 
 You can also start the worker with the following command:
 
