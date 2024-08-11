@@ -50,7 +50,7 @@ class WebDavUserController extends Controller {
 
     public function store(Request $request): RedirectResponse {
         $data = $request->validate([
-            'label' => ['nullable', 'string', 'max:128'],
+            'label' => ['required', 'string', 'max:128'],
             'readonly' => ['nullable'],
         ]);
 
@@ -61,7 +61,7 @@ class WebDavUserController extends Controller {
             ->forceCreate([
                 // username => uuid
                 'password' => $password,
-                'label' => $data['label'] ?? fake()->userName(),
+                'label' => $data['label'],
                 'readonly' => !!Arr::get($data, 'readonly', false),
                 'active' => true,
             ]);
