@@ -104,11 +104,16 @@ You can use a reverse proxy in front of the SecureDAV application to handle SSL 
     AllowEncodedSlashes NoDecode
     ProxyPass / http://localhost:8080/ nocanon
     ProxyPassReverse / http://localhost:8080/
+
+    RequestHeader set "X-Forwarded-Proto" expr=%{REQUEST_SCHEME}
 </VirtualHost>
 ```
 
 ::: tip IMPORTANT
-When using a proxy with SSL in front of the SecureDAV application, you have to adjust the `APP_FORCE_HTTPS` environment variable in the `.env` file to `true`
+When using a proxy with SSL in front of the SecureDAV application, make sure to set the `APP_TRUSTED_PROXIES` environment variable in the `.env` file accordingly (comma separated)!
+It must include the host or ip address of the proxied server (see `ProxyPass` and `ProxyPassReverse`)!
+
+Example for the virtual host configuration above: `APP_TRUSTED_PROXIES=localhost`
 :::
 
 ## First run

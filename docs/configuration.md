@@ -50,14 +50,14 @@ php artisan queue:restart
 
 ## General
 
-| Key                    | Type     | Description                                                                | :exclamation: |
-| ---------------------- | -------- | -------------------------------------------------------------------------- | :-----------: |
-| `APP_NAME`             | `string` | The name of the application (used in the title e.g.)                       |               |
-| `APP_ENV`              | `string` | The environment of the application (e.g. `local`, `production`)            |               |
-| `APP_DEBUG`            | `bool`   | Whether the application is in debug mode                                   |               |
-| `APP_URL`              | `string` | The URL of the application where it is deployed (used for static links)    | :exclamation: |
-| `APP_DEFAULT_TIMEZONE` | `string` | The default timezone of the application (e.g. `UTC`)                       |               |
-| `APP_FORCE_HTTPS`      | `bool`   | Whether to force using HTTPS for assets and absolute routes within the app |               |
+| Key                    | Type     | Description                                                             | :exclamation: |
+| ---------------------- | -------- | ----------------------------------------------------------------------- | :-----------: |
+| `APP_NAME`             | `string` | The name of the application (used in the title e.g.)                    |               |
+| `APP_ENV`              | `string` | The environment of the application (e.g. `local`, `production`)         |               |
+| `APP_DEBUG`            | `bool`   | Whether the application is in debug mode                                |               |
+| `APP_URL`              | `string` | The URL of the application where it is deployed (used for static links) | :exclamation: |
+| `APP_DEFAULT_TIMEZONE` | `string` | The default timezone of the application (e.g. `UTC`)                    |               |
+| `APP_TRUSTED_PROXIES`  | `string` | The proxies that should be trusted by the application (comma-separated) |               |
 
 ## Security
 

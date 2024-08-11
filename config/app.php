@@ -70,7 +70,10 @@ return [
 
     'asset_url' => env('ASSET_URL'),
 
-    'force_https' => env('APP_FORCE_HTTPS', false),
+    'trusted_proxies' => explode(
+        ',',
+        env('APP_TRUSTED_PROXIES', 'localhost,127.0.0.1,::1')
+    ),
 
     /*
     |--------------------------------------------------------------------------
